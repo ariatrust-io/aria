@@ -212,6 +212,64 @@ agentsRouter.get("/", async (req, res) => {
   }
 });
 
+agentsRouter.get("/:did/secret", async (req, res) => {
+  try {
+    const keyResult = await query<{ user_id: string | null }>(
+      'SELECT user_id FROM api_keys WHERE id = $1',
+      [req.apiKeyId]
+    );
+    const userId = keyResult.rows[0]?.user_id ?? null;
+
+    const result = await query<{
+      did: string;
+      name: string;
+      hmac_key: string | null;
+      signing_version: number;
+    }>(
+      `SELECT did, name, hmac_key, signing_version
+       FROM agents
+       WHERE did = $1 AND (
+         (user_id = $2 AND $2 IS NOT NULL)
+         OR api_key_id = $3
+       )`,
+      [req.params.did, userId, req.apiKeyId]
+    );
+
+    if (!result.rows[0]) {
+      return res.status(404).json({
+        error: "Agent not found",
+        code: "NOT_FOUND"
+      });
+    }
+
+    const agent = result.rows[0];
+
+    if (!agent.hmac_key) {
+      return res.status(404).json({
+        error: "Secret not available for this agent",
+        code: "NO_SECRET"
+      });
+    }
+
+    const { decryptSecret } = await import('../utils/crypto.js');
+    const secret = decryptSecret(agent.hmac_key, agent.did);
+
+    return res.json({
+      did: agent.did,
+      name: agent.name,
+      secret,
+      signing_version: agent.signing_version
+    });
+  } catch (err) {
+    console.error('[agents] GET /:did/secret error:',
+      err instanceof Error ? err.message : 'Unknown');
+    return res.status(500).json({
+      error: 'Service unavailable',
+      code: 'INTERNAL_ERROR'
+    });
+  }
+});
+
 agentsRouter.get("/:did", async (req, res) => {
   try {
     const keyResult = await query<{ user_id: string | null }>(

@@ -42,33 +42,64 @@ async function ariaGet(path) {
 
 // ── Agent registration ────────────────────────────────────────────────────────
 async function ensureAgent() {
-  console.log('🔧 Registering new agent...');
-  const res = await fetch(`${ARIA_URL}/v1/agents`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: 'sim-lastressss',
-      scope: [
-        'process:sale',
-        'read:inventory',
-        'generate:report',
-        'create:invoice',
-        'read:customer'
-      ]
-    })
-  });
+  try {
+    // Check if agent already exists
+    const listRes = await fetch(
+      `${ARIA_URL}/v1/agents?name=sim-lastressss`,
+      { headers: { Authorization: `Bearer ${API_KEY}` } }
+    );
+    const listData = await listRes.json();
+    const existing = listData.agents?.find(
+      a => a.name === 'sim-lastressss'
+    );
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(`Agent registration failed: ${JSON.stringify(data)}`);
+    if (existing && existing.did) {
+      // Recover secret from server
+      const secretRes = await fetch(
+        `${ARIA_URL}/v1/agents/${existing.did}/secret`,
+        { headers: { Authorization: `Bearer ${API_KEY}` } }
+      );
+
+      if (secretRes.ok) {
+        const secretData = await secretRes.json();
+        AGENT_DID = secretData.did;
+        AGENT_SECRET = secretData.secret;
+        console.log(`♻️  Recovered existing agent: ${AGENT_DID}`);
+        return;
+      }
+    }
+
+    // No existing agent found — register new
+    console.log('🔧 Registering new agent...');
+    const res = await fetch(`${ARIA_URL}/v1/agents`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: 'sim-lastressss',
+        scope: [
+          'process:sale',
+          'read:inventory',
+          'generate:report',
+          'create:invoice',
+          'read:customer'
+        ]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(`Agent registration failed: ${JSON.stringify(data)}`);
+    }
+
+    AGENT_DID = data.agent.did;
+    AGENT_SECRET = data.secret;
+    console.log(`✅ Agent registered: ${AGENT_DID}`);
+  } catch (err) {
+    throw new Error(`ensureAgent failed: ${err.message}`);
   }
-
-  AGENT_DID = data.agent.did;
-  AGENT_SECRET = data.secret;
-  console.log(`✅ Agent registered: ${AGENT_DID}`);
 }
 
 // ── HMAC signing (v1) ─────────────────────────────────────────────────────────
