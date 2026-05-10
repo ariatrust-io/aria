@@ -5,6 +5,8 @@ console.log('[simulator] API_KEY loaded:', process.env.ARIA_API_KEY ? process.en
 // ── Config ────────────────────────────────────────────────────────────────────
 const ARIA_URL = 'https://ariatrust.org';
 const API_KEY = process.env.ARIA_API_KEY || 'efd1f57b-645f-4821-8620-6aab909dc155';
+const EXISTING_DID = process.env.AGENT_DID || null;
+const EXISTING_SECRET = process.env.AGENT_SECRET || null;
 
 let AGENT_DID = null;
 let AGENT_SECRET = null;
@@ -42,8 +44,16 @@ async function ariaGet(path) {
 
 // ── Agent registration ────────────────────────────────────────────────────────
 async function ensureAgent() {
+  // Priority 1: Use env vars if set
+  if (EXISTING_DID && EXISTING_SECRET) {
+    AGENT_DID = EXISTING_DID;
+    AGENT_SECRET = EXISTING_SECRET;
+    console.log(`♻️  Using existing agent: ${AGENT_DID}`);
+    return;
+  }
+
   try {
-    // Check if agent already exists
+    // Priority 2: Try to recover by name
     const listRes = await fetch(
       `${ARIA_URL}/v1/agents?name=sim-lastressss`,
       { headers: { Authorization: `Bearer ${API_KEY}` } }
