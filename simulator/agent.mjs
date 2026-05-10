@@ -123,7 +123,7 @@ function generateEvent(did, secret) {
   const roll = Math.random();
   let type, action, outcome, withinScope, meta;
 
-  if (roll < 0.70) {
+  if (roll < 0.80) {
     // ── 70% valid successes
     type = 'valid';
     outcome = 'success';
@@ -146,7 +146,7 @@ function generateEvent(did, secret) {
       meta = { customer_id: `CLI-${rand(100, 999)}` };
     }
 
-  } else if (roll < 0.85) {
+  } else if (roll < 0.95) {
     // ── 15% valid-scope errors
     type = 'error';
     outcome = 'error';
@@ -163,8 +163,8 @@ function generateEvent(did, secret) {
       meta = { error: 'product not found' };
     }
 
-  } else if (roll < 0.95) {
-    // ── 10% scope violations
+  } else if (roll < 0.98) {
+    // ── 3% scope violations
     type = 'violation';
     outcome = 'error';
     withinScope = false;
