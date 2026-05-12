@@ -15,6 +15,7 @@ import { agentsRouter } from "./routes/agents.js";
 import { eventsRouter } from "./routes/events.js";
 import { authRouter } from "./routes/auth.js";
 import { webhooksRouter } from "./routes/webhooks.js";
+import { gateRouter } from "./routes/gate.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
@@ -244,6 +245,7 @@ app.use("/v1/agents", apiLimiter, agentsRouter);
 app.use("/v1/events", apiLimiter, eventsRouter);
 app.use("/v1/auth", authRouter);
 app.use("/v1/webhooks", apiLimiter, webhooksRouter);
+app.use("/v1/gate", apiLimiter, gateRouter);
 
 // ENDPOINT 2: Create new API key
 app.post("/v1/api-keys", apiLimiter, requireApiKey, async (req, res) => {
