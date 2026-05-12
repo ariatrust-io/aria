@@ -1305,7 +1305,7 @@
       }
 
       if (data.api_key) {
-        // Direct login without 2FA
+        // Direct login (fallback - should not happen with 2FA enabled)
         apiKey = data.api_key;
         currentUser = data.user;
         localStorage.setItem('aria_api_key', apiKey);

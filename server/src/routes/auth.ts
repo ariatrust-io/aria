@@ -6,7 +6,7 @@ import { RedisStore } from "rate-limit-redis";
 import { getRedisClient } from "../utils/redis.js";
 import { query } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
-import { sendConfirmationEmail } from "../services/email.js";
+import { sendConfirmationEmail, sendVerificationCode } from "../services/email.js";
 
 export const authRouter = Router();
 
@@ -377,27 +377,22 @@ authRouter.post("/login", loginLimiter, validateLoginInput, async (req, res) => 
       });
     }
 
-    // TODO: re-enable 2FA — temporarily bypassed for testing
-    // Issue new key directly
-    const rawKey = randomUUID();
-    const keySha256 = createHash('sha256').update(rawKey).digest('hex');
-    const keyHash = await bcrypt.hash(rawKey, 10);
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
     await query(
-      `INSERT INTO api_keys (key_hash, key_sha256, label, owner_email, user_id)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [keyHash, keySha256, 'login', user.email, user.id]
+      `UPDATE users
+       SET verification_code = $1,
+           verification_code_expires = $2
+       WHERE id = $3`,
+      [code, codeExpires, user.id]
     );
 
-    await query(
-      "UPDATE users SET last_login = NOW() WHERE id = $1",
-      [user.id]
-    );
+    await sendVerificationCode(email.toLowerCase(), code);
 
     res.json({
-      api_key: rawKey,
-      user: { id: user.id, email: user.email, name: user.name },
-      message: "Signed in successfully"
+      message: "Verification code sent to your email",
+      requires2FA: true
     });
   } catch (e) {
     console.error("[auth] Login error:", e instanceof Error ? e.message : "Unknown");
