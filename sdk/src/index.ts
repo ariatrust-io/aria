@@ -23,8 +23,43 @@ export interface TrackResult {
   };
 }
 
+export interface GateOptions {
+  requireApproval?: string[];  // action patterns that need approval
+  autoBlock?: string[];        // action patterns always blocked
+  timeoutMs?: number;          // how long to wait (default 5 min)
+  pollIntervalMs?: number;     // polling interval (default 2 sec)
+}
+
+export class GateDeniedException extends Error {
+  constructor(
+    public readonly requestId: string,
+    public readonly action: string
+  ) {
+    super(`Gate denied: action '${action}' was denied by the owner`);
+    this.name = 'GateDeniedException';
+  }
+}
+
+export class GateBlockedException extends Error {
+  constructor(public readonly action: string) {
+    super(`Gate blocked: action '${action}' is auto-blocked`);
+    this.name = 'GateBlockedException';
+  }
+}
+
+export class GateTimeoutException extends Error {
+  constructor(
+    public readonly requestId: string,
+    public readonly action: string
+  ) {
+    super(`Gate timeout: no approval received for '${action}'`);
+    this.name = 'GateTimeoutException';
+  }
+}
+
 export interface TrackOptions {
-  mode?: 'light' | 'enforce';
+  mode?: 'light' | 'enforce' | 'gate';
+  gate?: GateOptions;
 }
 
 export class ARIAClient {
@@ -64,6 +99,43 @@ export class ARIAClient {
   ): Promise<TrackResult> {
     const mode = options.mode ?? 'enforce';
 
+    if (mode === 'gate' && options.gate) {
+      // Execute fn() first
+      const startTime = Date.now();
+      let outcome: 'success' | 'error' = 'success';
+      let fnError: string | undefined;
+      let result: unknown;
+
+      try {
+        result = await fn();
+      } catch (err) {
+        outcome = 'error';
+        fnError = err instanceof Error ? err.message : String(err);
+      }
+
+      const durationMs = Date.now() - startTime;
+
+      // Check gate AFTER fn() but before returning
+      await this.gateCheck(
+        action,
+        agentDid,
+        options.gate,
+        { outcome, durationMs }
+      );
+      // If gateCheck throws → caller handles exception
+      // If gateCheck passes → send event and return normally
+
+      const insights = await this.buildAndSendEvent(
+        agentDid, secret, action, outcome, durationMs, fnError
+      );
+
+      return {
+        success: true,
+        eventId: randomUUID(),
+        insights: insights.insights
+      };
+    }
+
     if (mode === 'light') {
       const startTime = Date.now();
       let outcome: 'success' | 'error' = 'success';
@@ -97,6 +169,101 @@ export class ARIAClient {
 
     const durationMs = Date.now() - start;
     return this.buildAndSendEvent(agentDid, secret, action, outcome, durationMs, error);
+  }
+
+  private async gateCheck(
+    action: string,
+    agentDid: string,
+    options: GateOptions,
+    context?: Record<string, unknown>
+  ): Promise<void> {
+    const timeoutMs = options.timeoutMs ?? 5 * 60 * 1000;
+    const pollIntervalMs = options.pollIntervalMs ?? 2000;
+
+    const matchesPattern = (patterns: string[], act: string): boolean => {
+      return patterns.some(pattern => {
+        if (pattern.endsWith(':*')) {
+          const prefix = pattern.slice(0, -1);
+          return act.startsWith(prefix);
+        }
+        return pattern === act;
+      });
+    };
+
+    // Check auto_block first
+    if (options.autoBlock && matchesPattern(options.autoBlock, action)) {
+      // Still POST to server for audit trail
+      await fetch(`${this.baseUrl}/v1/gate/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({ agentDid, action, context })
+      });
+      throw new GateBlockedException(action);
+    }
+
+    // Check requireApproval
+    if (!options.requireApproval ||
+        !matchesPattern(options.requireApproval, action)) {
+      return; // Action doesn't need approval
+    }
+
+    // Create gate request
+    const requestRes = await fetch(`${this.baseUrl}/v1/gate/request`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`
+      },
+      body: JSON.stringify({ agentDid, action, context })
+    });
+
+    if (!requestRes.ok) {
+      throw new Error(`Gate request failed: ${requestRes.status}`);
+    }
+
+    const requestData = await requestRes.json() as {
+      requestId: string;
+      status: string;
+    };
+
+    if (requestData.status === 'auto_blocked') {
+      throw new GateBlockedException(action);
+    }
+
+    const requestId = requestData.requestId;
+    const deadline = Date.now() + timeoutMs;
+
+    // Poll for approval
+    while (Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+
+      const pollRes = await fetch(
+        `${this.baseUrl}/v1/gate/request/${requestId}`,
+        {
+          headers: { 'Authorization': `Bearer ${this.apiKey}` }
+        }
+      );
+
+      if (!pollRes.ok) continue;
+
+      const pollData = await pollRes.json() as { status: string };
+
+      if (pollData.status === 'approved') return; // Proceed
+
+      if (pollData.status === 'denied') {
+        throw new GateDeniedException(requestId, action);
+      }
+
+      if (pollData.status === 'timeout') {
+        throw new GateTimeoutException(requestId, action);
+      }
+      // If still 'pending', keep polling
+    }
+
+    throw new GateTimeoutException(requestId, action);
   }
 
   private sendEventBackground(
