@@ -265,6 +265,44 @@ agentsRouter.post("/bulk-delete", async (req, res) => {
   }
 });
 
+agentsRouter.delete("/:did", async (req, res) => {
+  try {
+    const keyResult = await query<{ user_id: string | null }>(
+      'SELECT user_id FROM api_keys WHERE id = $1',
+      [req.apiKeyId]
+    );
+    const userId = keyResult.rows[0]?.user_id ?? null;
+
+    const agentResult = await query<{ id: string }>(
+      `SELECT id FROM agents
+       WHERE did = $1 AND (
+         (user_id = $2 AND $2 IS NOT NULL)
+         OR api_key_id = $3
+       )`,
+      [req.params.did, userId, req.apiKeyId]
+    );
+
+    if (!agentResult.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found', code: 'NOT_FOUND' });
+    }
+
+    const agentId = agentResult.rows[0].id;
+
+    await query('DELETE FROM gate_requests WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM gate_rules WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM anomalies_archive WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM anomalies WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM events WHERE agent_id = $1', [agentId]);
+    await query('DELETE FROM agents WHERE id = $1', [agentId]);
+
+    return res.status(204).send();
+  } catch (err) {
+    console.error('[agents] DELETE /:did error:', err instanceof Error ? err.message : 'Unknown');
+    return res.status(500).json({ error: 'Service unavailable', code: 'INTERNAL_ERROR' });
+  }
+});
+
 agentsRouter.get("/:did/secret", async (req, res) => {
   try {
     const keyResult = await query<{ user_id: string | null }>(

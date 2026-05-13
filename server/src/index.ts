@@ -123,8 +123,10 @@ app.use(express.json({ limit: "1mb" }));
 
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    const contentLength = req.headers['content-length'];
+    const hasBody = contentLength && parseInt(contentLength) > 0;
     const ct = req.headers['content-type'] || '';
-    if (!ct.includes('application/json')) {
+    if (hasBody && !ct.includes('application/json')) {
       return res.status(400).json({
         error: 'Content-Type must be application/json',
         code: 'INVALID_CONTENT_TYPE'
