@@ -100,14 +100,22 @@ export class ARIAClient {
     const mode = options.mode ?? 'enforce';
 
     if (mode === 'gate' && options.gate) {
-      // Execute fn() first
+      // STEP 1: Check gate BEFORE executing
+      await this.gateCheck(
+        action,
+        agentDid,
+        options.gate,
+        { action, requestedAt: new Date().toISOString() }
+      );
+      // If gateCheck throws → fn() never executes
+
+      // STEP 2: Gate approved — now execute fn()
       const startTime = Date.now();
       let outcome: 'success' | 'error' = 'success';
       let fnError: string | undefined;
-      let result: unknown;
 
       try {
-        result = await fn();
+        await fn();
       } catch (err) {
         outcome = 'error';
         fnError = err instanceof Error ? err.message : String(err);
@@ -115,24 +123,15 @@ export class ARIAClient {
 
       const durationMs = Date.now() - startTime;
 
-      // Check gate AFTER fn() but before returning
-      await this.gateCheck(
-        action,
-        agentDid,
-        options.gate,
-        { outcome, durationMs }
-      );
-      // If gateCheck throws → caller handles exception
-      // If gateCheck passes → send event and return normally
-
-      const insights = await this.buildAndSendEvent(
+      // STEP 3: Record event
+      const result = await this.buildAndSendEvent(
         agentDid, secret, action, outcome, durationMs, fnError
       );
 
       return {
         success: true,
-        eventId: randomUUID(),
-        insights: insights.insights
+        eventId: result.eventId,
+        insights: result.insights
       };
     }
 
