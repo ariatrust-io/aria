@@ -110,6 +110,7 @@ const ALLOWED_PATHS = [
   "/app",
   "/privacy",
   "/docs",
+  "/pricing",
   "/health",
   "/v1/setup",
   "/v1/agents",
