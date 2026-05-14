@@ -344,3 +344,6 @@ export class ARIAClient {
 export function createClient(config: ARIAConfig): ARIAClient {
   return new ARIAClient(config);
 }
+
+export { wrapTool, wrapTools, createARIACallbackHandler } from './langchain.js';
+export type { ARIAToolOptions } from './langchain.js';

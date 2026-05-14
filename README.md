@@ -162,7 +162,55 @@ When an agent attempts a gated action:
 4. Owner approves or denies within the timeout
 5. If denied or timeout → exception thrown
 
-### 6. View your agent in the dashboard
+### 6. LangChain Integration
+
+```typescript
+import { createClient } from '@ariatrust-io/aria-sdk';
+import { wrapTools, createARIACallbackHandler }
+  from '@ariatrust-io/aria-sdk/langchain';
+import { DynamicTool } from 'langchain/tools';
+import { AgentExecutor } from 'langchain/agents';
+
+const aria = createClient({
+  baseUrl: 'https://ariatrust.org',
+  apiKey: process.env.ARIA_API_KEY
+});
+
+const agent = await aria.registerAgent({
+  name: 'langchain-agent',
+  scope: [
+    'tool:search',
+    'tool:calculator',
+    'tool:send_email'
+  ]
+});
+
+// Option A: Wrap individual tools
+const tools = wrapTools(
+  [searchTool, calculatorTool, emailTool],
+  aria,
+  { agentDid: agent.did, secret: agent.secret }
+);
+
+// Option B: Use callback handler (tracks every step)
+const callbacks = [
+  createARIACallbackHandler(
+    aria, agent.did, agent.secret
+  )
+];
+
+const executor = AgentExecutor.fromAgentAndTools({
+  agent: myAgent,
+  tools,
+  callbacks
+});
+
+const result = await executor.invoke({
+  input: 'Search for recent AI news and summarize'
+});
+```
+
+### 7. View your agent in the dashboard
 
 Sign in at `https://ariatrust.org/app` and see:
 - Live trust score and trust level
