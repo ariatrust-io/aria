@@ -76,80 +76,11 @@ export async function sendGateRequestEmail(
   requestId: string,
   timeoutMinutes: number
 ): Promise<void> {
-  const approveUrl =
-    `${process.env.APP_URL}/v1/gate/approve/${requestId}`;
-  const denyUrl =
-    `${process.env.APP_URL}/v1/gate/deny-page/${requestId}`;
-  const dashboardUrl =
-    `${process.env.APP_URL}/app`;
-
-  await getResend().emails.send({
-    from: 'ARIA Gate <noreply@ariatrust.org>',
-    to: ownerEmail,
-    subject: `ARIA Gate: Action requires your approval`,
-    html: `
-      <div style="font-family:system-ui;max-width:600px;
-                  margin:0 auto;padding:32px;
-                  background:#04060d;color:#f8f4ee">
-        <h1 style="color:#c9a84c;font-size:24px;
-                   margin-bottom:8px">ARIA Gate</h1>
-        <p style="color:rgba(248,244,238,0.6);
-                  margin-bottom:32px">
-          Action approval required
-        </p>
-
-        <div style="background:#07090f;border:1px solid
-                    rgba(255,255,255,0.1);border-left:3px solid
-                    #c9a84c;border-radius:8px;padding:24px;
-                    margin-bottom:32px">
-          <p style="margin:0 0 8px;font-size:13px;
-                    color:rgba(248,244,238,0.5)">AGENT</p>
-          <p style="margin:0 0 20px;font-size:18px;
-                    font-weight:600">${agentName}</p>
-
-          <p style="margin:0 0 8px;font-size:13px;
-                    color:rgba(248,244,238,0.5)">
-            REQUESTED ACTION
-          </p>
-          <p style="margin:0 0 20px;font-size:18px;
-                    font-weight:600;color:#e8c87a;
-                    font-family:monospace">${action}</p>
-
-          <p style="margin:0;font-size:13px;
-                    color:rgba(248,244,238,0.5)">
-            This request expires in ${timeoutMinutes} minutes.
-            If no action is taken, the request will be
-            automatically denied.
-          </p>
-        </div>
-
-        <div style="display:flex;gap:12px;margin-bottom:32px">
-          <a href="${approveUrl}"
-             style="flex:1;display:block;text-align:center;
-                    padding:14px;background:#28c841;
-                    color:#04060d;text-decoration:none;
-                    border-radius:6px;font-weight:600;
-                    font-size:15px">
-            Approve
-          </a>
-          <a href="${denyUrl}"
-             style="flex:1;display:block;text-align:center;
-                    padding:14px;background:#c94c4c;
-                    color:#f8f4ee;text-decoration:none;
-                    border-radius:6px;font-weight:600;
-                    font-size:15px">
-            Deny
-          </a>
-        </div>
-
-        <p style="font-size:13px;
-                  color:rgba(248,244,238,0.35);
-                  text-align:center">
-          You can also manage this request in your
-          <a href="${dashboardUrl}"
-             style="color:#c9a84c">ARIA Dashboard</a>
-        </p>
-      </div>
-    `
-  });
+  // Email notifications disabled - using dashboard
+  // toast notifications instead
+  console.log(
+    `[gate] Notification suppressed for ${ownerEmail}: ` +
+    `${agentName} → ${action} (${requestId})`
+  );
+  return;
 }
