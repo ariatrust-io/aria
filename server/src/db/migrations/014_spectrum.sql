@@ -24,10 +24,10 @@ CREATE INDEX IF NOT EXISTS idx_behavior_patterns_type
 CREATE INDEX IF NOT EXISTS idx_behavior_patterns_severity
   ON behavior_patterns(severity);
 
-DO $$ BEGIN
-  ALTER TABLE behavior_patterns
-    ADD CONSTRAINT uq_behavior_patterns_agent_type_action
-    UNIQUE (agent_id, pattern_type, (COALESCE(action, '')));
-EXCEPTION WHEN duplicate_table THEN
-  -- constraint already exists
-END; $$;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_behavior_patterns_with_action
+  ON behavior_patterns (agent_id, pattern_type, action)
+  WHERE action IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_behavior_patterns_without_action
+  ON behavior_patterns (agent_id, pattern_type)
+  WHERE action IS NULL;

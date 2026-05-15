@@ -226,31 +226,51 @@ export async function analyzeAgentBehavior(agentId: string): Promise<void> {
     if (allPatterns.length === 0) return;
 
     for (const pattern of allPatterns) {
-      await query(`
-        INSERT INTO behavior_patterns
-          (agent_id, pattern_type, action, description,
-           occurrences, severity, metadata,
-           first_seen, last_seen, updated_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())
-        ON CONFLICT ON CONSTRAINT uq_behavior_patterns_agent_type_action
-        DO UPDATE SET
-          description = EXCLUDED.description,
-          occurrences = EXCLUDED.occurrences,
-          severity    = EXCLUDED.severity,
-          metadata    = EXCLUDED.metadata,
-          last_seen   = EXCLUDED.last_seen,
-          updated_at  = NOW()
-      `, [
-        agentId,
-        pattern.pattern_type,
-        pattern.action,
-        pattern.description,
-        pattern.occurrences,
-        pattern.severity,
-        JSON.stringify(pattern.metadata),
-        pattern.first_seen,
-        pattern.last_seen
-      ]);
+      if (pattern.action !== null) {
+        await query(`
+          INSERT INTO behavior_patterns
+            (agent_id, pattern_type, action, description,
+             occurrences, severity, metadata,
+             first_seen, last_seen, updated_at)
+          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())
+          ON CONFLICT (agent_id, pattern_type, action)
+          WHERE action IS NOT NULL
+          DO UPDATE SET
+            description = EXCLUDED.description,
+            occurrences = EXCLUDED.occurrences,
+            severity    = EXCLUDED.severity,
+            metadata    = EXCLUDED.metadata,
+            last_seen   = EXCLUDED.last_seen,
+            updated_at  = NOW()
+        `, [
+          agentId, pattern.pattern_type, pattern.action,
+          pattern.description, pattern.occurrences,
+          pattern.severity, JSON.stringify(pattern.metadata),
+          pattern.first_seen, pattern.last_seen
+        ]);
+      } else {
+        await query(`
+          INSERT INTO behavior_patterns
+            (agent_id, pattern_type, action, description,
+             occurrences, severity, metadata,
+             first_seen, last_seen, updated_at)
+          VALUES ($1,$2,NULL,$3,$4,$5,$6,$7,$8,NOW())
+          ON CONFLICT (agent_id, pattern_type)
+          WHERE action IS NULL
+          DO UPDATE SET
+            description = EXCLUDED.description,
+            occurrences = EXCLUDED.occurrences,
+            severity    = EXCLUDED.severity,
+            metadata    = EXCLUDED.metadata,
+            last_seen   = EXCLUDED.last_seen,
+            updated_at  = NOW()
+        `, [
+          agentId, pattern.pattern_type,
+          pattern.description, pattern.occurrences,
+          pattern.severity, JSON.stringify(pattern.metadata),
+          pattern.first_seen, pattern.last_seen
+        ]);
+      }
     }
 
     console.log(
