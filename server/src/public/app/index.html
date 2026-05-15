@@ -1807,11 +1807,66 @@
           <button onclick="exportEvents('${agent.did}','violations')" style="padding:7px 14px;background:transparent;border:1px solid rgba(201,168,76,0.3);color:#c9a84c;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Violations</button>
           <button onclick="exportEvents('${agent.did}','anomalies')" style="padding:7px 14px;background:transparent;border:1px solid rgba(255,189,46,0.3);color:#ffbd2e;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Anomalies</button>
         </div>
+        <div id="detail-patterns"></div>
         <div class="section-title" style="margin-bottom:16px">Event History</div>
         <div class="card" id="detail-events"><div class="loading"><div class="spinner"></div></div></div>
       `;
 
       document.querySelectorAll('.detail-stat').forEach(el => el.classList.add('visible'));
+
+      // Spectrum: fetch and render behavioral patterns
+      const patternsData = await apiCall(
+        `/v1/agents/${encodeURIComponent(did)}/patterns`
+      ).catch(() => ({ patterns: [] }));
+      const patterns = patternsData.patterns || [];
+      const patternContainer = document.getElementById('detail-patterns');
+      if (patterns.length > 0) {
+        let patternHtml = `
+          <div class="section-title" style="margin-bottom:16px;margin-top:8px">
+            Behavior Patterns
+          </div>`;
+        patterns.forEach(p => {
+          const severityColor =
+            p.severity === 'CRITICAL' ? '#c94c4c' :
+            p.severity === 'HIGH'     ? '#ff6b35' :
+            p.severity === 'MEDIUM'   ? '#ffbd2e' : '#28c841';
+          patternHtml += `
+            <div style="background:#07090f;border:1px solid rgba(255,255,255,0.06);
+                        border-left:3px solid ${severityColor};border-radius:8px;
+                        padding:20px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;
+                          align-items:center;margin-bottom:10px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:11px;font-weight:600;letter-spacing:1px;
+                               color:${severityColor};text-transform:uppercase">
+                    ${p.severity}
+                  </span>
+                  <span style="font-size:11px;color:rgba(248,244,238,0.4);
+                               text-transform:uppercase;letter-spacing:1px">
+                    ${p.pattern_type.replace(/_/g,' ')}
+                  </span>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;
+                             color:rgba(248,244,238,0.4)">
+                  ${p.occurrences} occurrences
+                </span>
+              </div>
+              ${p.action ? `
+                <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
+                            color:#e8c87a;margin-bottom:10px">
+                  ${escapeHtml(p.action)}
+                </div>` : ''}
+              <div style="font-size:13px;color:rgba(248,244,238,0.7);line-height:1.6">
+                ${escapeHtml(p.description)}
+              </div>
+              <div style="font-size:11px;color:rgba(248,244,238,0.3);margin-top:10px">
+                First seen: ${relativeTime(p.first_seen)} &middot;
+                Last seen: ${relativeTime(p.last_seen)}
+              </div>
+            </div>`;
+        });
+        patternContainer.innerHTML = patternHtml;
+      }
 
       const evts    = await apiCall(`/v1/events?agentDid=${encodeURIComponent(did)}&limit=20`);
       const evtList = evts.events || [];

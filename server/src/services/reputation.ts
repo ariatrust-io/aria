@@ -1,6 +1,7 @@
 import { syncToPublicTable } from "./sync-public-reputation.js";
 import { query } from "../db/pool.js";
 import { triggerWebhooks } from "./webhook.js";
+import { analyzeAgentBehavior } from "./pattern-detector.js";
 
 class ReputationQueue {
   private pending = new Set<string>();
@@ -208,6 +209,11 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
   ]);
 
   syncToPublicTable(agentId, finalScore).catch(() => {});
+
+  // Run Spectrum analysis in background
+  setImmediate(() => {
+    analyzeAgentBehavior(agentId).catch(() => {});
+  });
 
   if (finalScore < 20 && prevScore >= 20) {
     const agentInfo = await query<{ user_id: string | null; did: string; name: string }>(

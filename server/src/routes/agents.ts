@@ -361,6 +361,62 @@ agentsRouter.get("/:did/secret", async (req, res) => {
   }
 });
 
+agentsRouter.get("/:did/patterns", async (req, res) => {
+  try {
+    const keyResult = await query<{ user_id: string | null }>(
+      'SELECT user_id FROM api_keys WHERE id = $1',
+      [req.apiKeyId]
+    );
+    const userId = keyResult.rows[0]?.user_id ?? null;
+
+    const agentResult = await query<{ id: string }>(
+      `SELECT id FROM agents
+       WHERE did = $1 AND (
+         (user_id = $2 AND $2 IS NOT NULL)
+         OR api_key_id = $3
+       )`,
+      [req.params.did, userId, req.apiKeyId]
+    );
+
+    if (!agentResult.rows[0]) {
+      return res.status(404).json({ error: 'Agent not found', code: 'NOT_FOUND' });
+    }
+
+    const agentId = agentResult.rows[0].id;
+
+    const { analyzeAgentBehavior } = await import('../services/pattern-detector.js');
+    await analyzeAgentBehavior(agentId);
+
+    const patterns = await query(
+      `SELECT id, pattern_type, action, description,
+              occurrences, severity, metadata,
+              first_seen, last_seen, created_at
+       FROM behavior_patterns
+       WHERE agent_id = $1
+         AND resolved_at IS NULL
+       ORDER BY
+         CASE severity
+           WHEN 'CRITICAL' THEN 1
+           WHEN 'HIGH'     THEN 2
+           WHEN 'MEDIUM'   THEN 3
+           WHEN 'LOW'      THEN 4
+         END,
+         occurrences DESC`,
+      [agentId]
+    );
+
+    return res.json({
+      agent_did: req.params.did,
+      patterns: patterns.rows,
+      analyzed_at: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('[agents] GET /:did/patterns error:',
+      err instanceof Error ? err.message : 'Unknown');
+    return res.status(500).json({ error: 'Service unavailable', code: 'INTERNAL_ERROR' });
+  }
+});
+
 agentsRouter.get("/:did", async (req, res) => {
   try {
     const keyResult = await query<{ user_id: string | null }>(

@@ -18,6 +18,7 @@
     "migrate:011": "npx tsx migrate-011.ts",
     "migrate:012": "npx tsx migrate-012.ts",
     "migrate:013": "npx tsx migrate-013.ts",
+    "migrate:014": "npx tsx migrate-014.ts",
     "cli": "node cli-dashboard.mjs"
   },
   "keywords": [],
