@@ -1843,6 +1843,51 @@
           </div>`;
       }
 
+      // Temporal Anchor: fetch and render anchor status
+      const temporalData = await apiCall(
+        `/v1/temporal/anchors/${encodeURIComponent(did)}`
+      ).catch(() => null);
+
+      if (temporalData?.temporal_anchor?.total_anchors > 0) {
+        const anchor = temporalData.temporal_anchor;
+        let html = `
+          <div style="background:#07090f;
+                      border:1px solid rgba(255,255,255,0.06);
+                      border-left:3px solid #c9a84c;
+                      border-radius:8px;padding:16px 20px;
+                      margin-bottom:20px;
+                      display:flex;justify-content:space-between;
+                      align-items:center">
+            <div>
+              <div style="font-size:11px;font-weight:600;
+                          letter-spacing:2px;
+                          color:#c9a84c;
+                          text-transform:uppercase;
+                          margin-bottom:6px">
+                Temporal Anchor
+              </div>
+              <div style="font-size:13px;
+                          color:rgba(248,244,238,0.7)">
+                ${anchor.total_events_anchored} events anchored
+                across ${anchor.total_anchors} snapshots
+              </div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-family:'JetBrains Mono',monospace;
+                          font-size:11px;
+                          color:rgba(248,244,238,0.4)">
+                Latest hash
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;
+                          font-size:12px;color:#e8c87a">
+                ${anchor.latest_anchor_hash?.slice(0, 16)}...
+              </div>
+            </div>
+          </div>`;
+        const witnessEl = document.getElementById('detail-witness');
+        if (witnessEl) witnessEl.insertAdjacentHTML('afterend', html);
+      }
+
       // Spectrum: fetch and render behavioral patterns
       const patternsData = await apiCall(
         `/v1/agents/${encodeURIComponent(did)}/patterns`

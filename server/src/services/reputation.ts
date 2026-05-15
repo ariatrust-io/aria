@@ -3,6 +3,7 @@ import { query } from "../db/pool.js";
 import { triggerWebhooks } from "./webhook.js";
 import { analyzeAgentBehavior } from "./pattern-detector.js";
 import { createWitnessCheck } from "./shadow-witness.js";
+import { createTemporalAnchor } from "./temporal-anchor.js";
 
 class ReputationQueue {
   private pending = new Set<string>();
@@ -219,6 +220,20 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
   // Run Shadow Witness check in background
   setImmediate(() => {
     createWitnessCheck(agentId).catch(() => {});
+  });
+
+  // Create temporal anchor every 100 events
+  setImmediate(async () => {
+    try {
+      const countResult = await query<{ count: string }>(
+        'SELECT event_count FROM reputation_snapshots WHERE agent_id = $1',
+        [agentId]
+      );
+      const eventCount = parseInt(countResult.rows[0]?.count ?? '0');
+      if (eventCount % 100 === 0) {
+        await createTemporalAnchor(agentId);
+      }
+    } catch {}
   });
 
   if (finalScore < 20 && prevScore >= 20) {
