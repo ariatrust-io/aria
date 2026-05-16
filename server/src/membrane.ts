@@ -122,6 +122,7 @@ const ALLOWED_PATHS = [
   "/v1/witness",
   "/v1/temporal",
   "/v1/zeroproof",
+  "/v1/admin",
 ];
 
 app.use((req, _res, next) => {

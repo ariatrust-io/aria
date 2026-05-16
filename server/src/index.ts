@@ -19,6 +19,7 @@ import { gateRouter } from "./routes/gate.js";
 import { witnessRouter } from "./routes/witness.js";
 import { temporalRouter } from "./routes/temporal.js";
 import { zeroproofRouter } from "./routes/zeroproof.js";
+import { adminRouter } from "./routes/admin.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
@@ -254,6 +255,19 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
 });
 
 // 5. RUTAS PROTEGIDAS
+const adminLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  keyGenerator: (req) => getRateLimitKey(req),
+  handler: (_req, res) => {
+    res.status(429).json({
+      error: 'Too many admin requests',
+      code: 'RATE_LIMITED'
+    });
+  }
+});
+
+app.use('/v1/admin', adminLimiter, adminRouter);
 app.use("/v1/agents", apiLimiter, agentsRouter);
 app.use("/v1/events", apiLimiter, eventsRouter);
 app.use("/v1/auth", authRouter);
