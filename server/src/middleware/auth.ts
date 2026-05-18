@@ -33,10 +33,6 @@ function cleanExpiredCache(): void {
   }
 }
 
-export function invalidateCachedKey(rawKey: string): void {
-  keyCache.delete(rawKey);
-}
-
 export function invalidateCacheByApiKeyId(apiKeyId: string): void {
   for (const [key, entry] of keyCache.entries()) {
     if (entry.id === apiKeyId) {
