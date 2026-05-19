@@ -533,18 +533,26 @@ adminRouter.get('/db-stats', async (req, res) => {
   try {
     const result = await query(`
       SELECT
-        schemaname,
-        tablename,
-        pg_size_pretty(pg_total_relation_size(
-          schemaname||'.'||tablename
-        )) AS total_size,
-        n_live_tup AS row_count
-      FROM pg_stat_user_tables
-      ORDER BY pg_total_relation_size(
-        schemaname||'.'||tablename
-      ) DESC
+        (SELECT COUNT(*) FROM users) AS users,
+        (SELECT COUNT(*) FROM agents) AS agents,
+        (SELECT COUNT(*) FROM events) AS events,
+        (SELECT COUNT(*) FROM api_keys) AS api_keys,
+        (SELECT COUNT(*) FROM anomalies) AS anomalies,
+        (SELECT COUNT(*) FROM gate_requests) AS gate_requests,
+        (SELECT COUNT(*) FROM behavior_patterns) AS behavior_patterns,
+        (SELECT COUNT(*) FROM temporal_anchors) AS temporal_anchors,
+        (SELECT COUNT(*) FROM zero_proofs) AS zero_proofs,
+        (SELECT COUNT(*) FROM witness_sources) AS witness_sources,
+        (SELECT COUNT(*) FROM witness_checks) AS witness_checks,
+        (SELECT COUNT(*) FROM webhooks) AS webhooks,
+        (SELECT COUNT(*) FROM admin_logs) AS admin_logs
     `);
-    return res.json({ tables: result.rows });
+
+    return res.json({
+      tables: Object.entries(result.rows[0] || {}).map(
+        ([name, count]) => ({ tablename: name, row_count: count })
+      )
+    });
   } catch (err) {
     console.error('[admin] GET /db-stats error:', err);
     return res.status(500).json({ error: 'Internal error' });
