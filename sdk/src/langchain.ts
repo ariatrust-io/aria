@@ -1,4 +1,4 @@
-import { ARIAClient, TrackOptions } from './index.js';
+import { ARIAClient, TrackOptions, GateDeniedException, ScopeViolationException } from './index.js';
 
 export interface ARIAToolOptions {
   agentDid: string;
@@ -28,14 +28,24 @@ export function wrapTool<T extends {
   if (!originalFunc) return tool;
 
   const wrappedFunc = async (input: string): Promise<string> => {
-    const result = await aria.track(
-      options.agentDid,
-      options.secret,
-      action,
-      async () => originalFunc.call(tool, input),
-      options.trackOptions ?? { mode: 'light' }
-    );
-    return String(result);
+    try {
+      const result = await aria.track(
+        options.agentDid,
+        options.secret,
+        action,
+        async () => originalFunc.call(tool, input),
+        options.trackOptions ?? { mode: 'light' }
+      );
+      return String(result);
+    } catch (err) {
+      if (err instanceof ScopeViolationException) {
+        return `Action '${err.action}' blocked by ARIA: not in agent's declared scope.`;
+      }
+      if (err instanceof GateDeniedException) {
+        return `Action denied by owner via ARIA Gate.`;
+      }
+      throw err;
+    }
   };
 
   return {

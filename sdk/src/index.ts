@@ -57,9 +57,64 @@ export class GateTimeoutException extends Error {
   }
 }
 
+export class ScopeViolationException extends Error {
+  public readonly action: string;
+  public readonly allowedScope: string[];
+  public readonly code = 'SCOPE_VIOLATION';
+
+  constructor(action: string, allowedScope: string[]) {
+    super(
+      `Action '${action}' is not in the agent's declared scope. ` +
+      `Allowed: [${allowedScope.join(', ')}]. ` +
+      `Execution blocked by ARIA.`
+    );
+    this.name = 'ScopeViolationException';
+    this.action = action;
+    this.allowedScope = allowedScope;
+  }
+}
+
 export interface TrackOptions {
   mode?: 'light' | 'enforce' | 'gate';
   gate?: GateOptions;
+}
+
+const scopeCache = new Map<string, { scope: string[]; cachedAt: number }>();
+const SCOPE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+async function getAgentScope(
+  agentDid: string,
+  apiKey: string,
+  baseUrl: string
+): Promise<string[]> {
+  const cached = scopeCache.get(agentDid);
+  if (cached && Date.now() - cached.cachedAt < SCOPE_CACHE_TTL_MS) {
+    return cached.scope;
+  }
+  try {
+    const res = await fetch(
+      `${baseUrl}/v1/agents/${encodeURIComponent(agentDid)}`,
+      { headers: { Authorization: `Bearer ${apiKey}` } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json() as { agent?: { scope?: string[] } };
+    const scope = data.agent?.scope ?? [];
+    scopeCache.set(agentDid, { scope, cachedAt: Date.now() });
+    return scope;
+  } catch {
+    return [];
+  }
+}
+
+function actionMatchesScope(action: string, scope: string[]): boolean {
+  return scope.some(scopeItem => {
+    if (scopeItem === action) return true;
+    if (scopeItem.endsWith(':*')) {
+      const prefix = scopeItem.slice(0, -1);
+      return action.startsWith(prefix);
+    }
+    return false;
+  });
 }
 
 export class ARIAClient {
@@ -98,6 +153,13 @@ export class ARIAClient {
     options: TrackOptions = {}
   ): Promise<TrackResult> {
     const mode = options.mode ?? 'enforce';
+
+    // Scope check: BEFORE fn() executes in any mode
+    const agentScope = await getAgentScope(agentDid, this.apiKey, this.baseUrl);
+    if (agentScope.length > 0 && !actionMatchesScope(action, agentScope)) {
+      this.sendBlockedEventBackground(agentDid, secret, action);
+      throw new ScopeViolationException(action, agentScope);
+    }
 
     if (mode === 'gate' && options.gate) {
       // STEP 1: Check gate BEFORE executing
@@ -263,6 +325,36 @@ export class ARIAClient {
     }
 
     throw new GateTimeoutException(requestId, action);
+  }
+
+  private sendBlockedEventBackground(
+    agentDid: string,
+    secret: string,
+    action: string
+  ): void {
+    const eventId = randomUUID();
+    const timestamp = new Date().toISOString();
+    const payload = `${eventId}:${agentDid}:${action}:blocked:${timestamp}`;
+    const signature = createHmac('sha256', secret).update(payload).digest('hex');
+
+    fetch(`${this.baseUrl}/v1/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({
+        eventId,
+        agentDid,
+        action,
+        outcome: 'blocked',
+        withinScope: false,
+        durationMs: 0,
+        timestamp,
+        signature,
+        meta: { blocked_by: 'aria_scope_check' },
+      }),
+    }).catch(() => {});
   }
 
   private sendEventBackground(

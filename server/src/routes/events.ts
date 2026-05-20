@@ -103,7 +103,7 @@ interface IncomingEvent {
   eventId: string;
   agentDid: string;
   action: string;
-  outcome: "success" | "error" | "anomaly";
+  outcome: "success" | "error" | "anomaly" | "blocked";
   withinScope: boolean;
   durationMs: number;
   timestamp: string;
@@ -218,9 +218,10 @@ eventsRouter.post("/", checkEventLimit, async (req, res) => {
       },
       rateLimit: ingestionResult.rateLimitInfo,
       trustScore: {
-        impact: !ingestionResult.serverWithinScope ? -100 
+        impact: event.outcome === 'blocked' ? 0
+          : !ingestionResult.serverWithinScope ? -100
           : event.outcome === 'anomaly' ? -5
-          : event.outcome === 'error' ? -1 
+          : event.outcome === 'error' ? -1
           : 1
       }
     };
@@ -536,7 +537,7 @@ eventsRouter.get("/", async (req, res) => {
       params.push(agentDid);
     }
 
-    if (outcome && ["success", "error", "anomaly"].includes(outcome)) {
+    if (outcome && ["success", "error", "anomaly", "blocked"].includes(outcome)) {
       sql += ` AND e.outcome = $${paramIdx++}`;
       params.push(outcome);
     }
@@ -774,7 +775,7 @@ function validateEvent(e: Partial<IncomingEvent>): string | null {
   if (!e.eventId || typeof e.eventId !== "string") return "eventId is required";
   if (!e.agentDid || !e.agentDid.startsWith("did:agentrust:")) return "agentDid must be a valid DID";
   if (!e.action || typeof e.action !== "string") return "action is required";
-  if (!["success", "error", "anomaly"].includes(e.outcome ?? "")) return "outcome must be success | error | anomaly";
+  if (!["success", "error", "anomaly", "blocked"].includes(e.outcome ?? "")) return "outcome must be success | error | anomaly | blocked";
   if (typeof e.withinScope !== "boolean") return "withinScope must be boolean";
   if (typeof e.durationMs !== "number" || e.durationMs < 0) return "durationMs must be a non-negative number";
   if (!e.timestamp || isNaN(Date.parse(e.timestamp))) return "timestamp must be a valid ISO 8601 date";

@@ -50,10 +50,8 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
     successes: string;
   }>(`
     SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (
-        WHERE outcome = 'success'
-      ) AS successes
+      COUNT(*) FILTER (WHERE outcome != 'blocked') AS total,
+      COUNT(*) FILTER (WHERE outcome = 'success') AS successes
     FROM events
     WHERE agent_id = $1
       AND recorded_at > NOW() - INTERVAL '30 days'
@@ -78,10 +76,8 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
     within_scope: string;
   }>(`
     SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (
-        WHERE server_within_scope = true
-      ) AS within_scope
+      COUNT(*) FILTER (WHERE outcome != 'blocked') AS total,
+      COUNT(*) FILTER (WHERE server_within_scope = true AND outcome != 'blocked') AS within_scope
     FROM events
     WHERE agent_id = $1
       AND recorded_at > NOW() - INTERVAL '30 days'
@@ -185,6 +181,7 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
     FROM events
     WHERE agent_id = $1
       AND recorded_at > NOW() - INTERVAL '14 days'
+      AND outcome != 'blocked'
   `, [agentId]);
 
   const tr = trendResult.rows[0];
@@ -217,6 +214,7 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
     success_count: string;
     error_count: string;
     anomaly_count: string;
+    blocked_count: string;
     scope_violation_count: string;
     hardware_conflict_count: string;
   }>(`
@@ -225,8 +223,9 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
       COUNT(*) FILTER (WHERE outcome = 'success') AS success_count,
       COUNT(*) FILTER (WHERE outcome = 'error') AS error_count,
       COUNT(*) FILTER (WHERE outcome = 'anomaly') AS anomaly_count,
+      COUNT(*) FILTER (WHERE outcome = 'blocked') AS blocked_count,
       COUNT(*) FILTER (
-        WHERE server_within_scope = false
+        WHERE server_within_scope = false AND outcome != 'blocked'
       ) AS scope_violation_count,
       COUNT(*) FILTER (
         WHERE (meta->>'hardware_conflict')::boolean = true
@@ -247,15 +246,16 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
   await query(`
     INSERT INTO reputation_snapshots
       (agent_id, total_events, success_count, error_count,
-       anomaly_count, scope_violation_count,
+       anomaly_count, blocked_count, scope_violation_count,
        hardware_conflict_count, success_rate, top_actions,
        final_score, trust_level, last_computed_at)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'[]',$9,$10,NOW())
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'[]',$10,$11,NOW())
     ON CONFLICT (agent_id) DO UPDATE SET
       total_events            = EXCLUDED.total_events,
       success_count           = EXCLUDED.success_count,
       error_count             = EXCLUDED.error_count,
       anomaly_count           = EXCLUDED.anomaly_count,
+      blocked_count           = EXCLUDED.blocked_count,
       scope_violation_count   = EXCLUDED.scope_violation_count,
       hardware_conflict_count = EXCLUDED.hardware_conflict_count,
       success_rate            = EXCLUDED.success_rate,
@@ -269,6 +269,7 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
     totals.success_count,
     totals.error_count,
     totals.anomaly_count,
+    totals.blocked_count,
     totals.scope_violation_count,
     totals.hardware_conflict_count,
     successRateDisplay,

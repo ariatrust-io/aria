@@ -661,6 +661,7 @@
     .event-dot.success { background: #28c841; }
     .event-dot.error   { background: var(--red); }
     .event-dot.anomaly { background: #ffbd2e; }
+    .event-dot.blocked { background: #4a9ebb; }
     
     .event-action { flex: 1; font-size: 14px; font-weight: 500; color: var(--white); }
     .event-agent  { font-size: 12px; color: rgba(248,244,238,0.75); }
@@ -1812,10 +1813,13 @@
       let html = '';
       events.forEach(event => {
         const cls         = event.outcome === 'success' ? 'success'
-                          : event.outcome === 'anomaly'  ? 'anomaly' : 'error';
+                          : event.outcome === 'anomaly'  ? 'anomaly'
+                          : event.outcome === 'blocked'  ? 'blocked' : 'error';
         const withinScope = event.server_within_scope !== false;
         const outcomeBadge = event.outcome === 'success'
           ? '<span class="badge-success">SUCCESS</span>'
+          : event.outcome === 'blocked'
+          ? '<span style="display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0.5px;background:#071e2e;color:#4a9ebb;border:1px solid rgba(74,158,187,0.4)">BLOCKED BY ARIA</span>'
           : '<span class="badge-error">ERROR</span>';
         html += `<div class="event-item">
           <div class="event-dot ${cls}"></div>
@@ -2147,10 +2151,12 @@
           <div>Action</div><div>Outcome</div><div>Duration</div><div>Time</div></div>`;
         evtList.forEach(ev => {
           const isViolation = ev.server_within_scope === false;
-          const outcomeColor = isViolation ? 'var(--gold)'
+          const outcomeColor = ev.outcome === 'blocked' ? '#4a9ebb'
+            : isViolation ? 'var(--gold)'
             : ev.outcome === 'success' ? 'var(--success)'
             : 'var(--red)';
-          const outcomeLabel = isViolation ? 'SCOPE VIOLATION'
+          const outcomeLabel = ev.outcome === 'blocked' ? 'BLOCKED BY ARIA'
+            : isViolation ? 'SCOPE VIOLATION'
             : ev.outcome.toUpperCase();
           html += `<div class="detail-event">
             <div style="color:#f8f4ee;font-weight:500">${escapeHtml(ev.action)}</div>
