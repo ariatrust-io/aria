@@ -260,7 +260,7 @@ authRouter.get("/confirm", async (req, res) => {
       <p style="font-family:system-ui;text-align:center;margin-top:40px;color:#666">Confirmed! You can close this tab.</p>
       <script>
         if (window.opener) {
-          window.opener.postMessage('aria-confirmed', '*');
+          window.opener.postMessage('aria-confirmed', '${process.env.APP_URL || 'https://ariatrust.org'}');
           window.close();
         } else {
           window.location.href = '/app?confirmed=1';

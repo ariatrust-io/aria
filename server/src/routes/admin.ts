@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
-import { query } from '../db/pool.js';
+import { query, transaction } from '../db/pool.js';
 import { getRedisClient } from '../utils/redis.js';
 
 export const adminRouter = Router();
@@ -145,18 +145,20 @@ adminRouter.post('/users/:userId/suspend', async (req, res) => {
 // DELETE /v1/admin/agents/:agentId
 adminRouter.delete('/agents/:agentId', async (req, res) => {
   try {
-    await query('DELETE FROM gate_requests WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM gate_rules WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM behavior_patterns WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM witness_checks WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM temporal_proofs WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM temporal_anchors WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM zero_proofs WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM anomalies_archive WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM anomalies WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM events WHERE agent_id = $1', [req.params.agentId]);
-    await query('DELETE FROM agents WHERE id = $1', [req.params.agentId]);
+    await transaction(async (client) => {
+      await client.query('DELETE FROM gate_requests WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM gate_rules WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM behavior_patterns WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM witness_checks WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM temporal_proofs WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM temporal_anchors WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM zero_proofs WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM anomalies_archive WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM anomalies WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM events WHERE agent_id = $1', [req.params.agentId]);
+      await client.query('DELETE FROM agents WHERE id = $1', [req.params.agentId]);
+    });
 
     await logAdminAction(
       'delete_agent', 'agent', req.params.agentId,
@@ -293,8 +295,20 @@ adminRouter.get('/security/blocked-ips', async (req, res) => {
       return res.json({ blocked_ips: [], message: 'Redis unavailable' });
     }
 
-    const keys = await redis.keys('membrane:blocked:*');
-    const ips = keys.map(k => k.replace('membrane:blocked:', ''));
+    const ips: string[] = [];
+    let cursor = 0;
+
+    do {
+      const [nextCursor, keys] = await redis.scan(
+        cursor,
+        'MATCH', 'membrane:blocked:*',
+        'COUNT', 100
+      );
+      cursor = parseInt(nextCursor);
+      ips.push(
+        ...keys.map(k => k.replace('membrane:blocked:', ''))
+      );
+    } while (cursor !== 0);
 
     return res.json({ blocked_ips: ips, count: ips.length });
   } catch (err) {

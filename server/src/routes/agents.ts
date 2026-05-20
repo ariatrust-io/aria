@@ -3,7 +3,7 @@ import { randomUUID, randomBytes, hkdfSync } from "crypto";
 import * as sss from "shamirs-secret-sharing";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
-import { query } from "../db/pool.js";
+import { query, transaction } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
 import { encryptSecret } from "../utils/crypto.js";
 import { checkAgentLimit } from "../middleware/plans.js";
@@ -273,11 +273,13 @@ agentsRouter.post("/bulk-delete", async (req, res) => {
       });
     }
 
-    await query('DELETE FROM anomalies_archive WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-    await query('DELETE FROM anomalies WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-    await query('DELETE FROM reputation_snapshots WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-    await query('DELETE FROM events WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-    await query('DELETE FROM agents WHERE id = ANY($1::uuid[])', [agentIds]);
+    await transaction(async (client) => {
+      await client.query('DELETE FROM anomalies_archive WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM anomalies WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM events WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM agents WHERE id = ANY($1::uuid[])', [agentIds]);
+    });
 
     return res.json({
       deleted: agentIds.length,
@@ -316,13 +318,15 @@ agentsRouter.delete("/:did", async (req, res) => {
 
     const agentId = agentResult.rows[0].id;
 
-    await query('DELETE FROM gate_requests WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM gate_rules WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM anomalies_archive WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM anomalies WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM events WHERE agent_id = $1', [agentId]);
-    await query('DELETE FROM agents WHERE id = $1', [agentId]);
+    await transaction(async (client) => {
+      await client.query('DELETE FROM gate_requests WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM gate_rules WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM anomalies_archive WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM anomalies WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM events WHERE agent_id = $1', [agentId]);
+      await client.query('DELETE FROM agents WHERE id = $1', [agentId]);
+    });
 
     return res.status(204).send();
   } catch (err) {

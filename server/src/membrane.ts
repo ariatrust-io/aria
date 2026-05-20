@@ -30,14 +30,17 @@ const getRateLimitKey = (req: express.Request): string => {
 app.use(helmet({ contentSecurityPolicy: false }));
 app.disable("x-powered-by");
 
-app.use(async (req, _res, next) => {
+app.use(async (req, res, next) => {
   const ip = getRateLimitKey(req);
 
   try {
     const redis = getRedisClient();
     if (redis) {
       const blocked = await redis.get(`membrane:blocked:${ip}`);
-      if (blocked) return;
+      if (blocked) {
+        res.status(403).json({ error: 'Forbidden', code: 'FORBIDDEN' });
+        return;
+      }
     }
   } catch (err) {
     console.warn('[membrane] Redis unavailable for block check, allowing request:', err instanceof Error ? err.message : err);
@@ -72,6 +75,7 @@ app.use(async (req, _res, next) => {
       console.warn('[membrane] Redis unavailable for scan tracking:', err instanceof Error ? err.message : err);
     }
 
+    res.status(403).json({ error: 'Forbidden', code: 'FORBIDDEN' });
     return;
   }
 
@@ -129,20 +133,22 @@ const ALLOWED_PATHS = [
   "/v1/admin",
 ];
 
-app.use((req, _res, next) => {
+app.use((req, res, next) => {
   // "/" must be exact-matched — startsWith("/") would pass everything
   const allowed = ALLOWED_PATHS.some((p) =>
     p === "/" ? req.path === "/" : req.path.startsWith(p)
   );
   if (!allowed) {
+    res.status(404).json({ error: 'Not Found', code: 'NOT_FOUND' });
     return;
   }
   next();
 });
 
-// Debug log for incoming requests
 app.use((req, _res, next) => {
-  console.log('[membrane] Received request:', req.method, req.url);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[membrane] Received request:', req.method, req.url);
+  }
   next();
 });
 

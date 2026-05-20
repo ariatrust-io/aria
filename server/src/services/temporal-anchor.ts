@@ -125,25 +125,35 @@ export async function createTemporalAnchor(
 
     const anchorId = anchorResult.rows[0]!.id;
 
-    for (const eh of eventHashes) {
+    if (eventHashes.length > 0) {
+      const valuesClauses: string[] = [];
+      const bulkParams: unknown[] = [];
+      let paramIdx = 1;
+
+      for (const eh of eventHashes) {
+        valuesClauses.push(
+          `($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`
+        );
+        bulkParams.push(
+          eh.event_id,
+          agentId,
+          eh.event_hash,
+          anchorId,
+          JSON.stringify({
+            event_hash: eh.event_hash,
+            chain_hash: eh.chain_hash,
+            anchor_id: anchorId,
+            anchor_hash: runningHash
+          })
+        );
+      }
+
       await query(`
         INSERT INTO temporal_proofs
-          (event_id, agent_id, event_hash,
-           anchor_id, proof_chain)
-        VALUES ($1,$2,$3,$4,$5)
+          (event_id, agent_id, event_hash, anchor_id, proof_chain)
+        VALUES ${valuesClauses.join(', ')}
         ON CONFLICT (event_id) DO NOTHING
-      `, [
-        eh.event_id,
-        agentId,
-        eh.event_hash,
-        anchorId,
-        JSON.stringify({
-          event_hash: eh.event_hash,
-          chain_hash: eh.chain_hash,
-          anchor_id: anchorId,
-          anchor_hash: runningHash
-        })
-      ]);
+      `, bulkParams);
     }
 
     console.log(

@@ -7,8 +7,8 @@ if (!process.env.DATABASE_URL) {
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   
-  // Scale: Allow up to 50 connections to handle load spikes without saturating PostgreSQL.
-  max: 50, 
+  // Configurable via DB_POOL_MAX. Default 8 per instance × 3 Railway instances = 24 total (under the ~25 Railway limit).
+  max: parseInt(process.env.DB_POOL_MAX || '8'),
   
   // Kill stuck queries after 10 seconds to prevent connection leaks.
   statement_timeout: 10_000, 
