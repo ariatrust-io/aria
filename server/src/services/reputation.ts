@@ -237,9 +237,12 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
   const totals = totalsResult.rows[0];
   if (!totals) return;
 
-  const successRateDisplay = parseInt(totals.total_events) > 0
+  const effectiveTotal = parseInt(totals.total_events) -
+    parseInt(totals.blocked_count ?? '0');
+
+  const successRateDisplay = effectiveTotal > 0
     ? ((parseInt(totals.success_count) /
-        parseInt(totals.total_events)) * 100).toFixed(2)
+        effectiveTotal) * 100).toFixed(2)
     : null;
 
   // ── UPSERT SNAPSHOT ──────────────────────────────

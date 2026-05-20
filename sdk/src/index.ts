@@ -154,7 +154,33 @@ export class ARIAClient {
   ): Promise<TrackResult> {
     const mode = options.mode ?? 'enforce';
 
-    // Scope check: BEFORE fn() executes in any mode
+    if (mode === 'light') {
+      // Scope check runs in background — fn() has zero added latency
+      getAgentScope(agentDid, this.apiKey, this.baseUrl)
+        .then(agentScope => {
+          if (agentScope.length > 0 && !actionMatchesScope(action, agentScope)) {
+            this.sendBlockedEventBackground(agentDid, secret, action);
+          }
+        })
+        .catch(() => {});
+
+      const startTime = Date.now();
+      let outcome: 'success' | 'error' = 'success';
+      let fnError: string | undefined;
+
+      try {
+        await fn();
+      } catch (err) {
+        outcome = 'error';
+        fnError = err instanceof Error ? err.message : String(err);
+      }
+
+      const durationMs = Date.now() - startTime;
+      this.sendEventBackground(agentDid, secret, action, outcome, durationMs, fnError);
+      return { success: true, eventId: randomUUID() };
+    }
+
+    // enforce and gate modes: blocking scope check BEFORE fn()
     const agentScope = await getAgentScope(agentDid, this.apiKey, this.baseUrl);
     if (agentScope.length > 0 && !actionMatchesScope(action, agentScope)) {
       this.sendBlockedEventBackground(agentDid, secret, action);
@@ -195,25 +221,6 @@ export class ARIAClient {
         eventId: result.eventId,
         insights: result.insights
       };
-    }
-
-    if (mode === 'light') {
-      const startTime = Date.now();
-      let outcome: 'success' | 'error' = 'success';
-      let fnError: string | undefined;
-
-      try {
-        await fn();
-      } catch (err) {
-        outcome = 'error';
-        fnError = err instanceof Error ? err.message : String(err);
-      }
-
-      const durationMs = Date.now() - startTime;
-
-      this.sendEventBackground(agentDid, secret, action, outcome, durationMs, fnError);
-
-      return { success: true, eventId: randomUUID() };
     }
 
     // enforce mode — blocking, existing behavior
