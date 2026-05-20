@@ -1,101 +1,55 @@
-# ARIA — Trust Infrastructure for AI Agents
+# ARIA
 
-> Observe. Verify. Control. Stop damage before it happens.
+**Your AI agents are taking real actions. Can you prove what they did?**
 
-ARIA is an open-source trust and enforcement infrastructure
-for AI agents. Every agent gets a cryptographic identity,
-an immutable audit trail, a verified trust score, and
-human-in-the-loop enforcement before critical actions execute.
+ARIA gives every AI agent a cryptographic identity, an immutable audit trail, and a trust score based on real behavior. When an agent tries to do something destructive, ARIA stops it and asks you first.
 
-[![npm version](https://img.shields.io/npm/v/@ariatrust-io/aria-sdk)](https://www.npmjs.com/package/@ariatrust-io/aria-sdk)
+[![npm](https://img.shields.io/npm/v/@ariatrust-io/aria-sdk)](https://www.npmjs.com/package/@ariatrust-io/aria-sdk)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-92%2F92-brightgreen)](/)
 
 ---
 
-## Why ARIA Exists
+## The problem
 
-AI agents are being deployed to production environments
-where they can take real actions — deleting data, sending
-emails, moving funds, modifying configurations — with
-minimal human oversight.
+An AI agent deleted a production database, then generated fake logs to cover its tracks. There was no audit trail. No warning. No way to prove what happened.
 
-The results have been costly:
-
-- A coding agent executed `DROP DATABASE` on a production
-  system, then fabricated system logs to cover its tracks.
-  There was no audit trail.
-- An internal AI agent exposed sensitive company data due
-  to a scope error — accessing resources it was never
-  authorized to touch.
-- An autonomous agent platform was compromised, giving
-  attackers full control over every agent action. Users
-  lost funds with no cryptographic proof of what occurred.
-
-**ARIA exists to solve exactly this.**
+This is happening today. At scale, across thousands of agents making autonomous decisions, the question is no longer *"what can my agent do?"* — it's *"what did it actually do, and can I prove it?"*
 
 ---
 
-## What ARIA Does
-
-| Feature | Description |
-|---------|-------------|
-| **Cryptographic Identity** | Every agent gets a DID (`did:agentrust:<uuid>`) |
-| **Immutable Audit Trail** | Every action signed with HMAC-SHA256 |
-| **Trust Score** | 5-dimension behavioral score (0-95) |
-| **ARIA Gate** | Pause destructive actions, require human approval |
-| **ARIA Spectrum** | Detect behavioral patterns automatically |
-| **Shadow Witness** | Cross-verify actions against external sources |
-| **Temporal Anchor** | Cryptographic timestamp proofs |
-| **ZeroProof** | Prove behavior without revealing data |
-
----
-
-## Quick Start
-
-### 1. Install the SDK
+## The solution
 
 ```bash
 npm install @ariatrust-io/aria-sdk
 ```
 
-### 2. Register your agent
-
 ```typescript
 import { createClient } from '@ariatrust-io/aria-sdk';
 
-const aria = createClient({
-  baseUrl: 'https://ariatrust.org',
-  apiKey: process.env.ARIA_API_KEY
-});
+const aria = createClient({ apiKey: process.env.ARIA_API_KEY });
 
+// Register your agent once
 const agent = await aria.registerAgent({
-  name: 'my-agent',
-  scope: ['read:data', 'write:orders', 'send:email']
+  name: 'invoice-processor',
+  scope: ['read:invoices', 'send:email', 'write:database']
 });
 
-// Save these — required for tracking
-console.log(agent.did);    // did:agentrust:...
-console.log(agent.secret); // keep this secret
-```
-
-### 3. Track agent actions
-
-```typescript
-// Default mode — blocking, returns insights
-const result = await aria.track(
-  agent.did,
-  agent.secret,
-  'read:data',
-  async () => fetchUserData(userId)
-);
-
-// Light mode — fire and forget, zero latency
-await aria.track(did, secret, 'read:data', fn,
-  { mode: 'light' }
+// Track every action — one line
+await aria.track(agent.did, agent.secret, 'read:invoices',
+  () => fetchInvoices()
 );
 ```
 
-### 4. Require human approval for critical actions
+That's it. Your agent now has:
+- A cryptographic identity (`did:agentrust:...`)
+- An immutable audit trail for every action
+- A trust score updated in real time
+- Automatic scope enforcement
+
+---
+
+## Stop destructive actions before they happen
 
 ```typescript
 import { GateDeniedException } from '@ariatrust-io/aria-sdk';
@@ -105,32 +59,61 @@ try {
     agent.did,
     agent.secret,
     'delete:records',
-    async () => deleteRecords(ids),
-    {
-      mode: 'gate',
-      gate: {
-        requireApproval: ['delete:*'],
-        autoBlock: ['drop:*', 'truncate:*'],
-        timeoutMs: 5 * 60 * 1000
-      }
-    }
+    () => deleteRecords(ids),
+    { mode: 'gate' }
   );
 } catch (err) {
   if (err instanceof GateDeniedException) {
-    console.log('Owner denied — action blocked');
+    console.log('Owner denied — records protected');
   }
 }
 ```
 
-When a gated action is triggered:
+When a gated action triggers:
 1. Execution pauses immediately
-2. Owner receives a notification
-3. Owner approves or denies from their dashboard
-4. If no response in 5 minutes → automatically denied
+2. You get a notification
+3. You approve or deny from your dashboard
+4. No response in 5 minutes → automatically denied
 
 ---
 
-## LangChain Integration
+## What you get
+
+| | Free | Professional | Enterprise |
+|---|---|---|---|
+| Agents | 1 | 5 | Unlimited |
+| Events/month | 50,000 | 500,000 | Unlimited |
+| Event history | 30 days | 12 months | Unlimited |
+| ARIA Gate | — | ✓ | ✓ |
+| ZeroProof | — | ✓ | ✓ |
+| Export | — | ✓ | ✓ |
+| Price | Free | $49/mo | Custom |
+
+---
+
+## Trust Score
+
+Every agent gets a score from 0 to 95 based on 30 days of behavior. Calculated across 5 dimensions — all rate-based, never count-based:
+
+| Dimension | Weight |
+|-----------|--------|
+| Success rate | 40% |
+| Scope compliance | 30% |
+| Behavioral consistency | 15% |
+| Clean history | 10% |
+| Recent trend | 5% |
+
+An agent with 1,000,000 events and 6% violations scores the same as one with 1,000 events and 6% violations. Volume doesn't inflate penalties.
+
+| Score | Level |
+|-------|-------|
+| 80–95 | TRUSTED |
+| 50–79 | NEUTRAL |
+| 0–49 | UNTRUSTED |
+
+---
+
+## LangChain
 
 ```typescript
 import { wrapTools } from '@ariatrust-io/aria-sdk/langchain';
@@ -142,170 +125,114 @@ const tools = wrapTools(
 );
 ```
 
----
-
-## Trust Score
-
-Every agent has a score from 0 to 95 based on behavior
-over the last 30 days. Calculated across 5 dimensions:
-
-| Dimension | Weight | Description |
-|-----------|--------|-------------|
-| Success Rate | 40% | Rate of successful actions |
-| Scope Compliance | 30% | Actions within declared scope |
-| Consistency | 15% | Behavioral stability over time |
-| Clean History | 10% | No critical security incidents |
-| Recent Trend | 5% | Improving or worsening pattern |
-
-Score is based on **rates**, not counts.
-An agent with 1,000 events and 6% violations
-scores the same as one with 1,000,000 events
-and 6% violations.
-
-| Score | Level |
-|-------|-------|
-| 80-95 | TRUSTED |
-| 50-79 | NEUTRAL |
-| 0-49  | UNTRUSTED |
-
----
-
-## ARIA Spectrum — Behavioral Pattern Detection
-
-ARIA automatically detects patterns across agent behavior:
-
-- **Action Failure Patterns** — specific actions failing repeatedly
-- **Temporal Patterns** — failures clustering at specific hours
-- **Scope Violation Patterns** — unauthorized actions attempted repeatedly
-- **Frequency Spikes** — sudden burst of events (possible runaway loop)
-
-Instead of: *"Anomaly detected on delete:records"*
-
-You get: *"Your agent attempts delete:records outside its declared
-scope consistently between 11pm and 1am. 8 occurrences in the
-last 7 days. This pattern suggests a bug in a nightly scheduled job."*
-
----
-
-## ZeroProof — Behavioral Proofs
-
-Prove agent behavior without revealing sensitive data:
-
-```bash
-# Proof of Innocence
-POST /v1/zeroproof/innocence
-{ "agentDid": "...", "forbidden_pattern": "delete:*" }
-# → "Agent never executed delete:* in last 30 days"
-
-# Proof of Consistency  
-POST /v1/zeroproof/consistency
-{ "agentDid": "...", "min_success_rate": 90 }
-# → "Agent maintained ≥90% success rate"
-
-# Proof of Limits
-POST /v1/zeroproof/limits
-{ "agentDid": "...", "max_events_per_hour": 100 }
-# → "Agent never exceeded 100 events/hour"
-```
-
-All proofs use Merkle tree commitments —
-cryptographically verifiable by any auditor.
+Every tool call is automatically tracked. No other changes needed.
 
 ---
 
 ## API Reference
 
-Base URL: `https://ariatrust.org`  
+Base URL: `https://ariatrust.org`
 Auth: `Authorization: Bearer <api-key>`
 
-**Agents**
-```
-POST   /v1/agents                    Register agent
-GET    /v1/agents                    List agents
-GET    /v1/agents/:did               Agent details + trust score
-GET    /v1/agents/:did/patterns      Behavioral patterns (Spectrum)
-GET    /v1/agents/:did/secret        Recover agent secret
-DELETE /v1/agents/:did               Delete agent
-```
-
-**Events**
-```
-POST   /v1/events                    Track single event
-POST   /v1/events/batch              Track up to 500 events
-GET    /v1/events                    List events
-GET    /v1/events/export             Export as CSV or JSON
-```
-
-**ARIA Gate**
-```
-POST   /v1/gate/request              Request human approval
-GET    /v1/gate/request/:id          Check approval status
-POST   /v1/gate/approve/:id          Approve action
-POST   /v1/gate/deny/:id             Deny action
-GET    /v1/gate/pending              List pending approvals
-```
-
-**ZeroProof**
-```
-POST   /v1/zeroproof/innocence       Proof of Innocence
-POST   /v1/zeroproof/consistency     Proof of Consistency
-POST   /v1/zeroproof/limits          Proof of Limits
-GET    /v1/zeroproof/verify/:id      Verify a proof
-GET    /v1/zeroproof/list/:did       List proofs for agent
-```
-
-**Webhooks**
-```
-POST   /v1/webhooks                  Register webhook
-GET    /v1/webhooks                  List webhooks
-DELETE /v1/webhooks/:id              Remove webhook
-```
+Full docs: [ariatrust.org/docs](https://ariatrust.org/docs)
 
 ---
 
-## Roadmap
+## Advanced features
 
-- [x] **Phase 1** — Core: DID, HMAC signing, audit trail, trust score
-- [x] **Phase 2** — Production: Dashboard, 2FA, webhooks, Redis, security hardening
-- [x] **Phase 3** — ARIA Gate: Human-in-the-loop enforcement
-- [x] **Phase 4** — ARIA Spectrum: Behavioral pattern detection
-- [x] **Phase 5** — Shadow Witness: Independent action verification
-- [x] **Phase 6** — Temporal Anchor: Cryptographic timestamp proofs
-- [x] **Phase 7** — ZeroProof: Merkle tree behavioral proofs
-- [ ] **Phase 7b** — ZeroProof ZK: Full zk-SNARKs implementation
-- [ ] **Phase 8** — ARIA Shadow Witness: External source connectors
-- [ ] **Python SDK** — `pip install aria-sdk`
-- [ ] **Go SDK** — `go get ariatrust.org/go-sdk`
-- [ ] **SOC 2 Type II** — Enterprise compliance certification
-- [ ] **Docker Compose** — Self-hosting for enterprise
+<details>
+<summary>ARIA Spectrum — Behavioral pattern detection</summary>
+
+ARIA automatically detects patterns across agent behavior:
+
+- **Action failures** — a specific action failing repeatedly
+- **Temporal patterns** — failures clustering at specific hours
+- **Scope violations** — unauthorized actions attempted repeatedly
+- **Frequency spikes** — sudden burst of events (possible runaway loop)
+
+Instead of: *"Anomaly detected"*
+
+You get: *"Your agent attempts `delete:records` outside its declared scope consistently between 11pm–1am. 8 occurrences in 7 days. Likely a bug in a nightly cron job."*
+
+</details>
+
+<details>
+<summary>ZeroProof — Prove behavior without revealing data</summary>
+
+```bash
+# Prove agent never executed a forbidden action
+POST /v1/zeroproof/innocence
+{ "agentDid": "...", "forbidden_pattern": "delete:*" }
+→ "Agent never executed delete:* in last 30 days"
+   Merkle root: e86a6fc8...
+
+# Prove success rate above threshold
+POST /v1/zeroproof/consistency
+{ "agentDid": "...", "min_success_rate": 90 }
+→ "Agent maintained ≥90% success rate"
+
+# Prove agent never exceeded rate limit
+POST /v1/zeroproof/limits
+{ "agentDid": "...", "max_events_per_hour": 100 }
+→ "Agent never exceeded 100 events/hour"
+```
+
+All proofs use Merkle tree commitments — verifiable by any auditor without access to your system.
+
+</details>
+
+<details>
+<summary>Temporal Anchor — Cryptographic timestamp proofs</summary>
+
+Every 100 events, ARIA creates a hash chain anchor — a cryptographic proof of exactly when events occurred, independently verifiable.
+
+```bash
+POST /v1/temporal/anchor/:did     # Create anchor
+GET  /v1/temporal/verify/:eventId # Verify event timestamp
+```
+
+</details>
+
+<details>
+<summary>Shadow Witness — External verification</summary>
+
+Register an external source to cross-verify what your agent reports. If your agent says it sent 100 emails but your email provider shows 47 — ARIA flags the discrepancy.
+
+```bash
+POST /v1/witness/sources     # Register external source
+POST /v1/witness/confirm/:id # Submit external count
+```
+
+</details>
 
 ---
 
 ## Security
 
 - AES-256-GCM encryption with AAD context binding
-- HMAC-SHA256 with timing-safe comparison
-- 2FA on all user logins
-- Redis-backed rate limiting on all endpoints
-- IP blocking via Membrane security proxy
+- HMAC-SHA256 signatures with timing-safe comparison
+- 2FA on all accounts
+- Redis-backed rate limiting
 - Replay attack protection (5-minute window)
-- 34/34 internal security tests passing
-- 0 known vulnerabilities (npm audit clean)
+- 92 tests passing · 0 known vulnerabilities
 
-Report security issues to: security@ariatrust.org
-
----
-
-## Stack
-
-Node.js · TypeScript · Express · PostgreSQL · Redis ·
-Cloudflare · Railway
+Report security issues: dhdez3149@gmail.com
 
 ---
 
-## License
+## Roadmap
 
-BUSL-1.1 — See [LICENSE](LICENSE) for details.
+- [x] Phase 1 — DID, HMAC, audit trail, trust score
+- [x] Phase 2 — Dashboard, 2FA, webhooks, Redis
+- [x] Phase 3 — ARIA Gate
+- [x] Phase 4 — ARIA Spectrum
+- [x] Phase 5 — Shadow Witness
+- [x] Phase 6 — Temporal Anchor
+- [x] Phase 7 — ZeroProof (Merkle)
+- [ ] Phase 7b — ZeroProof (zk-SNARKs)
+- [ ] Python SDK
+- [ ] Go SDK
+- [ ] SOC 2 Type II
 
 ---
 
@@ -314,6 +241,12 @@ BUSL-1.1 — See [LICENSE](LICENSE) for details.
 - **Website**: https://ariatrust.org
 - **Dashboard**: https://ariatrust.org/app
 - **Docs**: https://ariatrust.org/docs
-- **Pricing**: https://ariatrust.org/pricing
 - **npm**: https://www.npmjs.com/package/@ariatrust-io/aria-sdk
-- **GitHub**: https://github.com/ariatrust-io/aria
+- **Pricing**: https://ariatrust.org/pricing
+
+---
+
+## License
+
+BUSL-1.1 — free for non-production use.
+Contact dhdez3149@gmail.com for commercial licensing.
