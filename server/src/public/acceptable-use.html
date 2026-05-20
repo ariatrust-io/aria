@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy — ARIA</title>
+<title>Acceptable Use Policy — ARIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -41,10 +41,6 @@ nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:cen
 .legal-wrap a{color:var(--gold);text-decoration:none}
 .legal-wrap a:hover{color:var(--gold-lt)}
 .legal-wrap strong{color:var(--white);font-weight:600}
-.processor-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px}
-.processor-table th{text-align:left;color:var(--gold);font-weight:600;padding:8px 12px;border-bottom:1px solid rgba(212,168,67,0.2);letter-spacing:1px}
-.processor-table td{color:var(--text);padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
-.processor-table tr:last-child td{border-bottom:none}
 
 footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60px 48px 0}
 .footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px}
@@ -63,7 +59,7 @@ footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60
 .footer-domain{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(212,168,67,0.28);letter-spacing:1px}
 
 @media(max-width:768px){nav{padding:0 24px}.nav-links{display:none}.legal-wrap{padding:100px 20px 60px}.footer-main{grid-template-columns:1fr 1fr}footer{padding:40px 24px 0}}
-@media(max-width:480px){.footer-main{grid-template-columns:1fr}.processor-table{font-size:11px}}
+@media(max-width:480px){.footer-main{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -86,110 +82,56 @@ footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60
 </nav>
 
 <div class="legal-wrap">
-  <div class="legal-title">Privacy Policy</div>
+  <div class="legal-title">Acceptable Use Policy</div>
   <div class="legal-updated">Last updated: May 19, 2026 &nbsp;&middot;&nbsp; Effective: May 19, 2026</div>
 
-  <h2>1. Introduction</h2>
-  <p>ARIA is operated by Josías Hernández, a natural person based in Colombia. This Privacy Policy explains what personal data we collect, how we use it, who we share it with, and what rights you have over it.</p>
-  <p>This policy applies to all users of <a href="https://ariatrust.org">ariatrust.org</a>, the ARIA API, and the <code>@ariatrust-io/aria-sdk</code> npm package.</p>
-  <p>We are committed to processing personal data in compliance with applicable privacy laws, including the EU General Data Protection Regulation (GDPR), Brazil's Lei Geral de Proteção de Dados (LGPD), and Colombia's Ley 1581 de 2012 (Habeas Data).</p>
+  <h2>1. Overview</h2>
+  <p>This Acceptable Use Policy ("AUP") defines what you may and may not do with ARIA ("the Service"). It applies to all users, including those on the Free plan, Professional plan, and Enterprise plan, as well as any third parties accessing the Service through your account or API keys.</p>
+  <p>This AUP is incorporated by reference into the <a href="/terms">Terms of Service</a>. Violations of this policy may result in suspension or termination of your account without refund.</p>
 
-  <h2>2. Data We Collect</h2>
-  <p><strong>Account data.</strong> When you register, we collect your email address and optionally your name. This is used to authenticate you and communicate with you about the Service.</p>
-  <p><strong>Agent data.</strong> Data you submit through the API: agent DIDs, declared scopes, event logs, trust scores, gate requests, zero-knowledge proofs, temporal anchors, and witness checks. You are the data controller for this data.</p>
-  <p><strong>Technical data.</strong> IP addresses, browser user-agent strings, request timestamps, and HTTP response codes collected in server logs. Retained for up to 30 days for security and debugging purposes.</p>
-  <p><strong>Payment data.</strong> If you subscribe to a paid plan, payment is processed by Stripe. We receive only a payment confirmation and masked card details (last 4 digits, expiry). We never store full card numbers or CVV codes.</p>
-  <p><strong>Communication data.</strong> If you contact us by email, we retain those communications to respond to your inquiry.</p>
-
-  <h2>3. How We Use Your Data</h2>
+  <h2>2. Prohibited Uses</h2>
+  <p>You must not use the Service for any of the following purposes:</p>
   <ul>
-    <li>To create and manage your account</li>
-    <li>To provide the ARIA service: identity resolution, audit trail storage, trust scoring, gate enforcement</li>
-    <li>To send transactional emails (account verification, password reset, billing notifications) via Resend</li>
-    <li>To detect anomalies and calculate agent trust scores</li>
-    <li>To comply with legal obligations</li>
-    <li>To improve the reliability and security of the Service</li>
-  </ul>
-  <p><strong>We never sell your data to third parties.</strong> We never use your data for advertising, profiling, or any purpose unrelated to providing the Service.</p>
-
-  <h2>4. Data Processors (Sub-processors)</h2>
-  <p>We use the following third-party service providers to operate ARIA. Each has agreed to process data only on our instructions:</p>
-  <table class="processor-table">
-    <thead>
-      <tr>
-        <th>Processor</th>
-        <th>Purpose</th>
-        <th>Country</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Railway</td><td>Application hosting and infrastructure</td><td>United States</td></tr>
-      <tr><td>PostgreSQL on Railway</td><td>Primary database</td><td>United States</td></tr>
-      <tr><td>Redis on Railway</td><td>Session cache and rate limiting</td><td>United States</td></tr>
-      <tr><td>Resend</td><td>Transactional email delivery</td><td>United States</td></tr>
-      <tr><td>Cloudflare</td><td>DNS, DDoS protection, CDN proxy</td><td>United States / Global</td></tr>
-      <tr><td>Stripe</td><td>Payment processing (when applicable)</td><td>United States</td></tr>
-    </tbody>
-  </table>
-
-  <h2>5. Data Retention</h2>
-  <p>We retain your data only as long as necessary to provide the Service or as required by law:</p>
-  <ul>
-    <li><strong>Free plan:</strong> Agent event history retained for 30 days</li>
-    <li><strong>Professional plan:</strong> Agent event history retained for 12 months</li>
-    <li><strong>Enterprise plan:</strong> Agent event history retained indefinitely (until deletion requested)</li>
-    <li><strong>Account data:</strong> Retained until you request account deletion</li>
-    <li><strong>Server logs:</strong> Retained for up to 30 days</li>
-    <li><strong>Billing records:</strong> Retained for 7 years as required by Colombian tax law</li>
+    <li><strong>Illegal activity.</strong> Any use that violates local, national, or international law, including but not limited to fraud, money laundering, intellectual property infringement, or unauthorized data collection.</li>
+    <li><strong>Harassment or abuse.</strong> Using the Service to harass, threaten, intimidate, or abuse any individual or organization.</li>
+    <li><strong>Spam or unsolicited communications.</strong> Using agent event data or ARIA infrastructure to send unsolicited messages, bulk emails, or automated outreach without recipient consent.</li>
+    <li><strong>Malware or harmful code.</strong> Uploading, transmitting, or distributing malware, viruses, ransomware, spyware, or any code designed to damage or gain unauthorized access to systems.</li>
+    <li><strong>Circumventing security measures.</strong> Attempting to bypass, defeat, or undermine ARIA's authentication, rate limiting, encryption, or any other security mechanism.</li>
+    <li><strong>Cryptocurrency mining.</strong> Using ARIA infrastructure for cryptocurrency mining or any computationally intensive operation unrelated to the Service's intended purpose.</li>
+    <li><strong>Scraping or excessive API calls.</strong> Systematically extracting data from ARIA beyond your plan's rate limits, or using automated tools to scrape the Dashboard or API in a manner that degrades service for others.</li>
+    <li><strong>Fake agents or false audit trails.</strong> Creating AI agent identities with the intent to deceive, or submitting fabricated event data to artificially inflate or manipulate trust scores.</li>
+    <li><strong>Non-consensual surveillance.</strong> Using ARIA to track, monitor, or profile individuals without their explicit, informed consent. This includes covert agent deployments designed to gather personal data without disclosure.</li>
+    <li><strong>Reselling without permission.</strong> Offering access to the ARIA Service to third parties as a product or service without prior written authorization from ARIA.</li>
   </ul>
 
-  <h2>6. Your Rights</h2>
-  <p>Depending on your jurisdiction, you have the following rights over your personal data:</p>
+  <h2>3. API Usage</h2>
+  <p><strong>Rate limits.</strong> Each plan includes defined rate limits. You must not attempt to exceed these limits through technical workarounds, credential sharing, or by creating multiple accounts.</p>
+  <p><strong>No automated account creation.</strong> Creating accounts programmatically or in bulk is prohibited. Account registration is intended for individual users and organizations.</p>
+  <p><strong>API key security.</strong> API keys are credentials — treat them as passwords. Do not share API keys across accounts, publish them in public repositories, or embed them in client-side code. If a key is compromised, rotate it immediately from the Dashboard.</p>
+  <p><strong>Reasonable use.</strong> Even within rate limits, sustained usage patterns that degrade Service performance for other users may trigger throttling or review.</p>
+
+  <h2>4. Agent Requirements</h2>
+  <p><strong>Accurate scope declaration.</strong> Agents registered with ARIA must declare scopes that accurately reflect the actions they are authorized to perform. Registering misleading or overly broad scopes to avoid gate checks is a violation of this policy.</p>
+  <p><strong>Honest event data.</strong> All events submitted to ARIA must truthfully represent actions taken by the agent. Deliberately falsifying, omitting, or altering event records undermines the integrity of the audit trail and is strictly prohibited.</p>
+  <p><strong>No cover-up use.</strong> ARIA must not be used to create the appearance of compliance or oversight while concealing actual agent misbehavior. The Service is designed for accountability — using it to obscure wrongdoing is a fundamental violation of these terms.</p>
+  <p><strong>No impersonation.</strong> Agents must not impersonate other agents, users, or systems. Each DID must correspond to a genuine, distinct agent identity.</p>
+
+  <h2>5. Enforcement</h2>
+  <p>ARIA reserves the right to investigate suspected violations of this AUP. Our enforcement approach is graduated but we retain full discretion:</p>
   <ul>
-    <li><strong>Access:</strong> Request a copy of the personal data we hold about you</li>
-    <li><strong>Export:</strong> Download your agent data in CSV or JSON format from the Dashboard</li>
-    <li><strong>Correction:</strong> Request correction of inaccurate personal data</li>
-    <li><strong>Deletion:</strong> Request deletion of your account and personal data</li>
-    <li><strong>Portability:</strong> Receive your data in a structured, machine-readable format (GDPR Article 20)</li>
-    <li><strong>Objection:</strong> Object to processing based on legitimate interests (GDPR Article 21)</li>
-    <li><strong>Restriction:</strong> Request restriction of processing in certain circumstances</li>
-    <li><strong>Habeas Data:</strong> Colombian users may exercise rights under Ley 1581 de 2012</li>
-    <li><strong>LGPD rights:</strong> Brazilian users may exercise rights under Lei 13.709/2018</li>
+    <li><strong>Warning.</strong> For first-time or minor violations, we may issue a written warning and require corrective action within a specified timeframe.</li>
+    <li><strong>Suspension.</strong> For repeated violations or more serious breaches, we may suspend your account temporarily, with or without notice.</li>
+    <li><strong>Permanent termination.</strong> For severe violations — including illegal activity, deliberate fraud, or persistent abuse — we will permanently terminate your account and may report violations to relevant authorities.</li>
+    <li><strong>No refund on termination for violations.</strong> Accounts terminated for AUP violations are not eligible for any refund of fees paid.</li>
   </ul>
-  <p>To exercise any of these rights, contact us at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a>. We will respond within 30 days.</p>
+  <p>We may also cooperate with law enforcement agencies in investigating violations that may be criminal in nature.</p>
 
-  <h2>7. Security</h2>
-  <p>We implement the following security measures to protect your data:</p>
-  <ul>
-    <li><strong>Encryption at rest:</strong> AES-256-GCM encryption for sensitive data fields</li>
-    <li><strong>Integrity verification:</strong> HMAC-SHA256 signatures on all event records</li>
-    <li><strong>Authentication:</strong> Two-factor authentication (2FA) available for all accounts</li>
-    <li><strong>Passwords:</strong> Stored as bcrypt hashes — we never store plaintext passwords</li>
-    <li><strong>Transport:</strong> All data transmitted over HTTPS/TLS 1.2+</li>
-    <li><strong>API keys:</strong> AES-256-GCM encrypted at rest; HMAC-verified on use</li>
-  </ul>
-  <p>Despite these measures, no system is perfectly secure. If you discover a security vulnerability, please report it to <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a>.</p>
-
-  <h2>8. Cookies</h2>
-  <p>ARIA uses only essential session cookies to keep you logged in. We do not use analytics cookies, advertising cookies, or any third-party tracking cookies. See our <a href="/cookies">Cookie Policy</a> for details.</p>
-
-  <h2>9. Children</h2>
-  <p>The Service is not directed at children under the age of 18. We do not knowingly collect personal data from anyone under 18. If we become aware that we have inadvertently collected data from a minor, we will delete it promptly.</p>
-
-  <h2>10. International Data Transfers</h2>
-  <p>Your data is processed on Railway infrastructure located in the United States. By using the Service, you acknowledge that your data may be transferred to and processed in the United States.</p>
-  <p>For users in the European Economic Area (EEA) or Brazil, such transfers are covered by appropriate safeguards, including standard contractual clauses where required. You may request a copy of applicable transfer mechanisms by contacting us.</p>
-
-  <h2>11. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time. For material changes, we will provide at least 30 days notice via email before the changes take effect. The "Last updated" date at the top of this page reflects the most recent revision.</p>
-
-  <h2>12. Contact</h2>
-  <p>For privacy questions, data requests, or to exercise your rights:</p>
+  <h2>6. Reporting Violations</h2>
+  <p>If you become aware of any use of ARIA that violates this policy, please report it to:</p>
   <ul>
     <li>Email: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></li>
-    <li>Website: <a href="https://ariatrust.org">ariatrust.org</a></li>
   </ul>
-  <p>Data controller: Josías Hernández, Colombia.</p>
+  <p>Reports are confidential. We take all reports seriously and will investigate promptly.</p>
 </div>
 
 <footer>

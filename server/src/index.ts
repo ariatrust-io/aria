@@ -121,6 +121,18 @@ app.get('/privacy', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
 });
 
+app.get('/terms', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
+app.get('/acceptable-use', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'acceptable-use.html'));
+});
+
+app.get('/cookies', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'cookies.html'));
+});
+
 app.get('/docs', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'docs.html'));
 });
