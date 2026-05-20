@@ -24,8 +24,8 @@ import { oauthRouter } from "./routes/oauth.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
-import { RedisStore } from 'rate-limit-redis';
 import { getRedisClient } from './utils/redis.js';
+import { getRateLimitKey, createRedisStore } from './utils/network.js';
 
 // 2. MANEJO DE ERRORES CRÍTICOS
 process.on("uncaughtException", (err) => {
@@ -44,17 +44,6 @@ const app = express();
 // Trust proxy for Railway (handles X-Forwarded-For header)
 app.set('trust proxy', 1);
 
-const normalizeIP = (ip: string | undefined): string => {
-  if (!ip) return 'unknown';
-  return ip.replace(/^::ffff:/, '');
-};
-
-const getRateLimitKey = (req: express.Request): string => {
-  const cfIp = req.headers['cf-connecting-ip'];
-  if (cfIp && typeof cfIp === 'string') return cfIp;
-  return normalizeIP(req.ip);
-};
-
 const _redis = getRedisClient();
 
 const apiLimiter = rateLimit({
@@ -62,8 +51,8 @@ const apiLimiter = rateLimit({
   max: 1500,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:api:'),
   message: 'Too many requests from your network, please try again later.',
 });
 
@@ -72,8 +61,8 @@ const setupLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:setup:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many setup attempts. Try again in 1 hour.',
@@ -165,16 +154,16 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
   next();
 });
 
+function checkDepth(obj: unknown, depth: number = 0): boolean {
+  if (depth > 5) return false;
+  if (typeof obj !== 'object' || obj === null) return true;
+  return Object.values(obj as Record<string, unknown>).every(v => checkDepth(v, depth + 1));
+}
+
 app.use((req, _res, next) => {
   if (!req.body || typeof req.body !== 'object') return next();
 
-  function checkDepth(obj: unknown, depth: number): boolean {
-    if (depth > 5) return false;
-    if (typeof obj !== 'object' || obj === null) return true;
-    return Object.values(obj).every(v => checkDepth(v, depth + 1));
-  }
-
-  if (!checkDepth(req.body, 0)) {
+  if (!checkDepth(req.body)) {
     _res.status(400).json({
       error: 'JSON nesting too deep',
       code: 'JSON_TOO_DEEP'
@@ -275,7 +264,7 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
 const adminLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  keyGenerator: (req) => getRateLimitKey(req),
+  keyGenerator: getRateLimitKey,
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many admin requests',

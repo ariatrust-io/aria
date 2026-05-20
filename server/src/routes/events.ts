@@ -120,6 +120,7 @@ interface AgentSignatureContext extends Record<string, unknown> {
 }
 
 function logEvent(level: "log" | "warn" | "error", message: string, context?: Record<string, unknown>): void {
+  if (level === 'log' && process.env.NODE_ENV === 'production') return;
   const payload = context ? ["[events]", message, context] : ["[events]", message];
   console[level](...payload);
 }

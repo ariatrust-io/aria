@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { RedisStore } from 'rate-limit-redis';
+import { getRateLimitKey, createRedisStore } from '../utils/network.js';
 import { query } from '../db/pool.js';
 import { requireApiKey } from '../middleware/auth.js';
 import { sendGateRequestEmail } from '../services/email.js';
@@ -18,18 +18,8 @@ const gateRequestLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    const cfIp = req.headers['cf-connecting-ip'];
-    if (cfIp && typeof cfIp === 'string') return cfIp;
-    return req.ip?.replace(/^::ffff:/, '') ?? 'unknown';
-  },
-  store: _gateRedis ? (() => {
-    try {
-      return new RedisStore({
-        sendCommand: (...args: string[]) => (_gateRedis as any).call(...args)
-      });
-    } catch { return undefined; }
-  })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_gateRedis, 'rl:gate:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many gate requests. Max 60 per minute.',

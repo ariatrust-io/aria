@@ -2,24 +2,13 @@ import { Router } from "express";
 import { randomUUID, createHash, randomBytes, randomInt } from "crypto";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
-import { RedisStore } from "rate-limit-redis";
 import { getRedisClient } from "../utils/redis.js";
+import { getRateLimitKey, createRedisStore } from '../utils/network.js';
 import { query } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
 import { sendConfirmationEmail, sendVerificationCode, sendPasswordResetEmail } from "../services/email.js";
 
 export const authRouter = Router();
-
-const normalizeIP = (ip: string | undefined): string => {
-  if (!ip) return 'unknown';
-  return ip.replace(/^::ffff:/, '');
-};
-
-const getRateLimitKey = (req: import("express").Request): string => {
-  const cfIp = req.headers['cf-connecting-ip'];
-  if (cfIp && typeof cfIp === 'string') return cfIp;
-  return normalizeIP(req.ip);
-};
 
 const _redis = getRedisClient();
 
@@ -28,8 +17,8 @@ const authRateLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:auth:'),
   message: { error: "Too many auth requests. Try again later.", code: "RATE_LIMITED" },
 });
 
@@ -38,8 +27,8 @@ const loginLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:login:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many login attempts. Try again in 15 minutes.',
@@ -53,8 +42,8 @@ const registerLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:register:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many registration attempts. Try again in 1 hour.',
@@ -68,8 +57,8 @@ const resendLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => { try { return new RedisStore({ sendCommand: (...args: string[]) => (_redis as any).call(...args) }); } catch { console.warn('[rate-limit] Redis store failed, using memory'); return undefined; } })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:resend:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many resend attempts. Try again in 1 hour.',
@@ -83,17 +72,8 @@ const verifyCodeLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
-  store: _redis ? (() => {
-    try {
-      return new RedisStore({
-        sendCommand: (...args: string[]) =>
-          (_redis as any).call(...args)
-      });
-    } catch {
-      return undefined;
-    }
-  })() : undefined,
+  keyGenerator: getRateLimitKey,
+  store: createRedisStore(_redis, 'rl:verify:'),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many attempts. Try again in 15 minutes.',
@@ -451,7 +431,7 @@ authRouter.post("/verify-code", verifyCodeLimiter, async (req, res) => {
 authRouter.post('/forgot-password', async (req, res) => {
   const { email } = req.body as { email?: string };
 
-  if (!email || !email.includes('@')) {
+  if (!email || !EMAIL_REGEX.test(email)) {
     return res.status(400).json({
       error: 'Valid email required',
       code: 'INVALID_EMAIL'

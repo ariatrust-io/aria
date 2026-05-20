@@ -9,8 +9,17 @@ class ReputationQueue {
   private pending = new Set<string>();
   private timer: ReturnType<typeof setTimeout> | null = null;
   private readonly DEBOUNCE_MS = 3000;
+  private readonly MAX_PENDING_SIZE = 1000;
 
   push(agentId: string): void {
+    if (this.pending.size >= this.MAX_PENDING_SIZE) {
+      console.warn(
+        `[reputation] Queue full (${this.MAX_PENDING_SIZE}). ` +
+        `Dropping agent ${agentId}. ` +
+        `This may indicate DB is under pressure.`
+      );
+      return;
+    }
     this.pending.add(agentId);
     this.schedule();
   }

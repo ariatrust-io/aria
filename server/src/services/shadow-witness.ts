@@ -29,47 +29,49 @@ export async function createWitnessCheck(
       windowEnd.getTime() - windowHours * 60 * 60 * 1000
     );
 
-    for (const source of sources.rows) {
-      const pattern = source.action_pattern;
-      const isWildcard = pattern.endsWith(':*');
-      const prefix = isWildcard ? pattern.slice(0, -1) : null;
+    await Promise.all(
+      sources.rows.map(async (source) => {
+        const pattern = source.action_pattern;
+        const isWildcard = pattern.endsWith(':*');
+        const prefix = isWildcard ? pattern.slice(0, -1) : null;
 
-      const countResult = await query<{ count: string }>(`
-        SELECT COUNT(*) AS count
-        FROM events
-        WHERE agent_id = $1
-          AND outcome = 'success'
-          AND client_ts BETWEEN $2 AND $3
-          AND (
-            ($4::boolean = true AND action LIKE $5)
-            OR
-            ($4::boolean = false AND action = $6)
-          )
-      `, [
-        agentId,
-        windowStart,
-        windowEnd,
-        isWildcard,
-        isWildcard ? `${prefix}%` : null,
-        isWildcard ? null : pattern
-      ]);
+        const countResult = await query<{ count: string }>(`
+          SELECT COUNT(*) AS count
+          FROM events
+          WHERE agent_id = $1
+            AND outcome = 'success'
+            AND client_ts BETWEEN $2 AND $3
+            AND (
+              ($4::boolean = true AND action LIKE $5)
+              OR
+              ($4::boolean = false AND action = $6)
+            )
+        `, [
+          agentId,
+          windowStart,
+          windowEnd,
+          isWildcard,
+          isWildcard ? `${prefix}%` : null,
+          isWildcard ? null : pattern
+        ]);
 
-      const agentReported = parseInt(countResult.rows[0]?.count ?? '0');
-      if (agentReported === 0) continue;
+        const agentReported = parseInt(countResult.rows[0]?.count ?? '0');
+        if (agentReported === 0) return;
 
-      await query(`
-        INSERT INTO witness_checks
-          (witness_source_id, agent_id, action_pattern,
-           window_start, window_end, agent_reported, status)
-        VALUES ($1,$2,$3,$4,$5,$6,'pending')
-        ON CONFLICT DO NOTHING
-      `, [source.id, agentId, pattern, windowStart, windowEnd, agentReported]);
+        await query(`
+          INSERT INTO witness_checks
+            (witness_source_id, agent_id, action_pattern,
+             window_start, window_end, agent_reported, status)
+          VALUES ($1,$2,$3,$4,$5,$6,'pending')
+          ON CONFLICT DO NOTHING
+        `, [source.id, agentId, pattern, windowStart, windowEnd, agentReported]);
 
-      console.log(
-        `[witness] Created check for agent ${agentId}: ` +
-        `${agentReported} ${pattern} events pending verification`
-      );
-    }
+        console.log(
+          `[witness] Created check for agent ${agentId}: ` +
+          `${agentReported} ${pattern} events pending verification`
+        );
+      })
+    );
   } catch (err) {
     console.error('[witness] createWitnessCheck failed:',
       err instanceof Error ? err.message : 'Unknown');

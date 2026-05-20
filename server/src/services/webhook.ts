@@ -121,7 +121,14 @@ async function deliverWithRetry(
     if (attempt < RETRY_DELAYS.length) {
       const delay = RETRY_DELAYS[attempt]!;
       console.warn(`[webhook] Retrying in ${delay / 1000}s (attempt ${attempt + 1})`);
-      setTimeout(() => deliverWithRetry(webhook, payload, attempt + 1), delay);
+      setTimeout(() => {
+        console.warn(
+          `[webhook] Retry attempt ${attempt + 1} for ` +
+          `webhook ${webhook.id} — ` +
+          `Note: retries are in-memory and will be lost on restart`
+        );
+        deliverWithRetry(webhook, payload, attempt + 1);
+      }, delay);
     } else {
       console.error(`[webhook] Max retries reached for ${webhook.url}`);
       await query(
