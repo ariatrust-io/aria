@@ -10,7 +10,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --black:#04060d;
+  --black:#030507;
   --navy:#06080f;
   --gold:#c9a84c;
   --gold-lt:#e8c87a;
@@ -62,7 +62,7 @@ nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.
 .plan-card.featured::before{content:'';position:absolute;inset:0;border-radius:10px;border:1px solid rgba(201,168,76,0.3);pointer-events:none}
 
 .plan-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;width:fit-content}
-.badge-beta{background:rgba(248,244,238,0.06);border:1px solid rgba(248,244,238,0.15);color:rgba(248,244,238,0.4)}
+.badge-free{background:rgba(248,244,238,0.06);border:1px solid rgba(248,244,238,0.15);color:rgba(248,244,238,0.4)}
 .badge-popular{background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);color:var(--gold-lt)}
 .badge-enterprise{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);color:rgba(201,168,76,0.7)}
 
@@ -79,10 +79,8 @@ nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:11px;flex:1;margin-bottom:32px}
 .plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:rgba(248,244,238,0.6);line-height:1.45}
 .plan-features li svg{flex-shrink:0;margin-top:2px}
-.plan-features li.dim{color:rgba(248,244,238,0.3)}
-.feat-check-starter{color:rgba(248,244,238,0.4)}
-.feat-check-pro{color:var(--gold)}
-.feat-check-ent{color:rgba(201,168,76,0.6)}
+.plan-features li.dim{color:rgba(248,244,238,0.25)}
+.plan-features li.section-hdr{color:rgba(248,244,238,0.35);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
 
 .plan-cta{display:block;text-align:center;padding:12px 24px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer}
 .cta-starter{border:1px solid rgba(248,244,238,0.2);color:rgba(248,244,238,0.65);background:transparent}
@@ -91,6 +89,14 @@ nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.
 .cta-pro:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.2)}
 .cta-ent{border:1px solid rgba(201,168,76,0.35);color:rgba(201,168,76,0.8);background:rgba(201,168,76,0.04)}
 .cta-ent:hover{border-color:var(--gold);color:var(--gold-lt);background:rgba(201,168,76,0.08)}
+
+.cta-note{font-size:11.5px;color:rgba(248,244,238,0.3);text-align:center;margin-top:10px;line-height:1.5}
+.cta-note a{color:var(--gold-lt);text-decoration:none}
+.cta-note a:hover{text-decoration:underline}
+
+/* COMPARISON NOTE */
+.compare-note{max-width:1040px;margin:32px auto 0;padding:18px 28px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:8px;text-align:center;font-size:13.5px;color:rgba(248,244,238,0.5);line-height:1.7}
+.compare-note strong{color:rgba(201,168,76,0.75);font-weight:500}
 
 /* COMPARE TABLE */
 .compare-section{padding:100px 24px 0}
@@ -106,12 +112,14 @@ nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.
 .compare-table tbody tr{border-bottom:1px solid rgba(255,255,255,0.03)}
 .compare-table tbody tr:last-child{border-bottom:none}
 .compare-table tbody tr:hover{background:rgba(255,255,255,0.015)}
+.compare-table tbody tr.group-hdr td{padding:10px 20px 6px;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.02);border-top:1px solid rgba(255,255,255,0.04)}
 .compare-table td{padding:13px 20px;vertical-align:middle;color:var(--gray)}
 .compare-table td:first-child{color:rgba(248,244,238,0.65);font-size:13.5px}
 .compare-table td:not(:first-child){text-align:center}
 .compare-table td.val-pro{color:var(--gold-lt)}
 .check-yes{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:rgba(92,200,126,0.1);border-radius:50%}
 .check-no{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px}
+.check-soon{font-size:10px;font-weight:500;color:rgba(201,168,76,0.5);letter-spacing:.5px}
 
 /* FAQ */
 .faq-section{padding:100px 24px}
@@ -125,7 +133,7 @@ nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.
 .faq-icon{flex-shrink:0;width:20px;height:20px;border:1px solid rgba(248,244,238,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .25s,border-color .2s}
 .faq-item.open .faq-icon{transform:rotate(45deg);border-color:rgba(201,168,76,0.4)}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
-.faq-item.open .faq-a{max-height:200px}
+.faq-item.open .faq-a{max-height:300px}
 .faq-a-inner{padding:0 24px 20px;font-size:14px;color:var(--gray);line-height:1.75}
 .faq-a-inner a{color:var(--gold-lt);text-decoration:none}
 .faq-a-inner a:hover{text-decoration:underline}
@@ -205,7 +213,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <section class="pricing-hero">
   <div class="pricing-hero-label">Pricing</div>
   <h1>Simple, transparent<br>pricing for every team.</h1>
-  <p>Start free during beta. Upgrade as your agents scale. No hidden fees.</p>
+  <p>Start free. Upgrade as your agents scale. No hidden fees.</p>
 </section>
 
 <!-- PLANS -->
@@ -213,21 +221,24 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
   <div class="plans-inner">
     <div class="plans-grid">
 
-      <!-- STARTER -->
+      <!-- FREE -->
       <div class="plan-card">
-        <div class="plan-badge badge-beta">Beta</div>
-        <div class="plan-name">Starter</div>
-        <div class="plan-price starter"><span class="currency">$</span>0<span class="period"> / month</span></div>
-        <div class="plan-desc">Everything you need to get started. Free during beta — no credit card required.</div>
+        <div class="plan-badge badge-free">Free</div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price starter"><span class="currency">$</span>0<span class="period"> / forever</span></div>
+        <div class="plan-desc">Everything you need to get started. No credit card required.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>1 agent</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>10,000 events / month</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>30-day audit trail</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Trust score</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Email alerts</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Dashboard access</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>50,000 events / month</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>30-day event history</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Trust score + behavioral analytics</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ARIA Spectrum (pattern detection)</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(248,244,238,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Community support</li>
+          <li class="dim"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="rgba(248,244,238,0.18)" stroke-width="1.5" stroke-linecap="round"/></svg>Gate (Pro)</li>
+          <li class="dim"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="rgba(248,244,238,0.18)" stroke-width="1.5" stroke-linecap="round"/></svg>ZeroProof (Pro)</li>
+          <li class="dim"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="rgba(248,244,238,0.18)" stroke-width="1.5" stroke-linecap="round"/></svg>Export, Webhooks, Batch events (Pro)</li>
+          <li class="dim"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="rgba(248,244,238,0.18)" stroke-width="1.5" stroke-linecap="round"/></svg>Temporal Anchor, Shadow Witness (Pro)</li>
         </ul>
         <a href="/app" class="plan-cta cta-starter">Get Started Free</a>
       </div>
@@ -240,17 +251,21 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
         <div class="plan-desc">For teams deploying AI agents in production. Full trust infrastructure included.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Starter, plus:</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>10 agents</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Free, plus:</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>5 agents</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>500,000 events / month</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>90-day audit trail</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>12-month event history</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ARIA Gate (human-in-the-loop)</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Webhook integrations</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV / JSON export</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority email support</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SDK access (npm)</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ZeroProof behavioral proofs</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV + JSON export</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Webhooks</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Batch event ingestion (up to 500/call)</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Temporal Anchor</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Shadow Witness</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Email support</li>
         </ul>
-        <a href="/app" class="plan-cta cta-pro">Start Free Trial</a>
+        <a href="/app" class="plan-cta cta-pro">Get Started</a>
+        <p class="cta-note">Stripe integration coming soon.<br>Contact <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a> to activate.</p>
       </div>
 
       <!-- ENTERPRISE -->
@@ -264,18 +279,22 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Professional, plus:</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited agents</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited events</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>1-year audit trail</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom data retention</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SSO / SAML</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited history</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated onboarding</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SLA guarantee</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated support</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>On-premise deployment option</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom integrations</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Compliance reports (SOC 2 ready)</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Invoice billing</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 <span style="font-size:11px;color:rgba(201,168,76,0.4);margin-left:4px">(coming soon)</span></li>
         </ul>
-        <a href="mailto:hello@ariatrust.org" class="plan-cta cta-ent">Contact Us</a>
+        <a href="mailto:dhdez3149@gmail.com" class="plan-cta cta-ent">Contact Us</a>
       </div>
 
+    </div>
+
+    <!-- COMPARISON NOTE -->
+    <div class="compare-note">
+      <strong>All plans include:</strong> cryptographic DID per agent, HMAC-SHA256 audit trail, real-time trust score, and ARIA Spectrum behavioral analytics.
     </div>
   </div>
 </section>
@@ -290,29 +309,47 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
         <thead>
           <tr>
             <th>Feature</th>
-            <th>Starter</th>
+            <th>Free</th>
             <th class="col-pro">Professional</th>
             <th>Enterprise</th>
           </tr>
         </thead>
         <tbody>
+          <tr class="group-hdr">
+            <td colspan="4">Limits</td>
+          </tr>
           <tr>
             <td>Agents</td>
             <td>1</td>
-            <td class="val-pro">10</td>
+            <td class="val-pro">5</td>
             <td>Unlimited</td>
           </tr>
           <tr>
             <td>Events / month</td>
-            <td>10,000</td>
+            <td>50,000</td>
             <td class="val-pro">500,000</td>
             <td>Unlimited</td>
           </tr>
           <tr>
-            <td>Audit trail</td>
+            <td>Event history</td>
             <td>30 days</td>
-            <td class="val-pro">90 days</td>
-            <td>1 year</td>
+            <td class="val-pro">12 months</td>
+            <td>Unlimited</td>
+          </tr>
+          <tr class="group-hdr">
+            <td colspan="4">Core Features</td>
+          </tr>
+          <tr>
+            <td>Cryptographic DID</td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>HMAC-SHA256 audit trail</td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
             <td>Trust Score</td>
@@ -321,7 +358,22 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
+            <td>ARIA Spectrum</td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr class="group-hdr">
+            <td colspan="4">Pro Features</td>
+          </tr>
+          <tr>
             <td>ARIA Gate</td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>ZeroProof</td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
@@ -339,34 +391,55 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
-            <td>SDK access</td>
+            <td>Batch events (500/call)</td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>Temporal Anchor</td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
-            <td>SSO / SAML</td>
+            <td>Shadow Witness</td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+            <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr class="group-hdr">
+            <td colspan="4">Enterprise</td>
+          </tr>
+          <tr>
+            <td>Dedicated onboarding</td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
-            <td>On-premise</td>
+            <td>SLA guarantee</td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
           </tr>
           <tr>
-            <td>SLA</td>
+            <td>Invoice billing</td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td><span class="check-yes"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 4" stroke="#5cc87e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></td>
+          </tr>
+          <tr>
+            <td>SOC 2</td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
+            <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
+            <td><span class="check-soon">Soon</span></td>
           </tr>
           <tr>
             <td>Support</td>
             <td>Community</td>
             <td class="val-pro">Email</td>
-            <td>Dedicated</td>
+            <td>Priority</td>
           </tr>
         </tbody>
       </table>
@@ -383,18 +456,10 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Can I change plans later?
+          Can I upgrade or downgrade anytime?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. You can upgrade or downgrade at any time. Changes take effect immediately.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          What counts as an event?
-          <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">Each action tracked by your agent counts as one event. Batch submissions count per individual event, not per batch.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Upgrades take effect immediately. Downgrades take effect at the next billing cycle.</div></div>
       </div>
 
       <div class="faq-item">
@@ -402,31 +467,23 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           What happens if I exceed my event limit?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">We will notify you when you reach 80% of your limit. Events are not dropped — we continue recording and work with you on an upgrade.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Events will be rejected until the next month begins. You will receive a warning at 80% usage. Upgrade anytime to avoid interruptions.</div></div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Is my audit trail data encrypted?
+          Is my data safe if I cancel?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. All event signatures use HMAC-SHA256. Agent secrets are encrypted with AES-256-GCM. Data is stored in isolated PostgreSQL instances.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">You have 30 days after cancellation to export your data. After that, it is permanently deleted.</div></div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          Do you offer discounts for startups?
+          Do you offer discounts for startups or non-profits?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Contact us at <a href="mailto:hello@ariatrust.org">hello@ariatrust.org</a> with proof of incorporation for startup pricing.</div></div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          Can I self-host ARIA?
-          <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
-        </button>
-        <div class="faq-a"><div class="faq-a-inner">Enterprise plan includes on-premise deployment. The core is open source at <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">github.com/ariatrust-io/aria</a>.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Contact us at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a> to discuss pricing.</div></div>
       </div>
 
     </div>
@@ -436,10 +493,10 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <!-- CTA STRIP -->
 <section class="cta-strip">
   <h2>Start free.<br><span style="color:var(--gold-lt)">Scale when you're ready.</span></h2>
-  <p>No credit card required. Full access during beta.</p>
+  <p>No credit card required. Full access on the Free plan.</p>
   <div class="cta-btns">
     <a href="/app" class="btn-gold">Create Free Account →</a>
-    <a href="mailto:hello@ariatrust.org" class="btn-outline">Talk to Sales</a>
+    <a href="mailto:dhdez3149@gmail.com" class="btn-outline">Talk to Sales</a>
   </div>
 </section>
 
