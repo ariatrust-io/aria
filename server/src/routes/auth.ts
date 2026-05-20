@@ -6,7 +6,7 @@ import { RedisStore } from "rate-limit-redis";
 import { getRedisClient } from "../utils/redis.js";
 import { query } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
-import { sendConfirmationEmail, sendVerificationCode } from "../services/email.js";
+import { sendConfirmationEmail, sendVerificationCode, sendPasswordResetEmail } from "../services/email.js";
 
 export const authRouter = Router();
 
@@ -444,6 +444,141 @@ authRouter.post("/verify-code", verifyCodeLimiter, async (req, res) => {
   } catch (e) {
     console.error("[auth] Verify-code error:", e instanceof Error ? e.message : "Unknown");
     res.status(500).json({ error: "Service unavailable", code: "VERIFY_ERROR" });
+  }
+});
+
+// ─── POST /v1/auth/forgot-password ───────────────────────────────────────────
+authRouter.post('/forgot-password', async (req, res) => {
+  const { email } = req.body as { email?: string };
+
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({
+      error: 'Valid email required',
+      code: 'INVALID_EMAIL'
+    });
+  }
+
+  const successResponse = {
+    message: 'If that email exists, a reset link has been sent.'
+  };
+
+  try {
+    const userResult = await query<{ id: string; email: string }>(
+      'SELECT id, email FROM users WHERE email = $1',
+      [email.toLowerCase().trim()]
+    );
+
+    if (!userResult.rows[0]) {
+      return res.json(successResponse);
+    }
+
+    const user = userResult.rows[0];
+
+    const rawToken = randomBytes(32).toString('hex');
+    const hashedToken = createHash('sha256').update(rawToken).digest('hex');
+
+    await query(`
+      INSERT INTO password_resets (user_id, token, expires_at)
+      VALUES ($1, $2, NOW() + INTERVAL '1 hour')
+      ON CONFLICT DO NOTHING
+    `, [user.id, hashedToken]);
+
+    const resetUrl = `${process.env.APP_URL}/reset-password?token=${rawToken}`;
+    await sendPasswordResetEmail(user.email, resetUrl);
+
+    console.log(`[auth] Password reset requested for ${user.email}`);
+
+    return res.json(successResponse);
+  } catch (err) {
+    console.error('[auth] forgot-password error:', err instanceof Error ? err.message : 'Unknown');
+    return res.json(successResponse);
+  }
+});
+
+// ─── POST /v1/auth/reset-password ────────────────────────────────────────────
+authRouter.post('/reset-password', async (req, res) => {
+  const { token, password } = req.body as { token?: string; password?: string };
+
+  if (!token || !password) {
+    return res.status(400).json({
+      error: 'Token and password required',
+      code: 'MISSING_FIELDS'
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: 'Password must be at least 8 characters',
+      code: 'PASSWORD_TOO_SHORT'
+    });
+  }
+
+  try {
+    const hashedToken = createHash('sha256').update(token).digest('hex');
+
+    const resetResult = await query<{
+      id: string;
+      user_id: string;
+      expires_at: string;
+      used_at: string | null;
+    }>(`
+      SELECT id, user_id, expires_at, used_at
+      FROM password_resets
+      WHERE token = $1
+    `, [hashedToken]);
+
+    const reset = resetResult.rows[0];
+
+    if (!reset) {
+      return res.status(400).json({
+        error: 'Invalid or expired reset link',
+        code: 'INVALID_TOKEN'
+      });
+    }
+
+    if (reset.used_at) {
+      return res.status(400).json({
+        error: 'Reset link already used',
+        code: 'TOKEN_USED'
+      });
+    }
+
+    if (new Date() > new Date(reset.expires_at)) {
+      return res.status(400).json({
+        error: 'Reset link has expired. Please request a new one.',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    await query(
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
+      [hashedPassword, reset.user_id]
+    );
+
+    await query(
+      'UPDATE password_resets SET used_at = NOW() WHERE id = $1',
+      [reset.id]
+    );
+
+    await query(`
+      UPDATE api_keys SET revoked_at = NOW()
+      WHERE owner_email = (SELECT email FROM users WHERE id = $1)
+        AND revoked_at IS NULL
+    `, [reset.user_id]);
+
+    console.log(`[auth] Password reset successful for user ${reset.user_id}`);
+
+    return res.json({
+      message: 'Password updated successfully. Please log in again.'
+    });
+  } catch (err) {
+    console.error('[auth] reset-password error:', err instanceof Error ? err.message : 'Unknown');
+    return res.status(500).json({
+      error: 'Service unavailable',
+      code: 'INTERNAL_ERROR'
+    });
   }
 });
 

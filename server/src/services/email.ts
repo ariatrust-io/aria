@@ -69,6 +69,97 @@ export async function sendVerificationCode(
   console.log('[email] Resend response:', JSON.stringify(response));
 }
 
+export async function sendPasswordResetEmail(
+  to: string,
+  resetUrl: string
+): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[email] Password reset link for ${to}: ${resetUrl}`);
+    return;
+  }
+
+  await getResend().emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: 'Reset your ARIA password',
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'IBM Plex Mono', monospace, sans-serif;
+      background: #030507;
+      color: #f0ece4;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #070b10;
+      border: 1px solid rgba(212,168,67,0.2);
+      border-top: 3px solid #d4a843;
+      border-radius: 8px;
+      padding: 40px;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #d4a843;
+      letter-spacing: 4px;
+      margin-bottom: 32px;
+    }
+    h1 { font-size: 18px; color: #f0ece4; margin-bottom: 16px; }
+    p { color: rgba(240,236,228,0.65); line-height: 1.6; margin-bottom: 24px; font-size: 14px; }
+    .button {
+      display: inline-block;
+      padding: 14px 28px;
+      background: #d4a843;
+      color: #030507;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .url { font-size: 11px; color: rgba(240,236,228,0.35); word-break: break-all; margin-bottom: 24px; }
+    .footer {
+      font-size: 11px;
+      color: rgba(240,236,228,0.3);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding-top: 20px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">ARIA</div>
+    <h1>Reset your password</h1>
+    <p>
+      You requested a password reset for your ARIA account.
+      Click the button below to set a new password.
+      This link expires in 1 hour.
+    </p>
+    <a href="${resetUrl}" class="button">Reset Password</a>
+    <p class="url">Or copy this link:<br>${resetUrl}</p>
+    <p>
+      If you did not request this reset, you can safely ignore this email.
+      Your password will not change.
+    </p>
+    <div class="footer">
+      ARIA · ariatrust.org<br>
+      This is an automated message — do not reply.
+    </div>
+  </div>
+</body>
+</html>
+    `
+  });
+}
+
 export async function sendGateRequestEmail(
   ownerEmail: string,
   agentName: string,

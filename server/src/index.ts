@@ -133,6 +133,10 @@ app.get('/cookies', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'cookies.html'));
 });
 
+app.get('/reset-password', (_, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'reset-password.html'))
+);
+
 app.get('/docs', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'docs.html'));
 });

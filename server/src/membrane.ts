@@ -114,6 +114,7 @@ const ALLOWED_PATHS = [
   "/cookies",
   "/docs",
   "/pricing",
+  "/reset-password",
   "/health",
   "/v1/setup",
   "/v1/agents",

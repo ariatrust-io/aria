@@ -1039,6 +1039,12 @@
         <label>Password</label>
         <input type="password" id="login-password" placeholder="••••••••" required autocomplete="off">
       </div>
+      <div style="text-align:right;margin-top:8px;margin-bottom:16px">
+        <a href="#" onclick="showForgotPassword();return false;"
+           style="font-size:12px;color:rgba(201,168,76,0.6);text-decoration:none">
+          Forgot password?
+        </a>
+      </div>
       <button type="submit" class="btn" id="login-btn">Sign In</button>
     </form>
 
@@ -1293,6 +1299,22 @@
   function backToLogin() {
     pendingLoginEmail = '';
     showAuthTab('login');
+  }
+
+  function showForgotPassword() {
+    const email = prompt('Enter your email address:');
+    if (!email) return;
+    fetch('/v1/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    .then(() => {
+      alert('If that email exists, a reset link has been sent. Check your inbox.');
+    })
+    .catch(() => {
+      alert('Something went wrong. Please try again.');
+    });
   }
 
   // ── STEP 1: Login ─────────────────────────────────────────────────────────
