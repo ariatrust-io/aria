@@ -7,9 +7,8 @@ export function getRedisClient(): Redis | null {
 
   if (!redisClient) {
     redisClient = new Redis(process.env.REDIS_URL, {
+      enableOfflineQueue: true,
       maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      enableOfflineQueue: false,
       connectTimeout: 5000,
     });
 

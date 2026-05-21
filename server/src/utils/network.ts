@@ -20,7 +20,11 @@ export function createRedisStore(
         (redis as any).call(...args) as any,
       prefix
     });
-  } catch {
+  } catch (err) {
+    console.warn(
+      '[redis] RedisStore init failed, using memory store:',
+      err instanceof Error ? err.message : 'Unknown'
+    );
     return undefined;
   }
 }
