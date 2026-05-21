@@ -216,28 +216,37 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
       return;
     }
     
+    // Find or create a user record so plan/limit checks work for service accounts
+    const userResult = await query<{ id: string }>(
+      `INSERT INTO users (email, name) VALUES ($1, 'Service Account')
+       ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+       RETURNING id`,
+      [normalizedEmail]
+    );
+    const userId = userResult.rows[0]!.id;
+
     const newKey = randomUUID();
     const keySha256 = createHash("sha256").update(newKey).digest("hex");
     const keyHash = await bcrypt.hash(newKey, 10);
-    
+
     const apiKeyResult = await query<{ id: string }>(
-      "INSERT INTO api_keys (key_hash, key_sha256, label, owner_email) VALUES ($1, $2, $3, $4) RETURNING id",
-      [keyHash, keySha256, "auto-generated", normalizedEmail]
+      "INSERT INTO api_keys (key_hash, key_sha256, label, owner_email, user_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+      [keyHash, keySha256, "auto-generated", normalizedEmail, userId]
     );
-    
+
     if (!apiKeyResult.rows[0]) {
       throw new Error("Failed to create API key");
     }
-    
+
     let agentResponse = null;
     if (name && scope && Array.isArray(scope)) {
       const did = `did:agentrust:${randomUUID()}`;
       const secret = randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "");
-      
+
       await query(
-        `INSERT INTO agents (did, name, scope, api_key_id, public_key, secret_hash, hmac_key, signing_version)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-        [did, name, scope, apiKeyResult.rows[0].id, scope.join("|"),
+        `INSERT INTO agents (did, name, scope, api_key_id, user_id, public_key, secret_hash, hmac_key, signing_version)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [did, name, scope, apiKeyResult.rows[0].id, userId, scope.join("|"),
          await bcrypt.hash(secret, 10), encryptSecret(secret, did), 1]
       );
       
