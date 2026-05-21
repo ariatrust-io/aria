@@ -221,8 +221,8 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
     const keyHash = await bcrypt.hash(newKey, 10);
     
     const apiKeyResult = await query<{ id: string }>(
-      "INSERT INTO api_keys (id, key_hash, key_sha256, label, owner_email) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-      [randomUUID(), keyHash, keySha256, "auto-generated", normalizedEmail]
+      "INSERT INTO api_keys (key_hash, key_sha256, label, owner_email) VALUES ($1, $2, $3, $4) RETURNING id",
+      [keyHash, keySha256, "auto-generated", normalizedEmail]
     );
     
     if (!apiKeyResult.rows[0]) {

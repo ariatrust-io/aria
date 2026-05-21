@@ -114,8 +114,8 @@ async function testSetup() {
     api_key: string
   };
   testApiKey = setupData.api_key;
-  assert.ok(testApiKey, 'API key should be returned');
-  console.log('✅ Test 1: Setup creates API key');
+  assert.ok(testApiKey, 'API key should not be empty');
+  console.log('✅ Test 1: Setup creates API key:', testApiKey.slice(0, 8) + '...');
 
   // Test 2: Duplicate setup rejected
   const dupRes = await fetch(`${BASE_URL}/v1/setup`, {
