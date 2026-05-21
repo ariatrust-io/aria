@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { getRateLimitKey, createRedisStore } from '../utils/network.js';
+import { createRedisStore } from '../utils/network.js';
 import { query } from '../db/pool.js';
 import { requireApiKey } from '../middleware/auth.js';
 import { sendGateRequestEmail } from '../services/email.js';
@@ -18,7 +18,6 @@ const gateRequestLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_gateRedis, 'rl:gate:'),
   handler: (_req, res) => {
     res.status(429).json({

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { randomUUID, randomBytes, hkdfSync } from "crypto";
 import * as sss from "shamirs-secret-sharing";
 import bcrypt from "bcrypt";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { query, transaction } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
 import { encryptSecret } from "../utils/crypto.js";
@@ -12,7 +12,7 @@ import { PLANS, type Plan } from "../config/plans.js";
 const secretRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  keyGenerator: (req) => `${req.ip ?? 'unknown'}:${req.apiKeyId ?? 'unknown'}`,
+  keyGenerator: (req) => `${ipKeyGenerator(req.ip ?? 'unknown')}:${req.apiKeyId ?? 'unknown'}`,
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many secret retrieval attempts. Maximum 5 per hour.',

@@ -3,7 +3,7 @@ import { randomUUID, createHash, randomBytes, randomInt } from "crypto";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import { getRedisClient } from "../utils/redis.js";
-import { getRateLimitKey, createRedisStore } from '../utils/network.js';
+import { createRedisStore } from '../utils/network.js';
 import { query } from "../db/pool.js";
 import { requireApiKey } from "../middleware/auth.js";
 import { sendConfirmationEmail, sendVerificationCode, sendPasswordResetEmail } from "../services/email.js";
@@ -17,7 +17,6 @@ const authRateLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:auth:'),
   message: { error: "Too many auth requests. Try again later.", code: "RATE_LIMITED" },
 });
@@ -27,7 +26,6 @@ const loginLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:login:'),
   handler: (_req, res) => {
     res.status(429).json({
@@ -42,7 +40,6 @@ const registerLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:register:'),
   handler: (_req, res) => {
     res.status(429).json({
@@ -57,7 +54,6 @@ const resendLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:resend:'),
   handler: (_req, res) => {
     res.status(429).json({
@@ -72,7 +68,6 @@ const verifyCodeLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:verify:'),
   handler: (_req, res) => {
     res.status(429).json({

@@ -25,7 +25,7 @@ import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
 import { getRedisClient } from './utils/redis.js';
-import { getRateLimitKey, createRedisStore } from './utils/network.js';
+import { createRedisStore } from './utils/network.js';
 
 // 2. MANEJO DE ERRORES CRÍTICOS
 process.on("uncaughtException", (err) => {
@@ -51,7 +51,6 @@ const apiLimiter = rateLimit({
   max: 1500,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:api:'),
   message: 'Too many requests from your network, please try again later.',
 });
@@ -61,7 +60,6 @@ const setupLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: getRateLimitKey,
   store: createRedisStore(_redis, 'rl:setup:'),
   handler: (_req, res) => {
     res.status(429).json({
@@ -264,7 +262,6 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
 const adminLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  keyGenerator: getRateLimitKey,
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many admin requests',

@@ -87,7 +87,6 @@ const membraneLimit = rateLimit({
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => getRateLimitKey(req),
   handler: (_req, res) => {
     res.status(429).json({
       error: 'Too many requests',

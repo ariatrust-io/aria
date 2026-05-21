@@ -1,4 +1,3 @@
-import { type Request } from 'express';
 import type { Redis } from 'ioredis';
 import { RedisStore } from 'rate-limit-redis';
 
@@ -8,12 +7,6 @@ export function normalizeIP(ip: string | undefined): string {
     return ip.slice(7);
   }
   return ip;
-}
-
-export function getRateLimitKey(req: Request): string {
-  const cfIp = req.headers['cf-connecting-ip'];
-  if (cfIp && typeof cfIp === 'string') return cfIp;
-  return normalizeIP(req.ip);
 }
 
 export function createRedisStore(
