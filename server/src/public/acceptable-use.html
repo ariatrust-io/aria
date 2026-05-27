@@ -1,185 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acceptable Use Policy — ARIA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --black:#030507;
-  --gold:#d4a843;
-  --gold-lt:#e8c87a;
-  --white:#f0ece4;
-  --muted:rgba(240,236,228,0.45);
-  --text:rgba(240,236,228,0.75);
-  --border:rgba(212,168,67,0.15);
-}
-html{scroll-behavior:smooth}
-body{font-family:'IBM Plex Mono',monospace;background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
-
-nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,5,7,0.96);border-bottom:1px solid var(--border);z-index:1000}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold-lt)}
-.nav-links{display:flex;align-items:center;gap:32px;list-style:none}
-.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .2s}
-.nav-links a:hover{color:var(--white)}
-.nav-cta{display:inline-flex;align-items:center;padding:8px 20px;background:var(--gold);color:var(--black);font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-decoration:none;border-radius:2px;letter-spacing:.5px;transition:background .2s}
-.nav-cta:hover{background:var(--gold-lt)}
-
-.legal-wrap{max-width:800px;margin:0 auto;padding:120px 24px 80px}
-.legal-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,80px);color:var(--white);letter-spacing:2px;margin-bottom:8px}
-.legal-updated{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid rgba(212,168,67,0.12)}
-.legal-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold-lt);border-left:3px solid #d4a843;padding-left:16px;margin:32px 0 16px 0}
-.legal-wrap p{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px}
-.legal-wrap ul{padding-left:20px;margin-bottom:14px}
-.legal-wrap li{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:6px}
-.legal-wrap a{color:var(--gold);text-decoration:none}
-.legal-wrap a:hover{color:var(--gold-lt)}
-.legal-wrap strong{color:var(--white);font-weight:600}
-
-footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60px 48px 0}
-.footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px}
-.footer-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.footer-brand-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold-lt)}
-.footer-desc{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:300;color:rgba(240,236,228,0.28);line-height:1.8;max-width:220px;margin-bottom:16px}
-.footer-gh{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.22);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s}
-.footer-gh:hover{color:var(--gold)}
-.footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
-.footer-col ul{list-style:none}
-.footer-col ul li{margin-bottom:10px}
-.footer-col ul li a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(240,236,228,0.3);text-decoration:none;transition:color .2s}
-.footer-col ul li a:hover{color:var(--white)}
-.footer-bottom{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);padding:22px 0;flex-wrap:wrap;gap:12px}
-.footer-copy{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.18);letter-spacing:.5px}
-.footer-domain{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(212,168,67,0.28);letter-spacing:1px}
-
-@media(max-width:768px){nav{padding:0 24px}.nav-links{display:none}.legal-wrap{padding:100px 20px 60px}.footer-main{grid-template-columns:1fr 1fr}footer{padding:40px 24px 0}}
-@media(max-width:480px){.footer-main{grid-template-columns:1fr}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Acceptable Use — ARIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg-black:#030712;--white:#f8fafc;--muted:#94a3b8;--accent:#6366f1;--border-muted:rgba(255,255,255,0.06);--font-sans:'Plus Jakarta Sans',sans-serif;--font-mono:'JetBrains Mono',monospace}
+    body{font-family:var(--font-sans);background:var(--bg-black);color:var(--white);line-height:1.6;padding-bottom:80px}
+    nav{position:fixed;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,7,18,0.6);border-bottom:1px solid rgba(255,255,255,0.03);z-index:1000}
+    .legal-wrap{max-width:880px;margin:0 auto;padding:120px 20px 40px}
+    .legal-title{font-size:clamp(36px,6vw,56px);font-weight:800;color:var(--white);margin-bottom:6px}
+    .legal-updated{color:var(--muted);font-size:13px;margin-bottom:28px}
+    h2{color:var(--accent);font-size:16px;margin:24px 0 10px}
+    p,li{color:#dfe7f6;font-size:15px}
+    ul{padding-left:20px}
+    footer{background:transparent;border-top:1px solid var(--border-muted);padding:48px}
+    .footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
+    .footer-bottom{max-width:1100px;margin:20px auto 0;display:flex;justify-content:space-between;color:rgba(248,250,252,0.6)}
+    @media(max-width:768px){.footer-main{grid-template-columns:1fr 1fr}.legal-wrap{padding:100px 20px}}
+    @media(max-width:480px){.footer-main{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
 
 <nav>
-  <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(212,168,67,0.18)" stroke-width="0.75"/>
-    </svg>
-    <span class="nav-logo-text">ARIA</span>
-  </a>
-  <ul class="nav-links">
-    <li><a href="/docs">Docs</a></li>
-    <li><a href="/pricing">Pricing</a></li>
-    <li><a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">GitHub</a></li>
-  </ul>
-  <a href="/app" class="nav-cta">Get Access</a>
+  <a href="/" style="display:flex;align-items:center;gap:12px;color:var(--white);text-decoration:none;font-weight:700">ARIA</a>
+  <div style="display:flex;gap:12px;align-items:center"><a href="/docs" style="color:var(--muted);text-decoration:none">Docs</a><a href="/app" style="background:var(--accent);color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none">Get Access</a></div>
 </nav>
 
-<div class="legal-wrap">
-  <div class="legal-title">Acceptable Use Policy</div>
-  <div class="legal-updated">Last updated: May 19, 2026 &nbsp;&middot;&nbsp; Effective: May 19, 2026</div>
+<main class="legal-wrap">
+  <div class="legal-title">Acceptable Use</div>
+  <div class="legal-updated">Last updated: May 27, 2026 &nbsp;&middot;&nbsp; Effective: May 27, 2026</div>
 
-  <h2>1. Overview</h2>
-  <p>This Acceptable Use Policy ("AUP") defines what you may and may not do with ARIA ("the Service"). It applies to all users, including those on the Free plan, Professional plan, and Enterprise plan, as well as any third parties accessing the Service through your account or API keys.</p>
-  <p>This AUP is incorporated by reference into the <a href="/terms">Terms of Service</a>. Violations of this policy may result in suspension or termination of your account without refund.</p>
-
-  <h2>2. Prohibited Uses</h2>
-  <p>You must not use the Service for any of the following purposes:</p>
+  <h2>Prohibited uses</h2>
+  <p>Do not use ARIA for illegal, harmful, or deceptive activities. Examples include:</p>
   <ul>
-    <li><strong>Illegal activity.</strong> Any use that violates local, national, or international law, including but not limited to fraud, money laundering, intellectual property infringement, or unauthorized data collection.</li>
-    <li><strong>Harassment or abuse.</strong> Using the Service to harass, threaten, intimidate, or abuse any individual or organization.</li>
-    <li><strong>Spam or unsolicited communications.</strong> Using agent event data or ARIA infrastructure to send unsolicited messages, bulk emails, or automated outreach without recipient consent.</li>
-    <li><strong>Malware or harmful code.</strong> Uploading, transmitting, or distributing malware, viruses, ransomware, spyware, or any code designed to damage or gain unauthorized access to systems.</li>
-    <li><strong>Circumventing security measures.</strong> Attempting to bypass, defeat, or undermine ARIA's authentication, rate limiting, encryption, or any other security mechanism.</li>
-    <li><strong>Cryptocurrency mining.</strong> Using ARIA infrastructure for cryptocurrency mining or any computationally intensive operation unrelated to the Service's intended purpose.</li>
-    <li><strong>Scraping or excessive API calls.</strong> Systematically extracting data from ARIA beyond your plan's rate limits, or using automated tools to scrape the Dashboard or API in a manner that degrades service for others.</li>
-    <li><strong>Fake agents or false audit trails.</strong> Creating AI agent identities with the intent to deceive, or submitting fabricated event data to artificially inflate or manipulate trust scores.</li>
-    <li><strong>Non-consensual surveillance.</strong> Using ARIA to track, monitor, or profile individuals without their explicit, informed consent. This includes covert agent deployments designed to gather personal data without disclosure.</li>
-    <li><strong>Reselling without permission.</strong> Offering access to the ARIA Service to third parties as a product or service without prior written authorization from ARIA.</li>
+    <li>Hacking, unauthorized access, or distributing malware.</li>
+    <li>Fraud, money laundering, or other criminal conduct.</li>
+    <li>Non-consensual surveillance or harvesting personal data without consent.</li>
+    <li>Generating false audit trails, impersonation, or fabricating events.</li>
+    <li>Using the service to send spam or unsolicited bulk communications.</li>
   </ul>
 
-  <h2>3. API Usage</h2>
-  <p><strong>Rate limits.</strong> Each plan includes defined rate limits. You must not attempt to exceed these limits through technical workarounds, credential sharing, or by creating multiple accounts.</p>
-  <p><strong>No automated account creation.</strong> Creating accounts programmatically or in bulk is prohibited. Account registration is intended for individual users and organizations.</p>
-  <p><strong>API key security.</strong> API keys are credentials — treat them as passwords. Do not share API keys across accounts, publish them in public repositories, or embed them in client-side code. If a key is compromised, rotate it immediately from the Dashboard.</p>
-  <p><strong>Reasonable use.</strong> Even within rate limits, sustained usage patterns that degrade Service performance for other users may trigger throttling or review.</p>
+  <h2>Compliance requirements</h2>
+  <p>You must follow applicable laws and industry standards. Keep API keys secure, declare accurate agent scopes, and provide truthful event data. Rate limits and technical constraints must be respected.</p>
 
-  <h2>4. Agent Requirements</h2>
-  <p><strong>Accurate scope declaration.</strong> Agents registered with ARIA must declare scopes that accurately reflect the actions they are authorized to perform. Registering misleading or overly broad scopes to avoid gate checks is a violation of this policy.</p>
-  <p><strong>Honest event data.</strong> All events submitted to ARIA must truthfully represent actions taken by the agent. Deliberately falsifying, omitting, or altering event records undermines the integrity of the audit trail and is strictly prohibited.</p>
-  <p><strong>No cover-up use.</strong> ARIA must not be used to create the appearance of compliance or oversight while concealing actual agent misbehavior. The Service is designed for accountability — using it to obscure wrongdoing is a fundamental violation of these terms.</p>
-  <p><strong>No impersonation.</strong> Agents must not impersonate other agents, users, or systems. Each DID must correspond to a genuine, distinct agent identity.</p>
+  <h2>Enforcement</h2>
+  <p>We enforce this policy using a graduated approach: warnings, temporary suspension, and permanent termination for severe or repeated violations. Serious illegal activity may be reported to authorities.</p>
 
-  <h2>5. Enforcement</h2>
-  <p>ARIA reserves the right to investigate suspected violations of this AUP. Our enforcement approach is graduated but we retain full discretion:</p>
-  <ul>
-    <li><strong>Warning.</strong> For first-time or minor violations, we may issue a written warning and require corrective action within a specified timeframe.</li>
-    <li><strong>Suspension.</strong> For repeated violations or more serious breaches, we may suspend your account temporarily, with or without notice.</li>
-    <li><strong>Permanent termination.</strong> For severe violations — including illegal activity, deliberate fraud, or persistent abuse — we will permanently terminate your account and may report violations to relevant authorities.</li>
-    <li><strong>No refund on termination for violations.</strong> Accounts terminated for AUP violations are not eligible for any refund of fees paid.</li>
-  </ul>
-  <p>We may also cooperate with law enforcement agencies in investigating violations that may be criminal in nature.</p>
-
-  <h2>6. Reporting Violations</h2>
-  <p>If you become aware of any use of ARIA that violates this policy, please report it to:</p>
-  <ul>
-    <li>Email: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></li>
-  </ul>
-  <p>Reports are confidential. We take all reports seriously and will investigate promptly.</p>
-</div>
+  <h2>Contact</h2>
+  <p>Report violations or ask questions: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></p>
+</main>
 
 <footer>
   <div class="footer-main">
-    <div class="footer-col">
-      <div class="footer-logo-row">
-        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-          <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
-        </svg>
-        <span class="footer-brand-name">ARIA</span>
-      </div>
-      <p class="footer-desc">Trust infrastructure for AI agents. Cryptographic identity, immutable audit trail, human enforcement.</p>
-      <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener" class="footer-gh">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        ariatrust-io/aria
-      </a>
+    <div>
+      <div style="font-weight:800;color:var(--white)">ARIA</div>
+      <div style="color:var(--muted)">Cryptographic identity and audit trails for agent fleets.</div>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Product</div>
-      <ul>
-        <li><a href="/app">Dashboard</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/app/keys">API Keys</a></li>
-      </ul>
+    <div>
+      <div style="font-weight:700;color:var(--accent);margin-bottom:8px">Product</div>
+      <ul style="list-style:none;padding:0"><li><a href="/app" style="color:var(--muted)">Dashboard</a></li></ul>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Resources</div>
-      <ul>
-        <li><a href="/docs">Docs</a></li>
-        <li><a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">GitHub</a></li>
-        <li><a href="https://www.npmjs.com/package/@ariatrust-io/aria-sdk" target="_blank" rel="noopener">npm</a></li>
-      </ul>
+    <div>
+      <div style="font-weight:700;color:var(--accent);margin-bottom:8px">Resources</div>
+      <ul style="list-style:none;padding:0"><li><a href="/docs" style="color:var(--muted)">Docs</a></li></ul>
     </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Legal</div>
-      <ul>
-        <li><a href="/terms">Terms</a></li>
-        <li><a href="/privacy">Privacy</a></li>
-        <li><a href="/acceptable-use">Acceptable Use</a></li>
-        <li><a href="/cookies">Cookies</a></li>
-        <li><a href="/security">Security</a></li>
-      </ul>
+    <div>
+      <div style="font-weight:700;color:var(--accent);margin-bottom:8px">Legal</div>
+      <ul style="list-style:none;padding:0"><li><a href="terms.html" style="color:var(--muted)">Terms of Service</a></li><li><a href="privacy.html" style="color:var(--muted)">Privacy Policy</a></li></ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <div class="footer-copy">&copy; 2026 ARIA &middot; Built for the agentic era</div>
-    <div class="footer-domain">ariatrust.org</div>
+    <div>&copy; 2026 ARIA Trust Systems</div>
+    <div style="font-family:var(--font-mono)">ariatrust.org</div>
   </div>
 </footer>
 

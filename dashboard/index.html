@@ -5,31 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ARIA Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     /* ── Design tokens (matching landing page) ── */
     :root {
-      --black:   #0a0a0a;
-      --gold:    #b8962e;
-      --gold2:   #d4a843;
-      --muted:   #666;
-      --light:   #f5f5f5;
-      --border:  #e8e8e8;
-      --surface: #ffffff;
-      --success: #2d7a4f;
-      --error:   #c73535;
-      --warning: #b8711a;
-      --sans:    'Outfit', system-ui, sans-serif;
-      --mono:    'DM Mono', monospace;
+      --bg-black: #030712;
+      --bg-dark: #070a13;
+      --surface: rgba(15, 23, 42, 0.92);
+      --surface-soft: rgba(8, 13, 24, 0.9);
+      --accent-primary: #6366f1;
+      --accent-secondary: #a855f7;
+      --gold: #6366f1;
+      --gold2: #a855f7;
+      --success: #22c55e;
+      --error: #f97316;
+      --warning: #38bdf8;
+      --white: #f8fafc;
+      --muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.12);
+      --light: rgba(255,255,255,0.05);
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --sans: var(--font-sans);
+      --mono: var(--font-mono);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: var(--sans);
-      background: #fafafa;
-      color: var(--black);
+      font-family: var(--font-sans);
+      background: var(--bg-black);
+      color: var(--white);
       min-height: 100vh;
     }
 
@@ -44,9 +53,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 40px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
+      background: rgba(3, 7, 18, 0.8);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       z-index: 100;
     }
 
@@ -60,8 +69,8 @@
     .navbar-logo-text {
       font-weight: 700;
       font-size: 16px;
-      letter-spacing: 5px;
-      color: var(--black);
+      letter-spacing: 2px;
+      color: var(--white);
     }
 
     .navbar-right {
@@ -78,17 +87,17 @@
     .btn-nav {
       font-size: 12px;
       font-weight: 500;
-      color: var(--muted);
+      color: var(--white);
       background: transparent;
-      border: 1px solid rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.12);
       padding: 7px 18px;
       border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
-      font-family: var(--sans);
+      font-family: var(--font-sans);
     }
 
-    .btn-nav:hover { background: rgba(0,0,0,0.04); color: var(--black); }
+    .btn-nav:hover { background: rgba(255,255,255,0.08); color: var(--white); }
 
     /* ── AUTH SCREEN ── */
     #auth-screen {
@@ -97,17 +106,17 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      background: #fafafa;
+      background: var(--bg-black);
     }
 
     .auth-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
       padding: 40px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      max-width: 420px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.25);
     }
 
     .auth-logo {
@@ -119,7 +128,7 @@
       font-weight: 700;
       font-size: 28px;
       letter-spacing: 6px;
-      color: var(--black);
+      color: var(--white);
       display: block;
     }
 
@@ -153,7 +162,7 @@
     }
 
     .auth-toggle button.active {
-      background: var(--black);
+      background: var(--accent-primary);
       color: #fff;
       font-weight: 500;
     }
@@ -171,19 +180,19 @@
 
     .form-group input {
       width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 4px;
       padding: 11px 14px;
-      color: var(--black);
+      color: var(--white);
       font-size: 14px;
-      font-family: var(--sans);
+      font-family: var(--font-sans);
       transition: border-color 0.2s;
     }
 
     .form-group input:focus {
       outline: none;
-      border-color: var(--black);
+      border-color: var(--accent-primary);
     }
 
     .form-group input::placeholder { color: #bbb; }
@@ -209,26 +218,26 @@
 
     .code-input-group input:focus {
       outline: none;
-      border-color: var(--black);
-      background: var(--surface);
+      border-color: var(--accent-primary);
+      background: rgba(255,255,255,0.08);
     }
 
     /* ── BUTTONS ── */
     .btn {
-      background: var(--black);
+      background: var(--accent-primary);
       color: #fff;
       border: none;
       border-radius: 4px;
       padding: 12px 20px;
       font-size: 14px;
       font-weight: 500;
-      font-family: var(--sans);
+      font-family: var(--font-sans);
       cursor: pointer;
       width: 100%;
       transition: background 0.2s;
     }
 
-    .btn:hover { background: #222; }
+    .btn:hover { background: rgba(99,102,241,0.9); }
 
     .btn:disabled {
       opacity: 0.4;
@@ -237,8 +246,8 @@
 
     .btn-outline {
       background: transparent;
-      border: 1px solid var(--border);
-      color: var(--black);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--white);
       font-weight: 400;
     }
 
@@ -280,7 +289,7 @@
       margin-bottom: 24px;
     }
 
-    .btn-back:hover { color: var(--black); }
+    .btn-back:hover { color: var(--white); }
 
     /* ── ALERTS ── */
     .alert {
@@ -339,12 +348,12 @@
       transition: all 0.2s;
     }
 
-    .tab:hover { color: var(--black); }
+    .tab:hover { color: var(--white); }
 
     .tab.active {
-      color: var(--black);
+      color: var(--white);
       font-weight: 500;
-      border-bottom-color: var(--black);
+      border-bottom-color: var(--accent-primary);
     }
 
     /* ── STATS ROW ── */
@@ -374,8 +383,8 @@
     .stat-value {
       font-size: 36px;
       font-weight: 600;
-      font-family: var(--mono);
-      color: var(--black);
+      font-family: var(--font-mono);
+      color: var(--white);
     }
 
     .stat-value.gold    { color: var(--gold); }
@@ -428,7 +437,7 @@
     }
 
     .agent-row.header {
-      background: #fafafa;
+      background: var(--surface-soft);
       font-size: 11px;
       font-weight: 600;
       color: var(--muted);
@@ -587,8 +596,8 @@
     .detail-stat-value {
       font-size: 28px;
       font-weight: 600;
-      font-family: var(--mono);
-      color: var(--black);
+      font-family: var(--font-mono);
+      color: var(--white);
     }
 
     .detail-stat-label {
@@ -612,7 +621,7 @@
     .detail-event:last-child { border-bottom: none; }
 
     .detail-event.header {
-      background: #fafafa;
+      background: var(--surface-soft);
       font-size: 11px;
       font-weight: 600;
       color: var(--muted);
@@ -634,17 +643,17 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 20px;
-      background: var(--light);
-      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 4px;
       padding: 12px 16px;
     }
 
     .api-key-value {
       flex: 1;
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 14px;
-      color: var(--black);
+      color: var(--white);
       letter-spacing: 1px;
     }
 
@@ -670,8 +679,8 @@
     .spinner {
       width: 28px;
       height: 28px;
-      border: 2px solid var(--border);
-      border-top-color: var(--black);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-top-color: var(--white);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
@@ -684,7 +693,7 @@
       color: var(--muted);
     }
 
-    .empty-state h3 { color: var(--black); margin-bottom: 8px; font-weight: 500; }
+    .empty-state h3 { color: var(--white); margin-bottom: 8px; font-weight: 500; }
 
     /* ── PAGINATION ── */
     .pagination {
@@ -696,17 +705,17 @@
 
     .pagination button {
       background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--black);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--white);
       padding: 8px 14px;
       border-radius: 4px;
       cursor: pointer;
-      font-family: var(--sans);
+      font-family: var(--font-sans);
       font-size: 13px;
       transition: border-color 0.2s;
     }
 
-    .pagination button:hover  { border-color: var(--black); }
+    .pagination button:hover  { border-color: var(--white); }
     .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* ── DIVIDER ── */

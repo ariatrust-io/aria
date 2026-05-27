@@ -1,78 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terms of Service — ARIA</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --black:#030507;
-  --dark:#070b10;
-  --gold:#d4a843;
-  --gold-lt:#e8c87a;
-  --white:#f0ece4;
-  --muted:rgba(240,236,228,0.45);
-  --text:rgba(240,236,228,0.75);
-  --border:rgba(212,168,67,0.15);
-}
-html{scroll-behavior:smooth}
-body{font-family:'IBM Plex Mono',monospace;background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — ARIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg-black:#030712;
+      --white:#f8fafc;
+      --muted:#94a3b8;
+      --accent-primary:#6366f1;
+      --accent-secondary:#a855f7;
+      --border-muted:rgba(255,255,255,0.06);
+      --font-sans:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+      --font-mono:'JetBrains Mono',monospace;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-sans);background-color:var(--bg-black);color:var(--white);line-height:1.6;overflow-x:hidden;padding-bottom:80px}
+    nav{position:fixed;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,7,18,0.6);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.03);z-index:1000}
+    .nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--white)}
+    .nav-logo svg{opacity:0.95}
+    .nav-links{display:flex;gap:24px;list-style:none}
+    .nav-links a{color:var(--muted);text-decoration:none;font-size:14px}
+    .nav-cta{padding:8px 16px;background:var(--accent-primary);color:#fff;border-radius:6px;text-decoration:none}
 
-nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,5,7,0.96);border-bottom:1px solid var(--border);z-index:1000}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold-lt)}
-.nav-links{display:flex;align-items:center;gap:32px;list-style:none}
-.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .2s}
-.nav-links a:hover{color:var(--white)}
-.nav-cta{display:inline-flex;align-items:center;padding:8px 20px;background:var(--gold);color:var(--black);font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-decoration:none;border-radius:2px;letter-spacing:.5px;transition:background .2s}
-.nav-cta:hover{background:var(--gold-lt)}
+    .legal-wrap{max-width:880px;margin:0 auto;padding:120px 20px 40px}
+    .legal-title{font-size:clamp(36px,6vw,56px);font-weight:800;letter-spacing:1px;color:var(--white);margin-bottom:6px}
+    .legal-updated{color:var(--muted);font-size:13px;margin-bottom:28px}
+    h2{color:var(--accent-primary);font-size:16px;margin:28px 0 12px}
+    p, li{color:#dfe7f6;font-size:15px;line-height:1.7;margin-bottom:12px}
+    ul{padding-left:20px;margin-bottom:12px}
+    a{color:var(--accent-primary);text-decoration:none}
+    a:hover{text-decoration:underline}
 
-.legal-wrap{max-width:800px;margin:0 auto;padding:120px 24px 80px}
-.legal-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,80px);color:var(--white);letter-spacing:2px;margin-bottom:8px}
-.legal-updated{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid rgba(212,168,67,0.12)}
-.legal-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold-lt);border-left:3px solid #d4a843;padding-left:16px;margin:32px 0 16px 0}
-.legal-wrap p{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px}
-.legal-wrap ul{padding-left:20px;margin-bottom:14px}
-.legal-wrap li{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:6px}
-.legal-wrap a{color:var(--gold);text-decoration:none}
-.legal-wrap a:hover{color:var(--gold-lt)}
-.legal-wrap strong{color:var(--white);font-weight:600}
+    footer{background:transparent;border-top:1px solid var(--border-muted);padding:48px 48px 24px;margin-top:40px}
+    .footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
+    .footer-col-title{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent-primary);margin-bottom:12px}
+    .footer-col ul{list-style:none;padding:0}
+    .footer-col ul li a{color:var(--muted);text-decoration:none}
+    .footer-bottom{max-width:1100px;margin:20px auto 0;display:flex;justify-content:space-between;align-items:center;color:rgba(248,250,252,0.6);font-size:13px}
 
-footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60px 48px 0}
-.footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px}
-.footer-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.footer-brand-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold-lt)}
-.footer-desc{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:300;color:rgba(240,236,228,0.28);line-height:1.8;max-width:220px;margin-bottom:16px}
-.footer-gh{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.22);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s}
-.footer-gh:hover{color:var(--gold)}
-.footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
-.footer-col ul{list-style:none}
-.footer-col ul li{margin-bottom:10px}
-.footer-col ul li a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(240,236,228,0.3);text-decoration:none;transition:color .2s}
-.footer-col ul li a:hover{color:var(--white)}
-.footer-bottom{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);padding:22px 0;flex-wrap:wrap;gap:12px}
-.footer-copy{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.18);letter-spacing:.5px}
-.footer-domain{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(212,168,67,0.28);letter-spacing:1px}
-
-@media(max-width:768px){nav{padding:0 24px}.nav-links{display:none}.legal-wrap{padding:100px 20px 60px}.footer-main{grid-template-columns:1fr 1fr}footer{padding:40px 24px 0}}
-@media(max-width:480px){.footer-main{grid-template-columns:1fr}}
-</style>
+    @media(max-width:768px){.footer-main{grid-template-columns:1fr 1fr}.legal-wrap{padding:100px 20px 40px}}
+    @media(max-width:480px){.footer-main{grid-template-columns:1fr}.nav-links{display:none}}
+  </style>
 </head>
 <body>
 
 <nav>
   <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(212,168,67,0.18)" stroke-width="0.75"/>
-    </svg>
-    <span class="nav-logo-text">ARIA</span>
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none"><polygon points="14,2 26,24 2,24" stroke="currentColor" stroke-opacity="0.12" stroke-width="1.2"/></svg>
+    <span style="font-weight:700;letter-spacing:2px;color:var(--white)">ARIA</span>
   </a>
   <ul class="nav-links">
     <li><a href="/docs">Docs</a></li>
@@ -82,144 +63,63 @@ footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60
   <a href="/app" class="nav-cta">Get Access</a>
 </nav>
 
-<div class="legal-wrap">
+<main class="legal-wrap">
   <div class="legal-title">Terms of Service</div>
-  <div class="legal-updated">Last updated: May 19, 2026 &nbsp;&middot;&nbsp; Effective: May 19, 2026</div>
+  <div class="legal-updated">Last updated: May 27, 2026 &nbsp;&middot;&nbsp; Effective: May 27, 2026</div>
 
-  <h2>1. Acceptance of Terms</h2>
-  <p>By accessing or using ARIA ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you must not use the Service.</p>
-  <p>These Terms constitute a legally binding agreement between you (an individual or entity, "User") and Josías Hernández ("ARIA", "we", "us", or "our"), operating under the domain <strong>ariatrust.org</strong>.</p>
-  <p>If you are using the Service on behalf of an organization, you represent and warrant that you have authority to bind that organization to these Terms.</p>
+  <h2>Service terms</h2>
+  <p>These Terms explain how you may use ARIA and what we provide. By using ARIA you agree to these Terms. If you do not agree, do not use the service.</p>
 
-  <h2>2. Description of Service</h2>
-  <p>ARIA provides trust infrastructure for AI agents, including:</p>
+  <h2>User responsibilities</h2>
+  <p>You are responsible for securing your account and any API keys. Use the Service lawfully. Do not share credentials, impersonate others, or submit false data. If you manage accounts for an organization, you confirm you have authority to do so.</p>
   <ul>
-    <li><strong>Identity:</strong> Decentralized identifiers (DIDs) for AI agents</li>
-    <li><strong>Audit trail:</strong> Cryptographically signed, immutable event logs</li>
-    <li><strong>Trust scoring:</strong> Real-time reputation scoring based on agent behavior</li>
-    <li><strong>Gate system:</strong> Human-in-the-loop enforcement for high-risk agent actions</li>
-    <li><strong>API access:</strong> RESTful API for integrating ARIA into your systems</li>
-    <li><strong>SDK:</strong> <code>@ariatrust-io/aria-sdk</code> available on npm</li>
-    <li><strong>Dashboard:</strong> Web-based interface for managing agents, viewing events, and monitoring trust scores</li>
+    <li>Keep login details and API keys secure.</li>
+    <li>Provide accurate information during registration.</li>
+    <li>Comply with the Acceptable Use policy and applicable laws.</li>
   </ul>
-  <p>The Service is provided over the internet. We reserve the right to modify, suspend, or discontinue any part of the Service with reasonable notice.</p>
 
-  <h2>3. Account Registration</h2>
-  <p><strong>Eligibility.</strong> You must be at least 18 years old to use the Service. By registering, you confirm that you meet this requirement.</p>
-  <p><strong>Accurate information.</strong> You agree to provide accurate, current, and complete information during registration and to update this information as necessary.</p>
-  <p><strong>One account per person or entity.</strong> Creating multiple accounts to circumvent limits or restrictions is prohibited.</p>
-  <p><strong>Account security.</strong> You are solely responsible for maintaining the confidentiality of your credentials and API keys. You must notify us immediately at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a> if you suspect unauthorized access to your account.</p>
-  <p>We are not liable for any loss or damage arising from your failure to maintain account security.</p>
+  <h2>Liability limitations</h2>
+  <p>We provide ARIA "as is". To the extent allowed by law, ARIA is not liable for indirect, special, or consequential damages. Our maximum liability for direct damages is limited to fees you paid in the three months before a claim.</p>
 
-  <h2>4. Plans and Payment</h2>
-  <p><strong>Free Plan.</strong> Available at no charge with the following limitations: 30-day event history retention, limited API rate limits, and community support only.</p>
-  <p><strong>Professional Plan.</strong> Priced at $49 USD per month, billed monthly. Includes 12-month event history retention, higher rate limits, and email support.</p>
-  <p><strong>Enterprise Plan.</strong> Custom pricing. Contact us for details. Includes unlimited event history, dedicated support, SLA guarantees, and custom integrations.</p>
-  <p><strong>Payment.</strong> Paid plans are processed via Stripe. By providing payment information, you authorize us to charge the applicable fees. All prices are in USD and exclusive of applicable taxes.</p>
-  <p><strong>Refunds.</strong> We offer a 7-day money-back guarantee for new Professional plan subscriptions. After this period, all fees are non-refundable. Refunds are not available for partial billing periods.</p>
-  <p><strong>Plan changes.</strong> Upgrades take effect immediately. Downgrades take effect at the end of the current billing cycle. We do not prorate partial-month downgrades.</p>
-  <p><strong>Overdue payments.</strong> We reserve the right to suspend or terminate your account if payment is overdue by more than 10 days.</p>
+  <h2>License</h2>
+  <p>Server-side source code is released under the Business Source License 1.1 (BUSL-1.1). The SDKs and select client-side components may be under separate open-source licenses; check their headers for details.</p>
 
-  <h2>5. Acceptable Use</h2>
-  <p>You agree to use the Service only for lawful purposes and in accordance with these Terms and our <a href="/acceptable-use">Acceptable Use Policy</a>. You must not:</p>
-  <ul>
-    <li>Use the Service for any illegal activity or to facilitate illegal activity</li>
-    <li>Abuse, circumvent, or attempt to circumvent API rate limits</li>
-    <li>Reverse engineer, decompile, or attempt to extract the source code of the Service</li>
-    <li>Resell or sublicense access to the Service without prior written permission from ARIA</li>
-    <li>Use the Service to track, surveil, or monitor individuals without their informed consent</li>
-    <li>Upload or transmit malware, harmful code, or any content that could damage the Service or other users</li>
-    <li>Create fake agent identities or submit deliberately false event data</li>
-    <li>Attempt to gain unauthorized access to other users' accounts or data</li>
-  </ul>
-  <p>Violations of the Acceptable Use Policy may result in immediate suspension or termination without refund.</p>
-
-  <h2>6. Data and Privacy</h2>
-  <p>Your use of the Service is also governed by our <a href="/privacy">Privacy Policy</a>, which is incorporated into these Terms by reference.</p>
-  <p><strong>Ownership of agent data.</strong> You retain full ownership of the agent event data you submit through the Service. We do not claim any intellectual property rights over your data.</p>
-  <p><strong>Data processing.</strong> ARIA processes your data solely to provide and improve the Service. We do not sell your data to third parties or use it for advertising.</p>
-  <p><strong>Data retention.</strong> Event data is retained according to your plan: 30 days (Free), 12 months (Professional), unlimited (Enterprise). Account data is retained until you request deletion.</p>
-
-  <h2>7. Intellectual Property</h2>
-  <p><strong>ARIA software.</strong> The ARIA server-side source code is licensed under the Business Source License 1.1 (BUSL-1.1). The SDK (<code>@ariatrust-io/aria-sdk</code>) is open source under the MIT License.</p>
-  <p><strong>Your data.</strong> All agent data, event logs, and configurations you create remain your property. You grant ARIA a limited, non-exclusive license to process this data solely to provide the Service.</p>
-  <p><strong>ARIA brand.</strong> The ARIA name, logo, and brand marks are owned by Josías Hernández. You may not use them without prior written permission, except to truthfully describe your use of the Service (e.g., "Powered by ARIA").</p>
-
-  <h2>8. Limitation of Liability</h2>
-  <p><strong>As-is service.</strong> THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.</p>
-  <p><strong>Uptime.</strong> We make no guarantee of uninterrupted availability. We strive for high availability on a best-effort basis but do not commit to specific uptime SLAs on Free and Professional plans.</p>
-  <p><strong>Maximum liability.</strong> TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, ARIA'S TOTAL LIABILITY TO YOU FOR ANY CLAIMS ARISING OUT OF OR RELATED TO THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE TOTAL FEES YOU PAID TO ARIA IN THE THREE (3) MONTHS IMMEDIATELY PRECEDING THE CLAIM.</p>
-  <p><strong>Agent actions.</strong> ARIA is a trust infrastructure provider. We are not responsible for the actions of AI agents registered with our Service, any damages caused by agents acting on third-party systems, or any decisions made based on ARIA trust scores.</p>
-  <p><strong>Indirect damages.</strong> IN NO EVENT SHALL ARIA BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, REGARDLESS OF THE CAUSE OF ACTION OR THE THEORY OF LIABILITY.</p>
-
-  <h2>9. Termination</h2>
-  <p><strong>By you.</strong> You may cancel your account at any time through the Dashboard or by contacting us at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a>. Cancellation takes effect at the end of the current billing period.</p>
-  <p><strong>By ARIA.</strong> We may suspend or terminate your account immediately, without notice, if you violate these Terms, the Acceptable Use Policy, or any applicable law. We may also terminate accounts that are inactive for more than 12 consecutive months on the Free plan.</p>
-  <p><strong>Effect of termination.</strong> Upon termination, your right to access the Service ceases immediately. You may request an export of your data within 30 days following termination; after this period, your data may be permanently deleted.</p>
-
-  <h2>10. Governing Law</h2>
-  <p>These Terms are governed by the laws of the Republic of Colombia, without regard to conflict-of-law principles.</p>
-  <p><strong>Dispute resolution.</strong> In the event of a dispute, the parties agree to first attempt resolution through good-faith negotiation for at least 30 days. If unresolved, disputes shall be submitted to binding arbitration under the rules of the Centro de Arbitraje y Conciliación de la Cámara de Comercio de Bogotá.</p>
-  <p><strong>Jurisdiction.</strong> For matters not subject to arbitration, you consent to the exclusive jurisdiction of the courts of Bogotá, Colombia.</p>
-
-  <h2>11. Changes to Terms</h2>
-  <p>We reserve the right to modify these Terms at any time. For material changes, we will provide at least 30 days notice via email or a prominent notice on the Service before the changes take effect.</p>
-  <p>Your continued use of the Service after the effective date of updated Terms constitutes your acceptance of the changes. If you do not agree to the updated Terms, you must stop using the Service.</p>
-
-  <h2>12. Contact</h2>
-  <p>For questions about these Terms, please contact:</p>
-  <ul>
-    <li>Email: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></li>
-    <li>Website: <a href="https://ariatrust.org">ariatrust.org</a></li>
-  </ul>
-</div>
+  <h2>Contact</h2>
+  <p>Questions about these Terms: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></p>
+</main>
 
 <footer>
   <div class="footer-main">
-    <div class="footer-col">
-      <div class="footer-logo-row">
-        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-          <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
-        </svg>
-        <span class="footer-brand-name">ARIA</span>
-      </div>
-      <p class="footer-desc">Trust infrastructure for AI agents. Cryptographic identity, immutable audit trail, human enforcement.</p>
-      <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener" class="footer-gh">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        ariatrust-io/aria
-      </a>
+    <div>
+      <div style="font-weight:800;letter-spacing:2px;color:var(--white);margin-bottom:8px">ARIA</div>
+      <div style="color:var(--muted);max-width:320px">Cryptographic identity, immutable audit trails, and human-in-the-loop enforcement for autonomous AI agent fleets.</div>
     </div>
-    <div class="footer-col">
+    <div>
       <div class="footer-col-title">Product</div>
       <ul>
         <li><a href="/app">Dashboard</a></li>
         <li><a href="/pricing">Pricing</a></li>
-        <li><a href="/app/keys">API Keys</a></li>
       </ul>
     </div>
-    <div class="footer-col">
+    <div>
       <div class="footer-col-title">Resources</div>
       <ul>
         <li><a href="/docs">Docs</a></li>
         <li><a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">GitHub</a></li>
-        <li><a href="https://www.npmjs.com/package/@ariatrust-io/aria-sdk" target="_blank" rel="noopener">npm</a></li>
       </ul>
     </div>
-    <div class="footer-col">
+    <div>
       <div class="footer-col-title">Legal</div>
       <ul>
-        <li><a href="/terms">Terms</a></li>
-        <li><a href="/privacy">Privacy</a></li>
-        <li><a href="/acceptable-use">Acceptable Use</a></li>
-        <li><a href="/cookies">Cookies</a></li>
-        <li><a href="/security">Security</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="acceptable-use.html">Acceptable Use</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <div class="footer-copy">&copy; 2026 ARIA &middot; Built for the agentic era</div>
-    <div class="footer-domain">ariatrust.org</div>
+    <div>&copy; 2026 ARIA Trust Systems &middot; Cryptographic Protection for Autonomy</div>
+    <div style="font-family:var(--font-mono)">ariatrust.org</div>
   </div>
 </footer>
 
