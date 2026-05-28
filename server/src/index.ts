@@ -218,7 +218,8 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
     
     // Find or create a user record so plan/limit checks work for service accounts
     const userResult = await query<{ id: string }>(
-      `INSERT INTO users (email, name) VALUES ($1, 'Service Account')
+      `INSERT INTO users (email, name, plan, plan_started_at, plan_expires_at)
+       VALUES ($1, 'Service Account', 'free', NOW(), NOW() + INTERVAL '30 days')
        ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
        RETURNING id`,
       [normalizedEmail]

@@ -7,9 +7,20 @@ import { FOUNDER_USER_ID, PLANS, type Plan } from '../config/plans.js';
 interface UserPlan {
   plan: Plan;
   userId: string;
+  planExpiresAt: string | null;
 }
 
 type ReqWithUser = Request & { userId?: string; plan?: Plan };
+
+function isTrialActive(expiresAt: string | null): boolean {
+  if (!expiresAt) return false;
+  return new Date(expiresAt).getTime() > Date.now();
+}
+
+function getEffectivePlan(userPlan: UserPlan): Plan {
+  if (isTrialActive(userPlan.planExpiresAt)) return 'enterprise';
+  return userPlan.plan;
+}
 
 export async function getUserPlan(
   apiKeyId: string
@@ -17,8 +28,9 @@ export async function getUserPlan(
   const result = await query<{
     user_id: string;
     plan: Plan;
+    plan_expires_at: string | null;
   }>(`
-    SELECT u.id AS user_id, u.plan
+    SELECT u.id AS user_id, u.plan, u.plan_expires_at
     FROM api_keys ak
     JOIN users u ON u.email = ak.owner_email
     WHERE ak.id = $1
@@ -28,7 +40,8 @@ export async function getUserPlan(
   if (!result.rows[0]) return null;
   return {
     plan: result.rows[0].plan,
-    userId: result.rows[0].user_id
+    userId: result.rows[0].user_id,
+    planExpiresAt: result.rows[0].plan_expires_at
   };
 }
 
@@ -78,13 +91,15 @@ export function requireFeature(
         return;
       }
 
-      const planConfig = PLANS[userPlan.plan];
+      const effectivePlan = getEffectivePlan(userPlan);
+      const planConfig = PLANS[effectivePlan];
       if (!planConfig.features[feature]) {
         res.status(403).json({
           error: `${feature} requires a Professional plan or higher.`,
           code: 'PLAN_LIMIT',
           feature,
           current_plan: userPlan.plan,
+          effective_plan: effectivePlan,
           upgrade_url: 'https://ariatrust.org/pricing'
         });
         return;
@@ -112,7 +127,8 @@ export async function checkAgentLimit(
       return;
     }
 
-    const planConfig = PLANS[userPlan.plan];
+    const effectivePlan = getEffectivePlan(userPlan);
+    const planConfig = PLANS[effectivePlan];
     if (planConfig.maxAgents === Infinity) {
       next();
       return;
@@ -164,7 +180,8 @@ export async function checkEventLimit(
       return;
     }
 
-    const planConfig = PLANS[userPlan.plan];
+    const effectivePlan = getEffectivePlan(userPlan);
+    const planConfig = PLANS[effectivePlan];
     if (planConfig.maxEventsPerMonth === Infinity) {
       (req as ReqWithUser).userId = userPlan.userId;
       next();
