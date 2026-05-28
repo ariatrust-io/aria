@@ -1,9 +1,9 @@
 import { query } from "../db/pool.js";
 import { triggerWebhooks } from "./webhook.js";
 
-// Security limit: A specific agent cannot generate more than 100 stored anomalies.
-// If it exceeds 100, new ones are ignored. This prevents disk fill-up attacks.
-const MAX_ANOMALIES_PER_AGENT = 100;
+// Security limit: A specific agent cannot generate more than 10,000 stored anomalies.
+// If it exceeds this threshold, new ones are ignored. This prevents disk fill-up attacks.
+const MAX_ANOMALIES_PER_AGENT = 10000;
 
 export async function recordAnomaly(params: {
   agentId: string;

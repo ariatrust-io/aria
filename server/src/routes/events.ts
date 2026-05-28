@@ -653,7 +653,7 @@ eventsRouter.get("/export",
     } else if (type === 'violations') {
       sql += ` AND e.server_within_scope = false`;
     } else if (type === 'anomalies') {
-      sql += ` AND e.outcome = 'anomaly'`;
+      sql += ` AND e.id IN (SELECT event_id FROM anomalies WHERE agent_id = a.id)`;
     }
 
     let paramIdx = 4;

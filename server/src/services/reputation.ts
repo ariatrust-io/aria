@@ -231,7 +231,7 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
       COUNT(*) AS total_events,
       COUNT(*) FILTER (WHERE outcome = 'success') AS success_count,
       COUNT(*) FILTER (WHERE outcome = 'error') AS error_count,
-      COUNT(*) FILTER (WHERE outcome = 'anomaly') AS anomaly_count,
+      (SELECT COUNT(*) FROM anomalies WHERE agent_id = $1) AS anomaly_count,
       COUNT(*) FILTER (WHERE outcome = 'blocked') AS blocked_count,
       COUNT(*) FILTER (
         WHERE server_within_scope = false AND outcome != 'blocked'
