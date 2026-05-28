@@ -2,7 +2,7 @@ import {
   type Request, type Response, type NextFunction
 } from 'express';
 import { query } from '../db/pool.js';
-import { PLANS, type Plan } from '../config/plans.js';
+import { FOUNDER_USER_ID, PLANS, type Plan } from '../config/plans.js';
 
 interface UserPlan {
   plan: Plan;
@@ -102,6 +102,9 @@ export async function checkAgentLimit(
 ): Promise<void> {
   try {
     const userPlan = await getUserPlan(req.apiKeyId);
+    if (userPlan?.userId === FOUNDER_USER_ID) {
+      return next();
+    }
     if (!userPlan) {
       res.status(401).json({
         error: 'Unauthorized', code: 'UNAUTHORIZED'
@@ -151,6 +154,9 @@ export async function checkEventLimit(
 ): Promise<void> {
   try {
     const userPlan = await getUserPlan(req.apiKeyId);
+    if (userPlan?.userId === FOUNDER_USER_ID) {
+      return next();
+    }
     if (!userPlan) {
       res.status(401).json({
         error: 'Unauthorized', code: 'UNAUTHORIZED'

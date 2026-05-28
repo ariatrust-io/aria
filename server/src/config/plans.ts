@@ -18,6 +18,8 @@ export interface PlanConfig {
   };
 }
 
+export const FOUNDER_USER_ID = '72b7f80d-6ca9-41f8-89ed-826852b3410e';
+
 export const PLANS: Record<Plan, PlanConfig> = {
   free: {
     name: 'Free',
