@@ -9,6 +9,7 @@ import { getRedisClient } from "../utils/redis.js";
 import { FOUNDER_USER_ID } from '../config/plans.js';
 import {
   requireFeature,
+  getUserPlan,
   checkEventLimit,
   incrementEventCount
 } from '../middleware/plans.js';
@@ -595,8 +596,8 @@ eventsRouter.get("/", async (req, res) => {
 
 eventsRouter.get("/export",
   async (req, res, next) => {
-    const userId = (req as any).user?.id;
-    if (userId === FOUNDER_USER_ID) {
+    const userPlan = await getUserPlan(req.apiKeyId);
+    if (userPlan?.userId === FOUNDER_USER_ID) {
       return next();
     }
     return requireFeature('export')(req, res, next);
