@@ -6,6 +6,7 @@ import { reputationQueue } from "../services/reputation.js";
 import { recordAnomaly } from "../services/anomaly-detector.js";
 import { decryptSecret } from "../utils/crypto.js";
 import { getRedisClient } from "../utils/redis.js";
+import { FOUNDER_USER_ID } from '../config/plans.js';
 import {
   requireFeature,
   checkEventLimit,
@@ -592,7 +593,15 @@ eventsRouter.get("/", async (req, res) => {
   }
 });
 
-eventsRouter.get("/export", requireFeature('export'), async (req, res) => {
+eventsRouter.get("/export",
+  async (req, res, next) => {
+    const userId = (req as any).user?.id;
+    if (userId === FOUNDER_USER_ID) {
+      return next();
+    }
+    return requireFeature('export')(req, res, next);
+  },
+  async (req, res) => {
   try {
     const {
       agentDid,
