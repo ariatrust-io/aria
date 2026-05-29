@@ -28,7 +28,7 @@
     "migrate:020": "tsx migrate-020.ts",
     "migrate:021": "tsx migrate-021.ts",
     "migrate:022": "tsx migrate-022.ts",
-    "migrate:023": "tsx --env-file=.env migrate-023.ts",
+    "migrate:023": "tsx migrate-023.ts",
     "test:integration": "tsx src/tests/integration.test.ts",
     "set-user-plan": "tsx scripts/set-user-plan.ts"
   },

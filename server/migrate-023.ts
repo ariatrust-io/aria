@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import 'dotenv/config';
 import { query } from './src/db/pool.js';
 
 const __filename = fileURLToPath(import.meta.url);
