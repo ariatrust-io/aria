@@ -20,7 +20,7 @@ function lsHeaders() {
 const VARIANT_MAP: Record<string, string | undefined> = {
   professional: process.env.LEMONSQUEEZY_PROFESSIONAL_VARIANT_ID,
   business:     process.env.LEMONSQUEEZY_BUSINESS_VARIANT_ID,
-  enterprise:   process.env.LEMONSQUEEZY_ENTERPRISE_VARIANT_ID,
+  // enterprise is sales-assisted — no automated checkout
 };
 
 function planByVariant(variantId: string | number): string {
@@ -35,9 +35,16 @@ function planByVariant(variantId: string | number): string {
 billingRouter.post('/checkout', requireApiKey, async (req, res) => {
   const { plan } = req.body as { plan?: string };
 
+  if (plan === 'enterprise') {
+    return res.status(400).json({
+      error: 'Enterprise requires a custom agreement. Contact dhdez3149@gmail.com',
+      code: 'ENTERPRISE_CONTACT_SALES'
+    });
+  }
+
   if (!plan || !VARIANT_MAP[plan]) {
     return res.status(400).json({
-      error: 'Valid plan required: professional, business or enterprise',
+      error: 'Valid plan required: professional or business',
       code: 'INVALID_PLAN'
     });
   }
