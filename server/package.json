@@ -28,7 +28,6 @@
     "migrate:020": "tsx migrate-020.ts",
     "migrate:021": "tsx migrate-021.ts",
     "migrate:022": "tsx migrate-022.ts",
-    "cli": "node cli-dashboard.mjs",
     "test:integration": "tsx src/tests/integration.test.ts",
     "set-user-plan": "tsx scripts/set-user-plan.ts"
   },
