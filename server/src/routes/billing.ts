@@ -1,42 +1,50 @@
 import { Router, type Request, type Response } from 'express';
-import Stripe from 'stripe';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { query } from '../db/pool.js';
 import { requireApiKey } from '../middleware/auth.js';
 
 export const billingRouter = Router();
 
-function getStripe(): Stripe {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('STRIPE_SECRET_KEY not configured');
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
+const LS_API = 'https://api.lemonsqueezy.com/v1';
+
+function lsHeaders() {
+  const key = process.env.LEMONSQUEEZY_API_KEY;
+  if (!key) throw new Error('LEMONSQUEEZY_API_KEY not configured');
+  return {
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/vnd.api+json',
+    'Accept': 'application/vnd.api+json',
+  };
 }
 
-const PRICE_MAP: Record<string, string | undefined> = {
-  professional: process.env.STRIPE_PROFESSIONAL_PRICE_ID,
-  enterprise:   process.env.STRIPE_ENTERPRISE_PRICE_ID,
+const VARIANT_MAP: Record<string, string | undefined> = {
+  professional: process.env.LEMONSQUEEZY_PROFESSIONAL_VARIANT_ID,
+  enterprise:   process.env.LEMONSQUEEZY_ENTERPRISE_VARIANT_ID,
 };
 
-function planByPrice(priceId: string): string {
-  for (const [plan, id] of Object.entries(PRICE_MAP)) {
-    if (id === priceId) return plan;
+function planByVariant(variantId: string | number): string {
+  const id = String(variantId);
+  for (const [plan, vid] of Object.entries(VARIANT_MAP)) {
+    if (vid === id) return plan;
   }
   return 'free';
 }
 
-// POST /v1/billing/checkout — create Stripe Checkout Session
+// POST /v1/billing/checkout — create Lemon Squeezy checkout
 billingRouter.post('/checkout', requireApiKey, async (req, res) => {
   const { plan } = req.body as { plan?: string };
 
-  if (!plan || !PRICE_MAP[plan]) {
+  if (!plan || !VARIANT_MAP[plan]) {
     return res.status(400).json({
       error: 'Valid plan required: professional or enterprise',
       code: 'INVALID_PLAN'
     });
   }
 
-  const priceId = PRICE_MAP[plan];
-  if (!priceId) {
+  const variantId = VARIANT_MAP[plan];
+  const storeId   = process.env.LEMONSQUEEZY_STORE_ID;
+
+  if (!variantId || !storeId) {
     return res.status(503).json({
       error: 'Billing not configured — contact support',
       code: 'BILLING_NOT_CONFIGURED'
@@ -44,12 +52,8 @@ billingRouter.post('/checkout', requireApiKey, async (req, res) => {
   }
 
   try {
-    const stripe = getStripe();
-
-    const userResult = await query<{
-      id: string; email: string; stripe_customer_id: string | null;
-    }>(
-      `SELECT u.id, u.email, u.stripe_customer_id
+    const userResult = await query<{ id: string; email: string }>(
+      `SELECT u.id, u.email
        FROM users u
        JOIN api_keys ak ON ak.user_id = u.id
        WHERE ak.id = $1 AND ak.revoked_at IS NULL`,
@@ -61,28 +65,44 @@ billingRouter.post('/checkout', requireApiKey, async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized', code: 'UNAUTHORIZED' });
     }
 
-    let customerId = user.stripe_customer_id;
-    if (!customerId) {
-      const customer = await stripe.customers.create({ email: user.email });
-      customerId = customer.id;
-      await query(
-        'UPDATE users SET stripe_customer_id = $1 WHERE id = $2',
-        [customerId, user.id]
-      );
-    }
-
     const appUrl = process.env.APP_URL || 'https://ariatrust.org';
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/app?billing=success`,
-      cancel_url:  `${appUrl}/app?billing=cancelled`,
-      allow_promotion_codes: true,
-      metadata: { user_id: user.id, plan },
+
+    const response = await fetch(`${LS_API}/checkouts`, {
+      method: 'POST',
+      headers: lsHeaders(),
+      body: JSON.stringify({
+        data: {
+          type: 'checkouts',
+          attributes: {
+            checkout_data: {
+              email: user.email,
+              custom: { user_id: user.id, plan },
+            },
+            product_options: {
+              redirect_url: `${appUrl}/app?billing=success`,
+            },
+          },
+          relationships: {
+            store:   { data: { type: 'stores',   id: storeId   } },
+            variant: { data: { type: 'variants', id: variantId } },
+          },
+        },
+      }),
     });
 
-    return res.json({ url: session.url });
+    if (!response.ok) {
+      const err = await response.text();
+      console.error('[billing] LS checkout API error:', err);
+      return res.status(500).json({
+        error: 'Could not create checkout', code: 'CHECKOUT_ERROR'
+      });
+    }
+
+    const data = await response.json() as {
+      data: { attributes: { url: string } }
+    };
+
+    return res.json({ url: data.data.attributes.url });
   } catch (err) {
     console.error('[billing] POST /checkout error:',
       err instanceof Error ? err.message : 'Unknown');
@@ -92,15 +112,13 @@ billingRouter.post('/checkout', requireApiKey, async (req, res) => {
   }
 });
 
-// GET /v1/billing/portal — Stripe Customer Portal (manage/cancel subscription)
+// GET /v1/billing/portal — get customer portal URL
 billingRouter.get('/portal', requireApiKey, async (req, res) => {
   try {
-    const stripe = getStripe();
-
     const userResult = await query<{
-      id: string; stripe_customer_id: string | null;
+      id: string; lemonsqueezy_subscription_id: string | null;
     }>(
-      `SELECT u.id, u.stripe_customer_id
+      `SELECT u.id, u.lemonsqueezy_subscription_id
        FROM users u
        JOIN api_keys ak ON ak.user_id = u.id
        WHERE ak.id = $1 AND ak.revoked_at IS NULL`,
@@ -108,20 +126,29 @@ billingRouter.get('/portal', requireApiKey, async (req, res) => {
     );
 
     const user = userResult.rows[0];
-    if (!user?.stripe_customer_id) {
+    if (!user?.lemonsqueezy_subscription_id) {
       return res.status(400).json({
         error: 'No active subscription found',
         code: 'NO_SUBSCRIPTION'
       });
     }
 
-    const appUrl = process.env.APP_URL || 'https://ariatrust.org';
-    const session = await stripe.billingPortal.sessions.create({
-      customer: user.stripe_customer_id,
-      return_url: `${appUrl}/app`,
-    });
+    const response = await fetch(
+      `${LS_API}/subscriptions/${user.lemonsqueezy_subscription_id}`,
+      { headers: lsHeaders() }
+    );
 
-    return res.json({ url: session.url });
+    if (!response.ok) {
+      return res.status(500).json({
+        error: 'Could not get portal URL', code: 'PORTAL_ERROR'
+      });
+    }
+
+    const data = await response.json() as {
+      data: { attributes: { urls: { customer_portal: string } } }
+    };
+
+    return res.json({ url: data.data.attributes.urls.customer_portal });
   } catch (err) {
     console.error('[billing] GET /portal error:',
       err instanceof Error ? err.message : 'Unknown');
@@ -131,86 +158,91 @@ billingRouter.get('/portal', requireApiKey, async (req, res) => {
   }
 });
 
-// POST /v1/billing/webhook — Stripe events
-// Mounted with express.raw() BEFORE express.json() — see index.ts
-export async function stripeWebhookHandler(
+// POST /v1/billing/webhook — Lemon Squeezy events (raw body, no auth)
+export async function lsWebhookHandler(
   req: Request, res: Response
 ): Promise<void> {
-  const sig = req.headers['stripe-signature'];
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret    = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+  const signature = req.headers['x-signature'] as string | undefined;
 
-  if (!sig || !secret) {
-    res.status(400).json({ error: 'Missing Stripe signature' });
+  if (!secret || !signature) {
+    res.status(400).json({ error: 'Missing signature' });
     return;
   }
 
-  let event: Stripe.Event;
+  const digest = createHmac('sha256', secret)
+    .update(req.body as Buffer)
+    .digest('hex');
+
   try {
-    const stripe = getStripe();
-    event = stripe.webhooks.constructEvent(
-      req.body as Buffer, sig, secret
-    );
-  } catch (err) {
-    console.error('[billing] Webhook signature failed:',
-      err instanceof Error ? err.message : 'Unknown');
-    res.status(400).json({ error: 'Invalid signature' });
+    if (!timingSafeEqual(Buffer.from(digest), Buffer.from(signature))) {
+      res.status(401).json({ error: 'Invalid signature' });
+      return;
+    }
+  } catch {
+    res.status(401).json({ error: 'Invalid signature' });
     return;
   }
 
-  try {
-    switch (event.type) {
+  const payload  = JSON.parse((req.body as Buffer).toString()) as Record<string, any>;
+  const event    = payload.meta?.event_name as string;
+  const attrs    = payload.data?.attributes ?? {};
+  const subId    = String(payload.data?.id ?? '');
 
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        if (
-          session.mode === 'subscription' &&
-          session.subscription &&
-          session.metadata?.user_id
-        ) {
-          const plan = session.metadata.plan ?? 'professional';
+  try {
+    switch (event) {
+
+      case 'subscription_created': {
+        const userId     = payload.meta?.custom_data?.user_id as string | undefined;
+        const plan       = (payload.meta?.custom_data?.plan as string) ?? 'professional';
+        const customerId = String(attrs.customer_id ?? '');
+        const variantId  = String(attrs.variant_id  ?? '');
+
+        if (userId) {
           await query(
             `UPDATE users
              SET plan = $1, plan_started_at = NOW(),
-                 stripe_subscription_id = $2, stripe_price_id = $3
-             WHERE id = $4`,
-            [plan, session.subscription,
-             (session as any).line_items?.data?.[0]?.price?.id ?? null,
-             session.metadata.user_id]
+                 lemonsqueezy_subscription_id = $2,
+                 lemonsqueezy_customer_id     = $3,
+                 lemonsqueezy_variant_id      = $4
+             WHERE id = $5`,
+            [plan, subId, customerId, variantId, userId]
           );
-          console.log(`[billing] Plan activated: ${plan} → user ${session.metadata.user_id}`);
+          console.log(`[billing] Plan activated: ${plan} → user ${userId}`);
         }
         break;
       }
 
-      case 'customer.subscription.updated': {
-        const sub = event.data.object as Stripe.Subscription;
-        const priceId = sub.items.data[0]?.price.id;
-        const plan = priceId ? planByPrice(priceId) : 'free';
+      case 'subscription_updated': {
+        const status    = attrs.status as string;
+        const variantId = String(attrs.variant_id ?? '');
+        const plan      = planByVariant(variantId);
 
-        if (sub.status === 'active' || sub.status === 'trialing') {
+        if (status === 'active') {
           await query(
             `UPDATE users
-             SET plan = $1, plan_started_at = NOW(),
-                 stripe_subscription_id = $2, stripe_price_id = $3
-             WHERE stripe_customer_id = $4`,
-            [plan, sub.id, priceId ?? null, sub.customer as string]
+             SET plan = $1, lemonsqueezy_variant_id = $2
+             WHERE lemonsqueezy_subscription_id = $3`,
+            [plan, variantId, subId]
           );
-          console.log(`[billing] Subscription updated: ${plan} for customer ${sub.customer}`);
-        } else if (sub.status === 'past_due' || sub.status === 'unpaid') {
-          console.warn(`[billing] Payment issue for customer ${sub.customer}: ${sub.status}`);
+          console.log(`[billing] Subscription updated: ${plan} (${subId})`);
+        } else if (status === 'past_due' || status === 'unpaid') {
+          console.warn(`[billing] Payment issue on ${subId}: ${status}`);
         }
         break;
       }
 
-      case 'customer.subscription.deleted': {
-        const sub = event.data.object as Stripe.Subscription;
+      case 'subscription_cancelled':
+      case 'subscription_expired': {
         await query(
           `UPDATE users
-           SET plan = 'free', stripe_subscription_id = NULL, stripe_price_id = NULL
-           WHERE stripe_customer_id = $1`,
-          [sub.customer as string]
+           SET plan = 'free',
+               lemonsqueezy_subscription_id = NULL,
+               lemonsqueezy_variant_id      = NULL
+           WHERE lemonsqueezy_subscription_id = $1`,
+          [subId]
         );
-        console.log(`[billing] Subscription cancelled → free: ${sub.customer}`);
+        console.log(`[billing] ${event} → downgraded to free (${subId})`);
         break;
       }
 

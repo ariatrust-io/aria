@@ -29,6 +29,7 @@
     "migrate:021": "tsx migrate-021.ts",
     "migrate:022": "tsx migrate-022.ts",
     "migrate:023": "tsx migrate-023.ts",
+    "migrate:024": "tsx migrate-024.ts",
     "test:integration": "tsx src/tests/integration.test.ts",
     "set-user-plan": "tsx scripts/set-user-plan.ts"
   },
@@ -49,8 +50,7 @@
     "pg": "^8.20.0",
     "rate-limit-redis": "^4.3.1",
     "resend": "^6.12.2",
-    "shamirs-secret-sharing": "^2.0.1",
-    "stripe": "^22.2.0"
+    "shamirs-secret-sharing": "^2.0.1"
   },
   "devDependencies": {
     "@express-rate-limit/tsconfig": "^1.0.2",

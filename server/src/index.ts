@@ -21,7 +21,7 @@ import { temporalRouter } from "./routes/temporal.js";
 import { zeroproofRouter } from "./routes/zeroproof.js";
 import { adminRouter } from "./routes/admin.js";
 import { oauthRouter } from "./routes/oauth.js";
-import { billingRouter, stripeWebhookHandler } from "./routes/billing.js";
+import { billingRouter, lsWebhookHandler } from "./routes/billing.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
@@ -137,7 +137,7 @@ app.get('/pricing', (_req, res) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 // Stripe webhook needs raw body — must be before express.json()
-app.post('/v1/billing/webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
+app.post('/v1/billing/webhook', express.raw({ type: 'application/json' }), lsWebhookHandler);
 
 app.use(express.json({ limit: "1mb" }));
 
