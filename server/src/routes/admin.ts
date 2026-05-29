@@ -175,12 +175,19 @@ adminRouter.delete('/agents/:agentId', async (req, res) => {
 // POST /v1/admin/agents/:agentId/reset-trust
 adminRouter.post('/agents/:agentId/reset-trust', async (req, res) => {
   try {
-    await query(`
+    const result = await query(`
       UPDATE reputation_snapshots
       SET final_score = 50, trust_level = 'NEUTRAL',
           last_computed_at = NOW()
       WHERE agent_id = $1
     `, [req.params.agentId]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: 'Agent not found or has no reputation record',
+        code: 'NOT_FOUND'
+      });
+    }
 
     await logAdminAction(
       'reset_trust', 'agent', req.params.agentId,

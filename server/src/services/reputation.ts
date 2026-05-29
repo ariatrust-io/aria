@@ -37,11 +37,15 @@ class ReputationQueue {
 
     for (const agentId of batch) {
       await computeReputationIncremental(agentId).catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = (err instanceof Error ? err.message : String(err)).toLowerCase();
         console.error(`[reputation] Failed for agent ${agentId}:`, message);
-        if (!message.includes("connection")) {
-           this.pending.add(agentId);
-           this.schedule();
+        const isTransient = message.includes('connection') ||
+          message.includes('timeout') ||
+          message.includes('pool') ||
+          message.includes('econnrefused');
+        if (isTransient) {
+          this.pending.add(agentId);
+          this.schedule();
         }
       });
     }

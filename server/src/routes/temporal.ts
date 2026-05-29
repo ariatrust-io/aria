@@ -65,6 +65,29 @@ temporalRouter.post('/anchor/:did', requireFeature('temporalAnchor'), async (req
 // GET /v1/temporal/verify/:eventId — verify event is in anchor chain
 temporalRouter.get('/verify/:eventId', async (req, res) => {
   try {
+    const keyResult = await query<{ user_id: string | null }>(
+      'SELECT user_id FROM api_keys WHERE id = $1',
+      [req.apiKeyId]
+    );
+    const userId = keyResult.rows[0]?.user_id ?? null;
+
+    const eventResult = await query<{ agent_id: string }>(
+      `SELECT e.agent_id FROM events e
+       JOIN agents a ON a.id = e.agent_id
+       WHERE e.event_id = $1 AND (
+         (a.user_id = $2 AND $2 IS NOT NULL)
+         OR a.api_key_id = $3
+       )`,
+      [req.params.eventId, userId, req.apiKeyId]
+    );
+
+    if (!eventResult.rows[0]) {
+      return res.status(404).json({
+        error: 'Event not found',
+        code: 'NOT_FOUND'
+      });
+    }
+
     const proof = await verifyEventProof(req.params.eventId);
     return res.json(proof);
   } catch (err) {

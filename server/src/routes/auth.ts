@@ -231,11 +231,19 @@ authRouter.get("/confirm", async (req, res) => {
       [user.id]
     );
 
+    const appOrigin = (() => {
+      try {
+        return new URL(process.env.APP_URL || 'https://ariatrust.org').origin;
+      } catch {
+        return 'https://ariatrust.org';
+      }
+    })();
+
     return res.send(`<html><body>
       <p style="font-family:system-ui;text-align:center;margin-top:40px;color:#666">Confirmed! You can close this tab.</p>
       <script>
         if (window.opener) {
-          window.opener.postMessage('aria-confirmed', '${process.env.APP_URL || 'https://ariatrust.org'}');
+          window.opener.postMessage('aria-confirmed', '${appOrigin}');
           window.close();
         } else {
           window.location.href = '/app?confirmed=1';
@@ -518,7 +526,8 @@ authRouter.post('/reset-password', async (req, res) => {
       });
     }
 
-    if (new Date() > new Date(reset.expires_at)) {
+    const expiresAt = new Date(reset.expires_at);
+    if (isNaN(expiresAt.getTime()) || new Date() > expiresAt) {
       return res.status(400).json({
         error: 'Reset link has expired. Please request a new one.',
         code: 'TOKEN_EXPIRED'

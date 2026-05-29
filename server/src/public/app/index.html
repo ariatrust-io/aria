@@ -1642,7 +1642,9 @@
       document.getElementById('stat-events').textContent    = totalEvents;
       document.getElementById('stat-anomalies').textContent = anomalies;
       document.getElementById('stat-trust').textContent     = avgTrust + '%';
-    } catch {}
+    } catch (err) {
+      console.error('[dashboard] loadStats failed:', err?.message || err);
+    }
   }
 
   // ── AGENTS LIST ───────────────────────────────────────────────────────────

@@ -94,6 +94,29 @@ witnessRouter.post('/confirm/:checkId', async (req, res) => {
   }
 
   try {
+    const keyResult = await query<{ user_id: string | null }>(
+      'SELECT user_id FROM api_keys WHERE id = $1',
+      [req.apiKeyId]
+    );
+    const userId = keyResult.rows[0]?.user_id ?? null;
+
+    const ownerCheck = await query<{ id: string }>(
+      `SELECT wc.id FROM witness_checks wc
+       JOIN agents a ON a.id = wc.agent_id
+       WHERE wc.id = $1 AND (
+         (a.user_id = $2 AND $2 IS NOT NULL)
+         OR a.api_key_id = $3
+       )`,
+      [req.params.checkId, userId, req.apiKeyId]
+    );
+
+    if (!ownerCheck.rows[0]) {
+      return res.status(404).json({
+        error: 'Check not found',
+        code: 'NOT_FOUND'
+      });
+    }
+
     const result = await resolveWitnessCheck(
       req.params.checkId,
       confirmed_count,
