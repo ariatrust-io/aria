@@ -1678,11 +1678,16 @@
             ${plan} plan
           </span>
           ${plan === 'free' ? `
-            <a href="/pricing"
+            <a href="#" onclick="startUpgrade('professional');return false;"
                style="font-size:11px;color:#d4a843;
                       text-decoration:none;margin-left:8px">
               Upgrade →
-            </a>` : ''}
+            </a>` : `
+            <a href="#" onclick="openBillingPortal();return false;"
+               style="font-size:11px;color:${planColor};
+                      text-decoration:none;margin-left:8px;opacity:0.7">
+              Manage
+            </a>`}
         </div>`;
 
       if (!agents.length) {
@@ -2300,6 +2305,16 @@
     showLoginError(oauthErrorMessages[oauthError] || 'Login failed. Please try again.');
   }
 
+  // Handle Stripe billing callbacks
+  const billingResult = urlParams.get('billing');
+  if (billingResult === 'success') {
+    window.history.replaceState({}, '', '/app');
+    _cachedAgents = null;
+    showAlert('🎉 Plan activated! Your account has been upgraded.', 'success');
+  } else if (billingResult === 'cancelled') {
+    window.history.replaceState({}, '', '/app');
+  }
+
   // Handle email confirmation redirect: /app?confirmed=1
   if (!oauthKey && !oauthError && urlParams.get('confirmed') === '1') {
     window.history.replaceState({}, '', '/app');
@@ -2315,6 +2330,29 @@
         apiKey = null;
         currentUser = null;
       });
+  }
+
+  async function startUpgrade(plan) {
+    try {
+      showAlert('Redirecting to checkout…', 'info');
+      const data = await apiCall('/v1/billing/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ plan })
+      });
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      showAlert(err.message || 'Could not start checkout. Try again.', 'error');
+    }
+  }
+
+  async function openBillingPortal() {
+    try {
+      showAlert('Opening billing portal…', 'info');
+      const data = await apiCall('/v1/billing/portal');
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      showAlert(err.message || 'Could not open billing portal. Try again.', 'error');
+    }
   }
 </script>
 <div style="text-align:center;padding:24px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(248,244,238,0.35);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
