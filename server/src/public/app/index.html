@@ -1446,7 +1446,7 @@
       refreshInterval = setInterval(async () => {
         const savedScrollY = window.scrollY;
         await loadDashboard();
-        window.scrollTo(0, savedScrollY);
+        requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
       }, 10000);
 
     }
@@ -1707,7 +1707,8 @@
         </div>`;
       });
 
-      el.innerHTML = html + '</div>';
+      const newHtml = html + '</div>';
+      if (el.innerHTML !== newHtml) el.innerHTML = newHtml;
     } catch (err) {
       document.getElementById('agents-list').innerHTML =
         `<div class="empty-state"><p style="color:var(--error)">${escapeHtml(err.message)}</p></div>`;
@@ -1747,7 +1748,7 @@
           <div class="event-time" style="color:rgba(248,244,238,0.4);font-size:12px;font-family:\'JetBrains Mono\',monospace">${relativeTime(event.client_ts)}</div>
         </div>`;
       });
-      el.innerHTML = html;
+      if (el.innerHTML !== html) el.innerHTML = html;
     } catch {
       document.getElementById('events-feed').innerHTML =
         `<div class="empty-state"><p style="color:var(--error)">Failed to load events</p></div>`;
