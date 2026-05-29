@@ -1,4 +1,4 @@
-const VALID_PLANS = ['free', 'professional', 'enterprise'] as const;
+const VALID_PLANS = ['free', 'professional', 'business', 'enterprise'] as const;
 
 type Plan = (typeof VALID_PLANS)[number];
 
