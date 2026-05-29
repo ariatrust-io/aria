@@ -520,7 +520,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           Can I upgrade or downgrade anytime?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Upgrades take effect immediately. Downgrades take effect at the next billing cycle.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Upgrades take effect immediately — your new limits are active the moment the payment is confirmed. Downgrades take effect at the start of the next billing cycle.</div></div>
       </div>
 
       <div class="faq-item">
@@ -528,7 +528,23 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           What happens if I exceed my event limit?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Events will be rejected until the next month begins. You will receive a warning at 80% usage. Upgrade anytime to avoid interruptions.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">It depends on your plan. <strong style="color:var(--white)">Free:</strong> new events are rejected once you reach 50,000. Your existing data is safe and events resume automatically on the 1st of next month. <strong style="color:var(--white)">Professional &amp; Business:</strong> your service <em>never stops</em>. Events beyond the base limit continue normally and are billed as overage at the end of the month.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How does overage billing work?
+          <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">If you exceed your monthly base limit, each additional 100,000 events is charged at your plan's overage rate — <strong style="color:var(--white)">$1.00/100K</strong> for Professional and <strong style="color:var(--white)">$0.75/100K</strong> for Business. For example: a Business customer who uses 5.3M events pays $149 + (300K / 100K × $0.75) = <strong style="color:var(--white)">$151.25</strong> that month. Your agents never go offline.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What is the difference between Professional and Business?
+          <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
+        </button>
+        <div class="faq-a"><div class="faq-a-inner">Both plans include the full ARIA feature set. The difference is scale: Professional supports up to 5 agents and 500K events/month — ideal for startups with a few production agents. Business supports up to 20 agents and 5M events/month, designed for teams running heavy workloads like customer service bots, data pipelines, or multi-agent orchestrators. Business also gets a lower overage rate ($0.75 vs $1.00 per 100K).</div></div>
       </div>
 
       <div class="faq-item">
@@ -536,7 +552,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           Is my data safe if I cancel?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">You have 30 days after cancellation to export your data. After that, it is permanently deleted.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. You have 30 days after cancellation to export all your agent data and event history via CSV or JSON. After that period, the data is permanently deleted. We recommend exporting before cancelling to keep a local copy.</div></div>
       </div>
 
       <div class="faq-item">
@@ -544,7 +560,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           Do you offer discounts for startups or non-profits?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Contact us at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a> to discuss pricing.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. We offer special pricing for early-stage startups, non-profits, and academic research projects. Contact us at <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a> with a brief description of your use case.</div></div>
       </div>
 
     </div>
@@ -554,7 +570,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <!-- CTA STRIP -->
 <section class="cta-strip">
   <h2>Start free.<br><span style="color:var(--gold-lt)">Scale when you're ready.</span></h2>
-  <p>No credit card required. Full access on the Free plan.</p>
+  <p>No credit card required. Free plan forever. Paid plans include a 30-day trial.</p>
   <div class="cta-btns">
     <a href="/app" class="btn-gold">Create Free Account →</a>
     <a href="mailto:dhdez3149@gmail.com" class="btn-outline">Talk to Sales</a>
