@@ -1183,6 +1183,8 @@
   let currentTab           = 'overview';
   let selectedAgentDid  = null;
   let refreshInterval   = null;
+  let _cachedAgents     = null;
+  let _cachedEvents     = null;
 
   // ── AUTH HELPERS ──────────────────────────────────────────────────────────
 
@@ -1424,6 +1426,8 @@
     apiKey = null;
     currentUser = null;
     clearInterval(refreshInterval);
+    _cachedAgents = null;
+    _cachedEvents = null;
     // Clear ALL auth-related localStorage
     localStorage.removeItem('aria_api_key');
     localStorage.removeItem('aria_user');
@@ -1645,6 +1649,9 @@
   async function loadAgents() {
     try {
       const data   = await apiCall('/v1/agents');
+      const dataKey = JSON.stringify(data);
+      if (dataKey === _cachedAgents) return;
+      _cachedAgents = dataKey;
       const agents = data.agents || [];
       const el     = document.getElementById('agents-list');
 
@@ -1719,6 +1726,9 @@
   async function loadRecentEvents() {
     try {
       const data   = await apiCall('/v1/events?limit=20');
+      const dataKey = JSON.stringify(data);
+      if (dataKey === _cachedEvents) return;
+      _cachedEvents = dataKey;
       const events = data.events || [];
       const el     = document.getElementById('events-feed');
 
