@@ -257,7 +257,7 @@ nav.scrolled {
 
 /* ── PRICING ── */
 #pricing { padding:120px 64px; background:rgba(7,10,19,0.4); position:relative; z-index:2; }
-.pricing-grid { max-width:1200px; margin:64px auto 0; display:grid; grid-template-columns:repeat(3,1fr); gap:32px; }
+.pricing-grid { max-width:1400px; margin:64px auto 0; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
 .pricing-card { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:16px; padding:48px 36px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); transition:all 0.3s ease; display:flex; flex-direction:column; position:relative; }
 .pricing-card.premium { border-color:rgba(99,102,241,0.4); background:rgba(15,23,42,0.65); }
 .pricing-card.premium::after { content:'POPULAR'; position:absolute; top:20px; right:20px; background:var(--accent-primary); color:var(--white); font-family:var(--font-mono); font-size:10px; font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:1px; }
@@ -319,7 +319,7 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   .hero-right { max-width:640px; margin:0 auto; width:100%; }
   .features-grid { grid-template-columns:repeat(2,1fr); }
   .uc-grid { grid-template-columns:repeat(2,1fr); }
-  .pricing-grid { grid-template-columns:repeat(2,1fr); }
+  .pricing-grid { grid-template-columns:repeat(2,1fr); max-width:900px; margin-left:auto; margin-right:auto; }
 }
 @media (max-width:768px) {
   nav { padding:0 28px; }
@@ -347,6 +347,7 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   .cta-btns { flex-direction:column; align-items:stretch; }
 }
 </style>
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 </head>
 <body>
 
@@ -675,13 +676,14 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   </div>
   <div class="pricing-grid">
     <div class="pricing-card reveal">
-      <h4 class="pricing-title">Developer</h4>
+      <h4 class="pricing-title">Free</h4>
       <div class="pricing-price">$0<span>/month</span></div>
       <p class="pricing-desc">For testing and personal sandbox integrations. No credit card required.</p>
       <ul class="pricing-features">
         <li>1 Registered Agent</li>
-        <li>50,000 Action Events / mo</li>
+        <li>50,000 Events / mo</li>
         <li>30-day History Log</li>
+        <li>Trust Score + ARIA Spectrum</li>
         <li>Community Support</li>
       </ul>
       <a href="/app" class="pricing-btn pricing-btn-outline">Register Free</a>
@@ -689,28 +691,42 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
     <div class="pricing-card premium reveal">
       <h4 class="pricing-title">Professional</h4>
       <div class="pricing-price">$49<span>/month</span></div>
-      <p class="pricing-desc">For startups automating core workflow pipelines with real accountability.</p>
+      <p class="pricing-desc">For startups with agents in production. Full trust infrastructure included.</p>
       <ul class="pricing-features">
         <li>5 Registered Agents</li>
-        <li>500,000 Action Events / mo</li>
+        <li>500,000 Events / mo</li>
+        <li>Overage: $1.00 / 100K extra</li>
         <li>12-Month History Log</li>
-        <li>Full ARIA Gating</li>
-        <li>ZeroProof Merkle Auditing</li>
-        <li>Webhook Integrations</li>
+        <li>ARIA Gate + ZeroProof</li>
+        <li>Webhooks + CSV/JSON Export</li>
       </ul>
-      <a href="/app" class="pricing-btn pricing-btn-gradient">Start Pro Trial</a>
+      <a href="https://ariatrust.lemonsqueezy.com/buy/1719434?checkout[custom][plan]=professional&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-gradient lemonsqueezy-button">Get Started</a>
+    </div>
+    <div class="pricing-card reveal" style="border-color:rgba(201,168,76,0.3)">
+      <h4 class="pricing-title" style="color:#e8c87a">Business</h4>
+      <div class="pricing-price">$149<span>/month</span></div>
+      <p class="pricing-desc">For companies running multiple heavy agents. Scale without interruptions.</p>
+      <ul class="pricing-features">
+        <li>20 Registered Agents</li>
+        <li>5,000,000 Events / mo</li>
+        <li>Overage: $0.75 / 100K extra</li>
+        <li>Never blocks on overage</li>
+        <li>All Professional features</li>
+        <li>Priority Email Support</li>
+      </ul>
+      <a href="https://ariatrust.lemonsqueezy.com/buy/1719617?checkout[custom][plan]=business&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-gradient lemonsqueezy-button">Get Started</a>
     </div>
     <div class="pricing-card reveal">
       <h4 class="pricing-title">Enterprise</h4>
-      <div class="pricing-price">Custom</div>
-      <p class="pricing-desc">For organizations requiring military-grade compliance and dedicated infrastructure.</p>
+      <div class="pricing-price">$599+<span>/month</span></div>
+      <p class="pricing-desc">For regulated industries requiring compliance, SLA, and dedicated infrastructure.</p>
       <ul class="pricing-features">
         <li>Unlimited Agents</li>
-        <li>Unlimited Action Events</li>
-        <li>Permanent History Log</li>
-        <li>SLA &amp; Dedicated Nodes</li>
-        <li>zk-SNARK ZeroProof (Roadmap)</li>
-        <li>Custom Integration Support</li>
+        <li>50M+ Events / mo</li>
+        <li>Custom Overage Rate</li>
+        <li>Dedicated Onboarding + SLA</li>
+        <li>Invoice Billing</li>
+        <li>Custom Integrations</li>
       </ul>
       <a href="mailto:dhdez3149@gmail.com" class="pricing-btn pricing-btn-primary">Contact Sales</a>
     </div>
