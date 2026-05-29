@@ -19,6 +19,7 @@ function lsHeaders() {
 
 const VARIANT_MAP: Record<string, string | undefined> = {
   professional: process.env.LEMONSQUEEZY_PROFESSIONAL_VARIANT_ID,
+  business:     process.env.LEMONSQUEEZY_BUSINESS_VARIANT_ID,
   enterprise:   process.env.LEMONSQUEEZY_ENTERPRISE_VARIANT_ID,
 };
 
@@ -36,7 +37,7 @@ billingRouter.post('/checkout', requireApiKey, async (req, res) => {
 
   if (!plan || !VARIANT_MAP[plan]) {
     return res.status(400).json({
-      error: 'Valid plan required: professional or enterprise',
+      error: 'Valid plan required: professional, business or enterprise',
       code: 'INVALID_PLAN'
     });
   }
@@ -199,6 +200,7 @@ export async function lsWebhookHandler(
         const variantId  = String(attrs.variant_id  ?? '');
 
         if (userId) {
+          // Authenticated checkout from dashboard — update by user id
           await query(
             `UPDATE users
              SET plan = $1, plan_started_at = NOW(),
@@ -209,6 +211,24 @@ export async function lsWebhookHandler(
             [plan, subId, customerId, variantId, userId]
           );
           console.log(`[billing] Plan activated: ${plan} → user ${userId}`);
+        } else {
+          // Anonymous checkout from pricing page — upsert by email
+          const email = (attrs.user_email as string | undefined)?.toLowerCase();
+          if (email) {
+            await query(
+              `INSERT INTO users (email, name, plan, plan_started_at,
+                                  lemonsqueezy_subscription_id, lemonsqueezy_customer_id, lemonsqueezy_variant_id)
+               VALUES ($1, COALESCE($2, 'User'), $3, NOW(), $4, $5, $6)
+               ON CONFLICT (email) DO UPDATE SET
+                 plan                         = EXCLUDED.plan,
+                 plan_started_at              = NOW(),
+                 lemonsqueezy_subscription_id = EXCLUDED.lemonsqueezy_subscription_id,
+                 lemonsqueezy_customer_id     = EXCLUDED.lemonsqueezy_customer_id,
+                 lemonsqueezy_variant_id      = EXCLUDED.lemonsqueezy_variant_id`,
+              [email, attrs.user_name as string | undefined, plan, subId, customerId, variantId]
+            );
+            console.log(`[billing] Plan activated (by email): ${plan} → ${email}`);
+          }
         }
         break;
       }

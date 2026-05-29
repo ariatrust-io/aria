@@ -182,15 +182,23 @@ export async function checkEventLimit(
 
     const effectivePlan = getEffectivePlan(userPlan);
     const planConfig = PLANS[effectivePlan];
+
+    // Enterprise (Infinity) — always pass
     if (planConfig.maxEventsPerMonth === Infinity) {
       (req as ReqWithUser).userId = userPlan.userId;
       next();
       return;
     }
 
-    const currentCount = await getMonthlyEventCount(
-      userPlan.userId
-    );
+    // Paid plans with overage — never block, allow excess and bill later
+    if (planConfig.overageRatePer100k !== null) {
+      (req as ReqWithUser).userId = userPlan.userId;
+      next();
+      return;
+    }
+
+    // Free plan — hard block at limit
+    const currentCount = await getMonthlyEventCount(userPlan.userId);
 
     if (currentCount >= planConfig.maxEventsPerMonth) {
       res.status(429).json({

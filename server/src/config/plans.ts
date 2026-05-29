@@ -1,10 +1,12 @@
-export type Plan = 'free' | 'professional' | 'enterprise';
+export type Plan = 'free' | 'professional' | 'business' | 'enterprise';
 
 export interface PlanConfig {
   name: string;
   maxAgents: number;
   maxEventsPerMonth: number;
   historyDays: number;
+  /** USD per 100K events over the base limit. null = hard block (free) or unlimited (enterprise). */
+  overageRatePer100k: number | null;
   features: {
     gate: boolean;
     zeroproof: boolean;
@@ -26,6 +28,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxAgents: 1,
     maxEventsPerMonth: 50_000,
     historyDays: 30,
+    overageRatePer100k: null,
     features: {
       gate: false,
       zeroproof: false,
@@ -43,6 +46,25 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxAgents: 5,
     maxEventsPerMonth: 500_000,
     historyDays: 365,
+    overageRatePer100k: 1.00,
+    features: {
+      gate: true,
+      zeroproof: true,
+      export: true,
+      webhooks: true,
+      batchEvents: true,
+      spectrum: true,
+      temporalAnchor: true,
+      shadowWitness: true,
+      apiAccess: true,
+    }
+  },
+  business: {
+    name: 'Business',
+    maxAgents: 20,
+    maxEventsPerMonth: 5_000_000,
+    historyDays: 365,
+    overageRatePer100k: 0.75,
     features: {
       gate: true,
       zeroproof: true,
@@ -60,6 +82,7 @@ export const PLANS: Record<Plan, PlanConfig> = {
     maxAgents: Infinity,
     maxEventsPerMonth: Infinity,
     historyDays: Infinity,
+    overageRatePer100k: null,
     features: {
       gate: true,
       zeroproof: true,

@@ -30,6 +30,7 @@
     "migrate:022": "tsx migrate-022.ts",
     "migrate:023": "tsx migrate-023.ts",
     "migrate:024": "tsx migrate-024.ts",
+    "migrate:025": "tsx migrate-025.ts",
     "test:integration": "tsx src/tests/integration.test.ts",
     "set-user-plan": "tsx scripts/set-user-plan.ts"
   },

@@ -1659,11 +1659,13 @@
 
       const plan = data.plan || 'free';
       const planColors = {
-        free: 'rgba(248,244,238,0.3)',
+        free:         'rgba(248,244,238,0.3)',
         professional: '#d4a843',
-        enterprise: '#4a9ebb'
+        business:     '#e8c87a',
+        enterprise:   '#4a9ebb'
       };
       const planColor = planColors[plan] || planColors.free;
+      const upgradeTarget = plan === 'free' ? 'professional' : plan === 'professional' ? 'business' : null;
       let planBadge = `
         <div style="display:inline-flex;align-items:center;
                     gap:6px;padding:4px 12px;
@@ -1677,8 +1679,8 @@
                        text-transform:uppercase">
             ${plan} plan
           </span>
-          ${plan === 'free' ? `
-            <a href="#" onclick="startUpgrade('professional');return false;"
+          ${upgradeTarget ? `
+            <a href="#" onclick="startUpgrade('${upgradeTarget}');return false;"
                style="font-size:11px;color:#d4a843;
                       text-decoration:none;margin-left:8px">
               Upgrade →
