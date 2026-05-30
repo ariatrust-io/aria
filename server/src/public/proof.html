@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA — Live Proof · Real Agent, Real Cryptography</title>
+<meta name="description" content="Live, anonymized proof from a real ARIA-protected agent: thousands of cryptographically sealed actions, gated violations, and a verifier you can run yourself.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-black: #030712;
+  --bg-dark: #070a13;
+  --bg-card: rgba(15, 23, 42, 0.45);
+  --accent-primary: #6366f1;
+  --accent-secondary: #a855f7;
+  --accent-teal: #14b8a6;
+  --gold: #f59e0b;
+  --gold-lt: #fbbf24;
+  --green: #22c55e;
+  --amber: #eab308;
+  --red: #ef4444;
+  --white: #f8fafc;
+  --muted: #94a3b8;
+  --border-muted: rgba(255, 255, 255, 0.06);
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-black);
+  color: var(--white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 24px 24px; pointer-events: none; z-index: 1;
+}
+.bg-glow-1 { position:absolute; top:-10%; left:-10%; width:50vw; height:50vw; background:radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%); pointer-events:none; z-index:0; }
+.bg-glow-2 { position:absolute; top:40%; right:-10%; width:60vw; height:60vw; background:radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%); pointer-events:none; z-index:0; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; background: rgba(3,7,18,0.85);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1000;
+}
+.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
+.nav-logo-text { font-weight:800; font-size:20px; letter-spacing:2px; color:var(--white); }
+.nav-links { display:flex; align-items:center; gap:32px; list-style:none; }
+.nav-links a { font-size:14px; font-weight:500; color:var(--muted); text-decoration:none; transition:color 0.2s; }
+.nav-links a:hover { color:var(--white); }
+.nav-cta {
+  display:inline-flex; align-items:center; padding:9px 22px;
+  background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);
+  color:var(--white); font-size:13px; font-weight:600; text-decoration:none; border-radius:6px;
+}
+
+/* WRAP */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
+section { position: relative; z-index: 2; }
+
+/* HEADER */
+.proof-hero { padding: 140px 0 40px; text-align: center; }
+.live-badge {
+  display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono);
+  font-size:12px; font-weight:500; letter-spacing:2px; color:var(--green);
+  text-transform:uppercase; margin-bottom:24px; background:rgba(34,197,94,0.08);
+  border:1px solid rgba(34,197,94,0.25); padding:6px 14px; border-radius:100px;
+}
+.live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
+.proof-hero h1 { font-size:clamp(34px,5vw,56px); font-weight:800; letter-spacing:-1.5px; line-height:1.08; margin-bottom:18px; }
+.proof-hero h1 .accent { background:linear-gradient(to right,#818cf8,#a78bfa,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.proof-hero p { font-size:17px; color:var(--muted); max-width:620px; margin:0 auto; }
+.agent-chip { font-family:var(--font-mono); font-size:13px; color:var(--accent-teal); background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.18); border-radius:8px; padding:8px 16px; display:inline-block; margin-top:24px; }
+
+/* SECTION LABELS */
+.sec-head { margin: 0 0 28px; }
+.sec-label { font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:3px; color:var(--accent-primary); text-transform:uppercase; display:block; margin-bottom:10px; }
+.sec-title { font-size:clamp(24px,3.5vw,34px); font-weight:800; letter-spacing:-1px; }
+.sec-sub { font-size:15px; color:var(--muted); margin-top:8px; max-width:680px; }
+
+/* COUNTERS */
+.counters { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin: 24px 0 16px; }
+.counter { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:14px; padding:28px 20px; text-align:center; backdrop-filter:blur(12px); }
+.counter .num { font-family:var(--font-mono); font-size:clamp(26px,3vw,40px); font-weight:700; line-height:1; letter-spacing:-1px; margin-bottom:10px; }
+.counter .lbl { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; line-height:1.4; }
+.counter.total .num { color:var(--white); }
+.counter.ok .num    { color:var(--green); }
+.counter.gate .num  { color:var(--red); }
+.counter.anom .num  { color:var(--gold-lt); }
+.counter.err .num   { color:var(--amber); }
+.uptime-line { text-align:center; font-family:var(--font-mono); font-size:13px; color:var(--muted); margin-top:8px; }
+.uptime-line b { color:var(--green); }
+
+/* SECTION BLOCKS */
+.block { padding: 56px 0; border-top: 1px solid var(--border-muted); }
+
+/* EVENT STREAM */
+.stream-wrap { background:#020617; border:1px solid rgba(99,102,241,0.15); border-radius:12px; overflow:hidden; }
+.stream-bar { padding:12px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(15,23,42,0.5); }
+.stream-bar .t { font-family:var(--font-mono); font-size:11px; color:rgba(148,163,184,0.7); letter-spacing:1px; }
+.stream-refresh { font-family:var(--font-mono); font-size:11px; color:var(--muted); display:flex; align-items:center; gap:7px; }
+table.stream { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:12.5px; }
+table.stream th { text-align:left; padding:11px 16px; color:#64748b; font-weight:500; font-size:11px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.05); }
+table.stream td { padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.03); color:#cbd5e1; white-space:nowrap; }
+table.stream tr:last-child td { border-bottom:none; }
+table.stream tr.row-success { box-shadow: inset 3px 0 0 var(--green); }
+table.stream tr.row-error   { box-shadow: inset 3px 0 0 var(--amber); }
+table.stream tr.row-gated   { box-shadow: inset 3px 0 0 var(--red); }
+.badge { display:inline-block; padding:2px 9px; border-radius:5px; font-size:11px; font-weight:600; letter-spacing:.5px; }
+.badge.success { background:rgba(34,197,94,0.12); color:#4ade80; }
+.badge.error   { background:rgba(234,179,8,0.12); color:#facc15; }
+.badge.blocked { background:rgba(239,68,68,0.12); color:#f87171; }
+.badge.anomaly { background:rgba(245,158,11,0.14); color:var(--gold-lt); }
+.scope-ok  { color:#4ade80; }
+.scope-bad { color:#f87171; }
+.act { color:#e2e8f0; }
+.muted-cell { color:#64748b; }
+.stream-empty { padding:32px; text-align:center; color:var(--muted); font-family:var(--font-mono); font-size:13px; }
+
+/* DOWNLOADS */
+.dl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.dl-btn { display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--bg-card); border:1px solid var(--border-muted); border-radius:12px; cursor:pointer; text-align:left; color:var(--white); transition:all .2s ease; font-family:var(--font-sans); }
+.dl-btn:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-2px); background:rgba(15,23,42,0.65); }
+.dl-btn .dl-title { font-size:15px; font-weight:700; display:flex; align-items:center; gap:9px; }
+.dl-btn .dl-desc { font-size:12.5px; color:var(--muted); }
+.dl-btn .dot { width:9px; height:9px; border-radius:50%; }
+.dl-btn.good .dot { background:var(--green); } .dl-btn.bad .dot { background:var(--amber); } .dl-btn.gated .dot { background:var(--red); }
+
+/* GATE DEMO */
+.gate-flow { display:grid; grid-template-columns:1fr; gap:0; max-width:760px; margin:0 auto; position:relative; }
+.gate-line { position:absolute; left:23px; top:24px; bottom:24px; width:2px; background:linear-gradient(to bottom,var(--accent-primary),rgba(239,68,68,0.4)); z-index:0; }
+.gstep { display:grid; grid-template-columns:48px 1fr; gap:22px; padding:14px 0; position:relative; z-index:1; }
+.gstep .gn { width:48px; height:48px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:600; font-size:14px; background:#070a13; border:1px solid rgba(99,102,241,0.3); flex-shrink:0; }
+.gstep.deny .gn { border-color:rgba(239,68,68,0.4); color:#f87171; }
+.gstep.allow .gn { border-color:rgba(34,197,94,0.4); color:#4ade80; }
+.gstep .gtitle { font-size:16px; font-weight:700; margin-bottom:4px; }
+.gstep .gdesc { font-size:13.5px; color:var(--muted); }
+.gstep .gcode { font-family:var(--font-mono); font-size:12px; color:var(--accent-teal); background:rgba(20,184,166,0.05); border:1px solid rgba(20,184,166,0.14); border-radius:6px; padding:6px 12px; display:inline-block; margin-top:8px; }
+.gstep .gcode.crit { color:#f87171; background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.18); }
+
+/* VERIFIER */
+.verify-box { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:14px; padding:32px; backdrop-filter:blur(12px); }
+.verify-row { display:flex; gap:12px; flex-wrap:wrap; }
+.verify-input { flex:1; min-width:240px; font-family:var(--font-mono); font-size:13px; padding:14px 16px; background:#020617; border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:var(--white); }
+.verify-input:focus { outline:none; border-color:var(--accent-primary); }
+.verify-btn { padding:14px 32px; border:none; border-radius:8px; font-family:var(--font-sans); font-size:14px; font-weight:600; color:var(--white); background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%); cursor:pointer; transition:transform .2s ease; }
+.verify-btn:hover { transform:translateY(-2px); }
+.verify-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.sample-row { font-family:var(--font-mono); font-size:12px; color:var(--muted); margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.sample-id { color:var(--accent-teal); word-break:break-all; }
+.copy-btn { background:rgba(255,255,255,0.04); border:1px solid var(--border-muted); color:var(--muted); font-size:11px; padding:3px 10px; border-radius:5px; cursor:pointer; font-family:var(--font-mono); }
+.copy-btn:hover { color:var(--white); border-color:rgba(255,255,255,0.2); }
+.verify-result { margin-top:20px; padding:18px 20px; border-radius:10px; font-family:var(--font-mono); font-size:13.5px; display:none; }
+.verify-result.show { display:block; }
+.verify-result.ok  { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); color:#4ade80; }
+.verify-result.bad { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#f87171; }
+.verify-result .vr-line { display:block; margin-top:6px; color:#cbd5e1; font-size:12.5px; }
+.verify-result .vr-root { color:var(--gold-lt); word-break:break-all; }
+
+/* FOOTER */
+footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.03); padding:48px 0; text-align:center; margin-top:40px; position:relative; z-index:2; }
+footer p { font-size:13px; color:var(--muted); }
+footer a { color:var(--accent-primary); text-decoration:none; }
+
+@media (max-width:860px) {
+  nav { padding:0 24px; } .nav-links { gap:18px; }
+  .counters { grid-template-columns:repeat(2,1fr); }
+  .dl-grid { grid-template-columns:1fr; }
+  table.stream { font-size:11.5px; } table.stream .hide-sm { display:none; }
+}
+@media (max-width:480px) {
+  .wrap { padding:0 20px; } .counters { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow-1"></div>
+<div class="bg-glow-2"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="#6366f1" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="rgba(99,102,241,0.15)"/>
+    </svg>
+    <span class="nav-logo-text">ARIA</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/docs">Docs</a></li>
+    <li><a href="/#pricing">Pricing</a></li>
+  </ul>
+  <a href="/app" class="nav-cta">Get Access &rarr;</a>
+</nav>
+
+<!-- HERO + SECTION 1: LIVE COUNTERS -->
+<section class="proof-hero">
+  <div class="wrap">
+    <span class="live-badge"><span class="live-dot"></span> Live · Real Data</span>
+    <h1>THIS IS A REAL AGENT.<br><span class="accent">EVERY ACTION IS SEALED.</span></h1>
+    <p>No mockups. The numbers below come straight from a live, ARIA-protected agent — anonymized, but cryptographically real. Download the logs. Verify a seal yourself.</p>
+    <div class="agent-chip" id="agent-chip">agent: demo-agent-01 · did:agentrust:20c1...</div>
+
+    <div class="counters">
+      <div class="counter total"><div class="num" id="c-total">—</div><div class="lbl">Total<br>Events</div></div>
+      <div class="counter ok"><div class="num" id="c-success">—</div><div class="lbl">Successful<br>Actions</div></div>
+      <div class="counter gate"><div class="num" id="c-gated">—</div><div class="lbl">Gated /<br>Out-of-scope</div></div>
+      <div class="counter anom"><div class="num" id="c-anom">—</div><div class="lbl">Anomalies<br>Detected</div></div>
+      <div class="counter err"><div class="num" id="c-error">—</div><div class="lbl">Errors<br>Logged</div></div>
+    </div>
+    <div class="uptime-line" id="uptime-line">Operating 24/7 &middot; <b>0 tamperable</b></div>
+  </div>
+</section>
+
+<!-- SECTION 2: LIVE EVENT STREAM -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">Section 02 — Live Feed</span>
+      <h2 class="sec-title">Live event stream</h2>
+      <p class="sec-sub">The last 50 actions this agent took, refreshing automatically. Green = success, amber = error, red = gated or out-of-scope. Every row is signed and sealed.</p>
+    </div>
+    <div class="stream-wrap">
+      <div class="stream-bar">
+        <span class="t">demo-agent-01 — RECENT ACTIVITY</span>
+        <span class="stream-refresh"><span class="live-dot"></span> auto-refresh 15s</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="stream">
+          <thead>
+            <tr>
+              <th>Action</th><th>Outcome</th><th>In&nbsp;Scope</th>
+              <th class="hide-sm">Duration</th><th>When</th>
+            </tr>
+          </thead>
+          <tbody id="stream-body">
+            <tr><td colspan="5" class="stream-empty">Loading live events…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3: DOWNLOADS -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">Section 03 — Evidence</span>
+      <h2 class="sec-title">Download the proof</h2>
+      <p class="sec-sub">Anonymized CSV exports (up to 50 rows each) of real, sealed events. No signatures, no secrets, no payloads — just the auditable trail.</p>
+    </div>
+    <div class="dl-grid">
+      <button class="dl-btn good" onclick="downloadCsv('good')">
+        <span class="dl-title"><span class="dot"></span> 50 successful actions</span>
+        <span class="dl-desc">outcome = success · in-scope, sealed actions</span>
+      </button>
+      <button class="dl-btn bad" onclick="downloadCsv('bad')">
+        <span class="dl-title"><span class="dot"></span> 50 errors</span>
+        <span class="dl-desc">outcome = error · failures captured immutably</span>
+      </button>
+      <button class="dl-btn gated" onclick="downloadCsv('gated')">
+        <span class="dl-title"><span class="dot"></span> 50 gated events</span>
+        <span class="dl-desc">scope_valid = false · actions ARIA refused</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4: GATE DEMO -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">Section 04 — How Gating Works</span>
+      <h2 class="sec-title">How ARIA gated a <code style="font-family:var(--font-mono);color:#f87171;">delete:database</code></h2>
+      <p class="sec-sub">A walkthrough of the exact flow that turns a catastrophic action into a logged, denied, non-event.</p>
+    </div>
+    <div class="gate-flow">
+      <div class="gate-line"></div>
+      <div class="gstep">
+        <div class="gn">01</div>
+        <div>
+          <div class="gtitle">Agent attempts the action</div>
+          <div class="gdesc">The agent calls a tool wrapped by ARIA. The action is signed with the agent's HMAC key before anything executes.</div>
+          <div class="gcode">aria.track(did, secret, 'delete:database', fn, { mode: 'gate' })</div>
+        </div>
+      </div>
+      <div class="gstep">
+        <div class="gn">02</div>
+        <div>
+          <div class="gtitle">Scope check + interception</div>
+          <div class="gdesc">ARIA compares the action against the agent's declared scope on the server. <code style="color:#f87171;font-family:var(--font-mono)">delete:database</code> is destructive and matches a gate rule — execution is halted.</div>
+          <div class="gcode crit">scope violation: DETECTED · gate active: HALTING EXECUTION</div>
+        </div>
+      </div>
+      <div class="gstep">
+        <div class="gn">03</div>
+        <div>
+          <div class="gtitle">Human-in-the-loop alert</div>
+          <div class="gdesc">The owner is notified instantly and the action waits. Nothing runs until a human decides — or it times out and is denied by default.</div>
+          <div class="gcode">owner notified in 0.1s · awaiting approval</div>
+        </div>
+      </div>
+      <div class="gstep deny">
+        <div class="gn">✕</div>
+        <div>
+          <div class="gtitle">Denied &amp; sealed</div>
+          <div class="gdesc">The owner denies it. The database is untouched, and the blocked attempt is recorded as an immutable, Merkle-sealed event — provable forever.</div>
+          <div class="gcode crit">outcome: blocked · database: SECURE · event cryptographically sealed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 5: MERKLE VERIFIER -->
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-label">Section 05 — Verify It Yourself</span>
+      <h2 class="sec-title">Merkle verifier</h2>
+      <p class="sec-sub">Paste a real event ID. ARIA recomputes its hash from the stored record and checks it against the sealed Merkle/anchor root — live, against the database. Tamper with one byte and it fails.</p>
+    </div>
+    <div class="verify-box">
+      <div class="verify-row">
+        <input class="verify-input" id="verify-input" type="text" placeholder="Paste an event ID…" autocomplete="off" spellcheck="false">
+        <button class="verify-btn" id="verify-btn" onclick="runVerify()">Verify</button>
+      </div>
+      <div class="sample-row" id="sample-row" style="display:none;">
+        <span>Sample to try:</span>
+        <span class="sample-id" id="sample-id"></span>
+        <button class="copy-btn" onclick="useSample()">use this</button>
+      </div>
+      <div class="verify-result" id="verify-result"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>ARIA — cryptographic trust infrastructure for AI agents. &nbsp;·&nbsp; <a href="/">Back to home</a> &nbsp;·&nbsp; <a href="/app">Get access &rarr;</a></p>
+    <p style="margin-top:8px;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);">All data anonymized. Signatures, secrets, full DIDs and payloads are never exposed.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var API = '/v1/proof/public';
+  var sampleEventId = null;
+
+  function fmt(n) { return (typeof n === 'number' ? n : 0).toLocaleString(); }
+
+  function timeAgo(ts) {
+    var then = new Date(ts).getTime();
+    if (isNaN(then)) return '—';
+    var s = Math.max(0, Math.floor((Date.now() - then) / 1000));
+    if (s < 60) return s + 's ago';
+    var m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+    var h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+    var d = Math.floor(h / 24); return d + 'd ago';
+  }
+
+  // ── SECTION 1: counters ──
+  function loadStats() {
+    fetch(API + '/stats').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || d.error) return;
+      document.getElementById('c-total').textContent   = fmt(d.total_events);
+      document.getElementById('c-success').textContent = fmt(d.successful_count);
+      document.getElementById('c-gated').textContent   = fmt(d.gated_count);
+      document.getElementById('c-anom').textContent    = fmt(d.anomaly_count);
+      document.getElementById('c-error').textContent   = fmt(d.error_count);
+      if (d.did_partial) {
+        document.getElementById('agent-chip').textContent = 'agent: ' + (d.agent || 'demo-agent-01') + ' · ' + d.did_partial;
+      }
+      var days = d.agent_age_days || 0;
+      document.getElementById('uptime-line').innerHTML =
+        'Operating 24/7 for <b>' + days + ' day' + (days === 1 ? '' : 's') + '</b> &middot; <b>0 tamperable</b>';
+      if (d.sample_event_id) {
+        sampleEventId = d.sample_event_id;
+        document.getElementById('sample-id').textContent = sampleEventId;
+        document.getElementById('sample-row').style.display = 'flex';
+      }
+    }).catch(function () {});
+  }
+
+  // ── SECTION 2: live stream (no-flicker: only redraw when data changes) ──
+  var lastStreamKey = '';
+  function rowClass(ev) {
+    if (ev.outcome === 'blocked' || ev.scope_valid === false) return 'row-gated';
+    if (ev.outcome === 'error' || ev.outcome === 'anomaly') return 'row-error';
+    return 'row-success';
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  function loadEvents() {
+    fetch(API + '/events?limit=50').then(function (r) { return r.json(); }).then(function (d) {
+      if (!d || !d.events) return;
+      var key = JSON.stringify(d.events);
+      if (key === lastStreamKey) return; // unchanged → no redraw, no flicker
+      lastStreamKey = key;
+
+      var body = document.getElementById('stream-body');
+      if (!d.events.length) {
+        body.innerHTML = '<tr><td colspan="5" class="stream-empty">No events yet.</td></tr>';
+        return;
+      }
+      var html = d.events.map(function (ev) {
+        var scope = ev.scope_valid
+          ? '<span class="scope-ok">✓ yes</span>'
+          : '<span class="scope-bad">✕ no</span>';
+        return '<tr class="' + rowClass(ev) + '">' +
+          '<td class="act">' + esc(ev.action) + '</td>' +
+          '<td><span class="badge ' + esc(ev.outcome) + '">' + esc(ev.outcome) + '</span></td>' +
+          '<td>' + scope + '</td>' +
+          '<td class="hide-sm muted-cell">' + esc(ev.duration_ms) + ' ms</td>' +
+          '<td class="muted-cell">' + esc(timeAgo(ev.timestamp)) + '</td>' +
+          '</tr>';
+      }).join('');
+      body.innerHTML = html;
+    }).catch(function () {});
+  }
+
+  // ── SECTION 3: downloads ──
+  window.downloadCsv = function (type) {
+    window.location.href = API + '/download/' + type;
+  };
+
+  // ── SECTION 5: verifier ──
+  window.useSample = function () {
+    if (!sampleEventId) return;
+    document.getElementById('verify-input').value = sampleEventId;
+  };
+
+  window.runVerify = function () {
+    var input = document.getElementById('verify-input');
+    var btn = document.getElementById('verify-btn');
+    var out = document.getElementById('verify-result');
+    var id = (input.value || '').trim();
+    if (!id) { input.focus(); return; }
+
+    btn.disabled = true; btn.textContent = 'Verifying…';
+    out.className = 'verify-result'; out.style.display = 'none';
+
+    fetch(API + '/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventId: id })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      out.classList.add('show');
+      if (d && d.verified) {
+        out.classList.add('ok');
+        var rootShort = d.root ? (d.root.slice(0, 16) + '…') : '—';
+        out.innerHTML = '✅ <b>Authentic &amp; sealed.</b>' +
+          '<span class="vr-line">Action: <b>' + esc(d.action) + '</b></span>' +
+          '<span class="vr-line">Sealed at: ' + esc(d.timestamp) + '</span>' +
+          '<span class="vr-line">Merkle root: <span class="vr-root">' + esc(rootShort) + '</span></span>' +
+          '<span class="vr-line">The stored record hashes exactly to the sealed root — untampered.</span>';
+      } else {
+        out.classList.add('bad');
+        var reason = (d && d.reason) ? d.reason : 'could not verify';
+        out.innerHTML = '❌ <b>Not verified.</b>' +
+          '<span class="vr-line">Reason: ' + esc(reason) + '</span>' +
+          (d && d.action ? '<span class="vr-line">Action: ' + esc(d.action) + '</span>' : '');
+      }
+    }).catch(function () {
+      out.className = 'verify-result show bad';
+      out.innerHTML = '❌ <b>Verification failed.</b><span class="vr-line">Network or service error — try again.</span>';
+    }).finally(function () {
+      btn.disabled = false; btn.textContent = 'Verify';
+    });
+  };
+
+  // ── boot ──
+  loadStats();
+  loadEvents();
+  setInterval(loadEvents, 15000);
+  setInterval(loadStats, 60000);
+})();
+</script>
+</body>
+</html>

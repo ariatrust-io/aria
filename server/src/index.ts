@@ -22,6 +22,7 @@ import { zeroproofRouter } from "./routes/zeroproof.js";
 import { adminRouter } from "./routes/admin.js";
 import { oauthRouter } from "./routes/oauth.js";
 import { billingRouter, lsWebhookHandler } from "./routes/billing.js";
+import { proofRouter } from "./routes/proof.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
 import { checkHealth, query } from "./db/pool.js";
 import rateLimit from 'express-rate-limit';
@@ -132,6 +133,10 @@ app.get('/docs', (_req, res) => {
 
 app.get('/pricing', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
+});
+
+app.get('/proof', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'proof.html'));
 });
 
 app.use(express.static(path.join(__dirname, "public")));
@@ -286,6 +291,7 @@ const adminLimiter = rateLimit({
 
 app.use('/v1/admin', adminLimiter, adminRouter);
 app.use('/v1/billing', apiLimiter, billingRouter);
+app.use('/v1/proof', proofRouter); // public, read-only; self rate-limited (30/min/IP)
 app.use("/v1/agents", apiLimiter, agentsRouter);
 app.use("/v1/events", apiLimiter, eventsRouter);
 app.use("/v1/auth", authRouter);
