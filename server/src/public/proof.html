@@ -453,7 +453,9 @@ footer a { color:var(--accent-primary); text-decoration:none; }
     if (!id) { input.focus(); return; }
 
     btn.disabled = true; btn.textContent = 'Verifying…';
-    out.className = 'verify-result'; out.style.display = 'none';
+    // Reset via class only — an inline display:none would override the
+    // .show class (inline styles win) and hide the result.
+    out.className = 'verify-result';
 
     fetch(API + '/verify', {
       method: 'POST',
