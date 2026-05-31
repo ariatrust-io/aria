@@ -6,6 +6,8 @@ This is the internal technical reference for the ARIA server. For the product ov
 
 ARIA is a Node and TypeScript service that provides trust and accountability for fleets of autonomous AI agents. It gives each agent a cryptographic identity, signs and stores every action in an immutable log, re checks each action against the agent's declared scope, can pause destructive actions for human approval, and computes a reputation score from verified behavior. It is a B2B SaaS product reached over an HTTPS API with an API key. There is no blockchain and no token.
 
+A note on the enforcement model, since it shapes what the server here can and cannot promise. Scope enforcement and the human approval gate run client side, inside the SDK, before the wrapped function executes. The SDK fetches the agent scope (or opens a gate request and polls it) and throws before calling `fn()` when the action is out of scope, denied, or timed out, so the action never runs. The server's job is to be the source of truth the SDK checks against, to record every attempt including blocked ones, and to re verify scope independently on ingest (`server_within_scope`). The server does not execute or intercept agent actions itself. An action an agent takes without routing it through `track()` is not gated or scope checked; for that path ARIA's value is the audit trail and the independent re check at ingest, not prevention.
+
 ## Process topology
 
 ARIA runs as two Node processes started together by `npm start` (via `concurrently`).

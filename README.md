@@ -75,6 +75,8 @@ try {
 
 When a gated action fires, execution pauses immediately, the owner gets a notification, and nothing runs until a human approves or denies it from the dashboard. If there is no response within five minutes, the action is denied by default.
 
+A note on how enforcement actually works, because this is security infrastructure and the distinction matters. The block happens inside the SDK, in your agent's own process: `track()` runs the scope check and the gate *before* it ever calls your function, so a denied or out-of-scope action never executes. That is real pre-execution prevention, not after-the-fact detection. But it is cooperative. ARIA enforces the actions you route through the SDK in `enforce` or `gate` mode. It is not a network-level kill switch that can stop an agent from doing something it never wrapped with `track()`. For anything outside that wrapper, ARIA's guarantee is the audit trail: it records and can flag what happened, but it did not stand in front of it. The `light` mode is detection only by design, running the scope check in the background so it adds no latency while your function runs regardless.
+
 ### LangChain
 
 ```typescript
@@ -181,7 +183,7 @@ Because the dimensions are rate based, an agent with a million events and a 6% v
 | Events / month | 50,000 | 500,000 | 5,000,000 | 50M+ |
 | History | 30 days | 12 months | 12 months | Unlimited |
 | ARIA Gate, ZeroProof, Export | no | yes | yes | yes |
-| Price | Free | $49/mo | $149/mo | Custom |
+| Price | Free | $49/mo | $149/mo | From $599/mo |
 
 Full and current pricing lives at [ariatrust.org/pricing](https://ariatrust.org/pricing).
 
