@@ -117,6 +117,7 @@ const ALLOWED_PATHS = [
   "/cookies",
   "/docs",
   "/pricing",
+  "/proof",
   "/reset-password",
   "/health",
   "/v1/setup",
@@ -131,6 +132,7 @@ const ALLOWED_PATHS = [
   "/v1/zeroproof",
   "/v1/admin",
   "/v1/billing",
+  "/v1/proof",
 ];
 
 app.use((req, res, next) => {
