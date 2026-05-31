@@ -1,8 +1,10 @@
 # ARIA
 
-**Your AI agents take real actions. Can you prove what they did?**
+**Your AI agents take real actions on their own. Do you actually know what they did?**
 
-ARIA is trust and accountability infrastructure for fleets of autonomous AI agents. It gives every agent a cryptographic identity, an immutable audit trail, a live trust score based on real behavior, and a human approval gate that can stop a destructive action before it runs.
+ARIA is the black box for your AI agents. The risk with an autonomous agent is not that it turns evil one day. The risk is that it makes thousands of decisions you never see, and when one of them is wrong you have no way to know what really happened or to prove it to anyone else. ARIA records every action an agent takes into an immutable, cryptographically sealed log, so you always have a precise and tamper proof answer to what was done, when, by which agent, and under whose configuration. It is the flight recorder for autonomous software: when a decision goes wrong, you have the record instead of a guess.
+
+On top of that record, ARIA gives every agent a verifiable identity, a live trust score based on real behavior, and an optional human approval gate for the few actions you decide are too risky to run unattended. Control and auditability first, with prevention where you ask for it.
 
 It is a normal B2B SaaS product. You talk to it over an HTTPS API with an API key, you watch your agents from a web dashboard, and you pay a monthly subscription. There is no blockchain, no token, and no wallet. Just an API, a database, and a dashboard.
 
@@ -19,7 +21,7 @@ That page shows tens of thousands of real actions from a production agent: succe
 
 ## The problem ARIA solves
 
-An autonomous agent can delete a production database, move money, or touch customer records, and then report whatever it wants about what it did. When something goes wrong at scale, across thousands of agents making decisions on their own, the hard question is not "what is my agent allowed to do". The hard question is "what did it actually do, and can I prove it to an auditor, a regulator, or a customer".
+An autonomous agent can delete a production database, move money, or touch customer records, and then report whatever it wants about what it did. When something goes wrong at scale, across thousands of agents making decisions on their own, the hard question is not "what is my agent allowed to do". The hard question is "what did it actually do, and can I prove it to an auditor, a regulator, or a customer". Without a record you control and cannot alter, it is your word against the algorithm's.
 
 ARIA answers that question with four things working together:
 
@@ -175,18 +177,6 @@ Because the dimensions are rate based, an agent with a million events and a 6% v
 | 50 to 79 | NEUTRAL |
 | 0 to 49 | UNTRUSTED |
 
-## Plans
-
-| | Free | Professional | Business | Enterprise |
-|---|---|---|---|---|
-| Agents | 1 | 5 | 20 | Unlimited |
-| Events / month | 50,000 | 500,000 | 5,000,000 | 50M+ |
-| History | 30 days | 12 months | 12 months | Unlimited |
-| ARIA Gate, ZeroProof, Export | no | yes | yes | yes |
-| Price | Free | $49/mo | $149/mo | From $599/mo |
-
-Full and current pricing lives at [ariatrust.org/pricing](https://ariatrust.org/pricing).
-
 ## More capabilities
 
 <details>
@@ -276,6 +266,7 @@ In production at [ariatrust.org](https://ariatrust.org). Shipped so far: DID ide
 - Live proof: https://ariatrust.org/proof
 - Dashboard: https://ariatrust.org/app
 - Docs: https://ariatrust.org/docs
+- Pricing: https://ariatrust.org/pricing
 - npm: https://www.npmjs.com/package/@ariatrust-io/aria-sdk
 
 ## License
