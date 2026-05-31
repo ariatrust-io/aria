@@ -1,403 +1,285 @@
-# ARIA - Autonomous Reliable Intelligent Agents
+# ARIA Technical Documentation
 
-## Overview
+This is the internal technical reference for the ARIA server. For the product overview and quickstart, see [README.md](README.md). For exact column definitions of any table, the source of truth is `server/src/db/schema.sql` plus the ordered files in `server/src/db/migrations/`.
 
-ARIA is a Node.js/Express/TypeScript server that provides a trust and auditing system for AI agents. It tracks agent activities, verifies cryptographic signatures, calculates reputation scores, and detects anomalies. The system is designed to ensure that AI agents operate within their defined scope and are who they claim to be.
+## What ARIA is
 
----
+ARIA is a Node and TypeScript service that provides trust and accountability for fleets of autonomous AI agents. It gives each agent a cryptographic identity, signs and stores every action in an immutable log, re checks each action against the agent's declared scope, can pause destructive actions for human approval, and computes a reputation score from verified behavior. It is a B2B SaaS product reached over an HTTPS API with an API key. There is no blockchain and no token.
 
-## Architecture Components
+## Process topology
 
-### 1. Main Server Entry Point (`src/index.ts`)
+ARIA runs as two Node processes started together by `npm start` (via `concurrently`).
 
-**Purpose:** Main application entry point that configures Express, sets up middleware, defines public routes, and starts the HTTP server.
+```
+Internet
+   |
+[ Cloudflare ]
+   |
+[ membrane.ts ]   public edge, listens on PORT (default 8080) on 0.0.0.0
+   |   - default-deny path allowlist (config/public-routes.ts)
+   |   - edge rate limiting (200 req/min/IP)
+   |   - scanner detection and temporary IP bans (Redis backed)
+   |   - method allowlist (GET, POST, DELETE, OPTIONS)
+   |   - proxies allowed requests to the internal API
+   v
+[ index.ts ]      internal API, listens on INTERNAL_PORT (default 3000) on 127.0.0.1
+   |
+[ PostgreSQL ]  +  [ Redis ]
+```
 
-**Key Functions:**
+The internal API is never exposed to the internet directly. It assumes every request reached it through the membrane.
 
-- **Error Handling:** 
-  - `process.on("uncaughtException")` - Catches fatal uncaught exceptions and exits the process
-  - `process.on("unhandledRejection")` - Catches unhandled promise rejections and exits the process
-  
-- **Middleware Configuration:**
-  - `helmet()` - Security headers (CSP disabled for development)
-  - `cors()` - Cross-Origin Resource Sharing enabled
-  - `express.json({ limit: "1mb" })` - Parses JSON bodies with 1MB limit
-  - `rateLimit()` - Express-rate-limit configured to 1500 requests per minute per IP
+### `src/membrane.ts` (public edge)
 
-- **Public Routes:**
-  - `POST /v1/setup` - Initial setup endpoint for new users to create their first API key and agent (Chicken-and-Egg solution). Accepts `owner_email`, `setup_key`, `name`, and `scope`. Returns `api_key` and optionally `agent` object with `did`, `name`, `scope`, and `secret`.
+Responsibilities, in request order:
 
-- **Protected Routes:**
-  - `POST /v1/agents` - Requires API key authentication via Bearer token
-  - `GET /v1/agents` - Lists all agents for the authenticated API key
-  - `GET /v1/agents/:did` - Gets detailed information about a specific agent
-  - `POST /v1/events` - Records a single event from an agent
-  - `POST /v1/events/batch` - Records multiple events in a single request
-  - `GET /v1/events` - Lists events with filtering by agent, outcome, and pagination
+1. Block requests from IPs already banned (`membrane:blocked:<ip>` in Redis).
+2. Detect scanner probes (paths like `/.env`, `/wp-admin`, `/phpmyadmin`). After `SCAN_THRESHOLD` (10) suspicious requests, the IP is banned for 24 hours.
+3. Edge rate limit of 200 requests per minute per IP.
+4. Reject any method outside GET, POST, DELETE, OPTIONS with 405.
+5. Apply the path allowlist. If `isPublicPath(req.path)` is false, return 404 before reaching application code.
+6. Proxy the request to `http://localhost:INTERNAL_PORT`.
 
-- **Health Check:**
-  - `GET /health` - Returns server status and database connection state
+On startup the membrane opens its HTTP port immediately, then polls the internal `/health` endpoint up to 30 times (once per second) before declaring the internal API ready. If the internal API never answers, the membrane keeps serving but logs a degraded state.
 
-- **Error Handlers:**
-  - 404 handler for undefined routes
-  - Global error handler for unhandled errors
+### `src/config/public-routes.ts` (the allowlist)
 
-- **Server Startup:**
-  - Listens on port 3001 (or PORT environment variable)
-  - Logs server start message with environment
+Single source of truth for which path prefixes the membrane forwards. It exports `PUBLIC_PATHS` and `isPublicPath(path)`. The matcher is precise: a path is public only if it exactly equals an allowed prefix or sits beneath it as `prefix/...`. So `/proof` allows `/proof` and `/proof/public/stats` but not `/proofXYZ`. `/` is special cased to an exact match so it never behaves as a catch all.
 
----
+Adding an entry here is a deliberate decision to expose a path publicly. The guardrail test `src/tests/membrane.test.ts` fails the build if `PUBLIC_PATHS` changes without a matching update to the test manifest, so a new route can never be silently exposed or silently left unreachable (a 404 in production that still works locally because local testing hits the internal API directly).
 
-### 2. Database Connection Pool (`src/db/pool.ts`)
+### `src/index.ts` (internal API)
 
-**Purpose:** Manages PostgreSQL connection pooling and provides query utilities.
+Configures Express, mounts every router, and starts the internal server. Notable points:
 
-**Key Components:**
+- Fatal `uncaughtException` and `unhandledRejection` handlers that log and exit the process. Railway restarts it.
+- `helmet` security headers, `cors` restricted to `ALLOWED_ORIGINS`.
+- The Lemon Squeezy billing webhook is mounted with a raw body parser before `express.json`, because signature verification needs the unparsed body.
+- `express.json({ limit: "1mb" })` plus guards that reject non JSON content types and JSON nested deeper than 5 levels.
+- A public `POST /v1/setup` endpoint to bootstrap the first API key and agent.
+- A per IP API rate limiter (1500 req/min) backed by Redis where available.
+- Final 404 and error handlers that always return JSON.
 
-- **Pool Configuration:**
-  - `max: 50` - Maximum number of connections in the pool
-  - `statement_timeout: 10,000ms` - Queries timeout after 10 seconds
-  - `idleTimeoutMillis: 30,000ms` - Connections idle for 30 seconds are closed
-  - `connectionTimeoutMillis: 2,000ms` - Connection attempts timeout after 2 seconds
-  - `ssl: { rejectUnauthorized: true }` - SSL required for production, disabled for local
+## Routers
 
-- **Functions:**
-  - `query(text, values)` - Executes a SQL query and returns results typed generically
-  - `transaction(fn)` - Executes a function within a database transaction (BEGIN/COMMIT/ROLLBACK)
-  - `checkHealth()` - Returns true if database is reachable, false otherwise
+All routers are mounted under `/v1` except the page routes and `/health`. Routes that require authentication use the `requireApiKey` middleware; feature gated routes also pass through `requireFeature(...)` from the plans middleware.
 
-- **Error Handling:**
-  - Pool error listener logs idle connection failures without crashing the server
+| Mount | File | Purpose |
+|---|---|---|
+| `/v1/setup` | `index.ts` | Bootstrap a first API key (and optionally a first agent) using `SETUP_KEY`. |
+| `/v1/agents` | `routes/agents.ts` | Register, list, and fetch agents. |
+| `/v1/events` | `routes/events.ts` | Ingest single and batch events, list events, export (CSV, JSON, OpenTelemetry). |
+| `/v1/auth` | `routes/auth.ts`, `routes/oauth.ts` | Account login, 2FA, session, and OAuth (Google, GitHub). |
+| `/v1/api-keys` | `index.ts` | Create and rotate API keys. |
+| `/v1/webhooks` | `routes/webhooks.ts` | Register and manage outbound webhooks. |
+| `/v1/gate` | `routes/gate.ts` | Human in the loop approval for gated actions. |
+| `/v1/witness` | `routes/witness.ts` | Shadow Witness external cross verification. |
+| `/v1/temporal` | `routes/temporal.ts` | Temporal anchors and per event seal verification. |
+| `/v1/zeroproof` | `routes/zeroproof.ts` | Merkle backed proofs of behavior. |
+| `/v1/admin` | `routes/admin.ts` | Administrative operations (tighter rate limit). |
+| `/v1/billing` | `routes/billing.ts` | Lemon Squeezy checkout and webhook handling. |
+| `/v1/proof` | `routes/proof.ts` | Public, read only, anonymized live proof for the demo agent. |
+| `/proof`, `/`, `/app`, `/docs`, `/pricing`, legal pages | `index.ts` | Static HTML served from `src/public`. |
+| `/health` | `index.ts` | Server and database health. |
 
----
+### Agents (`routes/agents.ts`)
 
-### 3. Authentication Middleware (`src/middleware/auth.ts`)
-
-**Purpose:** Protects API routes by validating API keys stored in the database.
-
-**Key Components:**
-
-- **API Key Cache:**
-  - `keyCache` - In-memory Map storing validated API keys
-  - `CACHE_TTL_MS: 300,000` - Cache entries expire after 5 minutes
-  - `MAX_CACHE_SIZE: 10,000` - Maximum number of cached keys to prevent memory leaks
-
-- **Cache Management:**
-  - `cleanExpiredCache()` - Removes expired entries from the cache
-
-- **Authentication Flow (`requireApiKey` function):**
-  1. Extracts Bearer token from Authorization header
-  2. Returns 401 if no key provided
-  3. Checks cache first (O(1) fast path) - if cache hit, sets `req.apiKeyId` and `req.ownerEmail`, calls `next()`
-  4. If not cached, computes SHA-256 hash of the key
-  5. **Fast Path:** Queries `api_keys` table by `key_sha256` index
-     - If found, verifies with bcrypt.compare against `key_hash`
-     - On success, caches the key and proceeds
-     - On failure (bcrypt mismatch), returns 401 immediately (prevents timing attacks)
-  6. **Slow Path (Legacy):** If no SHA-256 match, searches legacy keys without SHA-256 (limited to 50 for DoS protection)
-     - On match, updates the key with SHA-256 (self-heal) and caches it
-  7. Returns 401 if no valid key found
-  8. Returns 500 if database error occurs
-
-- **Request Augmentation:**
-  - Adds `apiKeyId` to `req` - The UUID of the API key
-  - Adds `ownerEmail` to `req` - The email of the key owner
-
----
-
-### 4. Agents Routes (`src/routes/agents.ts`)
-
-**Purpose:** Handles agent registration, listing, and retrieval.
-
-**Key Routes:**
-
-- **POST /** - Register a new agent
-  - **Input:** `name` (string, required), `scope` (array of strings, required), `hardwareFingerprint` (optional), `meta` (optional object)
-  - **Validation:** 
-    - Name must be non-empty string
-    - Scope must be non-empty array
-    - Each scope item must match pattern `verb:resource` (e.g., "send:email")
-  - **Credential Generation (Two Modes):**
-    - **Classic Mode:** If no `hardwareFingerprint` provided:
-      - Generates `secret` as two UUIDs concatenated without dashes
-      - Sets `signingVersion` to 1
-      - Hashes secret with bcrypt (cost 10)
-      - Returns `secret` to the client (used for HMAC signing)
-    - **DTS (Distributed Trusted Signing) Mode:** If `hardwareFingerprint` provided:
-      - Generates 32 random bytes as the master secret
-      - Splits secret into 3 shares using Shamir's Secret Sharing (threshold: 2)
-      - Derives `partialAKey` from shareA using HKDF-SHA256
-      - Hashes shareB with bcrypt
-      - Sets `signingVersion` to 2
-      - Returns `fragmentB` (shareB in hex) and `partialAKey` to the client
-  - **Output:** Returns `did` (format: `did:agentrust:<uuid>`), `name`, `scope`, `createdAt`, `publicKey`, and the credential (`secret` or `fragmentB`/`partialAKey`)
-
-- **GET /** - List all agents for the authenticated API key
-  - **Output:** Returns array of agents with `name`, `masked_did`, `scope_summary`, `scope_count`, `created_at`, `last_seen`, `total_events`, `anomaly_count`, `success_rate`
-
-- **GET /:did** - Get detailed information about a specific agent
-  - **Output:** Returns full agent details including `did`, `name`, `scope`, `created_at`, `last_seen`, `meta` (whitelisted keys only: simulated, version, environment, region), `total_events`, `success_count`, `error_count`, `anomaly_count`, `success_rate`, `top_actions`
-
----
-
-### 5. Events Routes (`src/routes/events.ts`)
-
-**Purpose:** Handles event ingestion, validation, signature verification, anomaly detection, and event listing.
-
-**Key Components:**
-
-- **Rate Limiting (Per-Agent):**
-  - `rateLimitMap` - Map tracking request counts per agent
-  - `RATE_LIMIT_WINDOW_MS: 60,000` - 1-minute window
-  - `RATE_LIMIT_MAX: 100` - Maximum 100 events per window
-  - If exceeded, events are accepted but flagged in metadata
-
-- **Event Interface (`IncomingEvent`):**
-  - `eventId` - Unique identifier for the event
-  - `agentDid` - The agent's DID (must start with "did:agentrust:")
-  - `action` - The action performed (e.g., "send:email")
-  - `outcome` - "success", "error", or "anomaly"
-  - `withinScope` - Boolean indicating if action was within declared scope
-  - `durationMs` - Duration in milliseconds
-  - `timestamp` - ISO 8601 timestamp
-  - `signature` - Cryptographic signature
-  - `error` (optional) - Error message if outcome is "error"
-  - `meta` (optional) - Additional metadata
-
-- **Validation Function (`validateEvent`):**
-  - Validates all required fields
-  - Returns error message if invalid, null if valid
-
-- **Signature Verification (`determineSignatureValidity`):**
-  - **Version 1 (Classic):** HMAC-SHA256 of payload
-    - Payload format: `${eventId}:${agentDid}:${action}:${outcome}:${timestamp}`
-    - Uses `timingSafeEqual` to prevent timing attacks
-  - **Version 2 (DTS):** XOR of two HMACs
-    - Derives `partial_A` from `partialAKey` using HKDF
-    - Gets `partial_B` from event meta
-    - XORs both to get expected signature
-
-- **Anomaly Detection:**
-  - **Hardware Fingerprint Mismatch:** Compares event's fingerprint with stored agent fingerprint
-  - **Missing Fingerprint:** Checks if event lacks hardware fingerprint
-  - **Rate Limit Exceeded:** Flags events when agent exceeds rate limit
-  - Calls `recordAnomaly()` to log anomalies in the anomalies table
-
-- **Key Routes:**
-
-  - **POST /** - Record a single event
-    - Validates event structure
-    - Looks up agent by DID and API key
-    - Verifies scope (checks if action is in declared scope)
-    - Verifies signature
-    - Checks rate limits
-    - Detects anomalies
-    - Inserts into `events` table
-    - Updates agent's `last_seen` timestamp
-    - Queues reputation recalculation
-    - Returns 202 Accepted
-
-  - **POST /batch** - Record multiple events (max 500)
-    - Validates array is non-empty and <= 500
-    - Looks up agent once
-    - Processes each event in a database transaction
-    - Tracks accepted vs rejected counts
-    - Returns summary of accepted/rejected events
-
-  - **GET /** - List events
-    - Filters by `agentDid`, `outcome`
-    - Supports pagination via `limit` (default 50, max 200) and `cursor`
-    - Returns events with agent information
-
----
-
-### 6. Reputation Service (`src/services/reputation.ts`)
-
-**Purpose:** Calculates and maintains agent reputation scores based on their event history.
-
-**Key Components:**
-
-- **ReputationQueue:**
-  - Debounces recalculation by 3 seconds
-  - Batches multiple agent updates
-  - Retries failed calculations (except connection errors)
-
-- **Reputation Calculation (`computeReputationIncremental`):**
-  - Gets events since last computation (or all if first time)
-  - Aggregates: `total_events`, `success_count`, `error_count`, `anomaly_count`, `scope_violation_count`, `hardware_conflict_count`
-  - Computes `success_rate` as percentage
-  - Updates `reputation_snapshots` table
-
-- **Scoring Algorithm:**
-  - `successPoints` = success_count × 1
-  - `errorPoints` = error_count × -1
-  - `anomalyPoints` = anomaly_count × -5
-  - `criticalPoints` = (scope_violation_count + hardware_conflict_count) × -100
-  - `finalScore` = clamped between 0 and 100
-  - **Trust Levels:**
-    - Score >= 80: "Trusted"
-    - Score >= 50: "Neutral"
-    - Score < 50: "Untrusted"
-
-- **Sync:** Calls `syncToPublicTable()` to update the public reputation table
-
----
-
-### 7. Public Reputation Sync (`src/services/sync-public-reputation.ts`)
-
-**Purpose:** Synchronizes internal reputation data to a publicly accessible table for web/API access.
-
-**Key Function (`syncToPublicTable`):**
-- Takes agent ID and score
-- Determines trust level based on score
-- Upserts into `public_agent_reputation` table
-- Non-critical - errors are logged but don't fail the main flow
-
----
-
-### 8. Anomaly Detector (`src/services/anomaly-detector.ts`)
-
-**Purpose:** Records and manages anomalies detected during event processing.
-
-**Key Components:**
-
-- **Storage Limits:**
-  - `MAX_ANOMALIES_PER_AGENT: 100` - Maximum anomalies stored per agent
-  - Prevents disk saturation from malicious agents
-
-- **Record Function (`recordAnomaly`):**
-  - Checks current anomaly count for the agent
-  - Skips recording if at limit (event already in events table)
-  - Inserts into `anomalies` table if space available
-  - Non-critical - logs errors but doesn't throw
-
-- **Cleanup Function (`cleanupOldAnomalies`):**
-  - Deletes anomalies older than 30 days
-  - Deletes acknowledged anomalies
-  - Designed to be run via cron job
-
----
-
-## Database Schema (Tables)
-
-### api_keys
-- `id` (UUID, PK)
-- `key_hash` (TEXT) - bcrypt hash of the API key
-- `key_sha256` (TEXT) - SHA-256 hash for fast lookups
-- `label` (TEXT) - Human-readable label
-- `owner_email` (TEXT) - Owner's email
-- `created_at` (TIMESTAMPTZ)
-- `revoked_at` (TIMESTAMPTZ, nullable)
-
-### agents
-- `id` (UUID, PK)
-- `did` (TEXT, unique)
-- `name` (TEXT)
-- `scope` (TEXT[]) - Array of scope actions
-- `api_key_id` (UUID, FK to api_keys)
-- `public_key` (TEXT)
-- `secret_hash` (TEXT) - bcrypt hash of the signing secret
-- `hmac_key` (TEXT) - The actual HMAC key (hex encoded)
-- `meta` (JSONB)
-- `signing_version` (INT) - 1 for classic, 2 for DTS
-- `created_at` (TIMESTAMPTZ)
-- `last_seen` (TIMESTAMPTZ, nullable)
-
-### events
-- `id` (UUID, PK)
-- `event_id` (TEXT, unique)
-- `agent_id` (UUID, FK to agents)
-- `action` (TEXT)
-- `outcome` (TEXT) - 'success', 'error', 'anomaly'
-- `within_scope` (BOOLEAN)
-- `duration_ms` (INT)
-- `signature` (TEXT)
-- `signature_valid` (BOOLEAN)
-- `error` (TEXT, nullable)
-- `meta` (JSONB, nullable)
-- `recorded_at` (TIMESTAMPTZ)
-- `client_ts` (TIMESTAMPTZ)
-- `server_within_scope` (BOOLEAN)
-
-### reputation_snapshots
-- `agent_id` (UUID, PK, FK to agents)
-- `total_events` (INT)
-- `success_count` (INT)
-- `error_count` (INT)
-- `anomaly_count` (INT)
-- `scope_violation_count` (INT)
-- `hardware_conflict_count` (INT)
-- `success_rate` (TEXT)
-- `top_actions` (JSONB)
-- `last_computed_at` (TIMESTAMPTZ)
-
-### public_agent_reputation
-- `did` (TEXT, PK)
-- `score` (INT)
-- `trust_level` (TEXT)
-- `last_updated` (TIMESTAMPTZ)
-
-### anomalies
-- `id` (UUID, PK)
-- `event_id` (TEXT)
-- `agent_id` (UUID, FK to agents)
-- `action` (TEXT)
-- `detected_at` (TIMESTAMPTZ)
-- `acknowledged` (BOOLEAN, default false)
-
----
-
-## Security Features
-
-1. **API Key Authentication:** All protected routes require valid API key via Bearer token
-2. **Double Hashing:** Keys stored with both SHA-256 (for fast lookup) and bcrypt (for verification)
-3. **Timing-Safe Comparison:** Prevents timing attacks on signature verification
-4. **Rate Limiting:** Per-IP (1500/min) and per-agent (100/min) rate limits
-5. **Input Validation:** All inputs validated before processing
-6. **Scope Validation:** Server independently verifies if actions are in declared scope
-7. **Signature Verification:** Cryptographic verification of event authenticity
-8. **Hardware Fingerprint Tracking:** Detects when events come from different machines
-9. **Anomaly Rate Limiting:** Prevents disk saturation from anomaly storage
-10. **SQL Parameterization:** All queries use parameterized statements to prevent injection
-
----
-
-## Setup Flow (Chicken-and-Egg Solution)
-
-1. **New User:** Calls `POST /v1/setup` with:
-   - `owner_email` - Their email
-   - `setup_key` - Master key (from environment or default "aria-setup-2024")
-   - `name` (optional) - Agent name
-   - `scope` (optional) - Agent scope array
-
-2. **Server:**
-   - Validates setup key
-   - Checks no existing API key for that email
-   - Generates new API key (UUID)
-   - Hashes with SHA-256 and stores
-   - Creates agent if name/scope provided
-   - Returns API key and agent credentials
-
-3. **Client:** Uses returned API key in Authorization header for all subsequent requests
-
----
-
-## Environment Variables
-
-- `PORT` - Server port (default: 3001)
-- `DATABASE_URL` - PostgreSQL connection string (required)
-- `NODE_ENV` - "development" or "production"
-- `SETUP_KEY` - Master key for initial setup (required: must be set via environment variable, no default)
-
----
-
-## Technology Stack
-
-- **Runtime:** Node.js
-- **Language:** TypeScript
-- **Framework:** Express.js 5.x
-- **Database:** PostgreSQL with pg driver
-- **Security:** bcrypt, crypto (HMAC-SHA256, HKDF, Shamir's Secret Sharing)
-- **Rate Limiting:** express-rate-limit
-- **Security Headers:** helmet
-- **TypeScript Execution:** tsx
+`POST /` registers an agent. Input is `name`, `scope` (array of `verb:resource` strings), an optional `hardwareFingerprint`, and optional `meta`. Two credential modes:
+
+- **Classic (signing version 1).** No hardware fingerprint. The server generates a `secret`, stores its bcrypt hash and an encrypted HMAC key, and returns the secret to the client for signing.
+- **DTS, distributed trusted signing (signing version 2).** A hardware fingerprint is provided. The master secret is split with Shamir's Secret Sharing (threshold 2 of 3). The server keeps a derived key part, the client receives its own key part, and a valid signature requires both parts to agree.
+
+`GET /` lists the caller's agents with masked DIDs and summary stats. `GET /:did` returns full detail for one agent including reputation aggregates and top actions.
+
+### Events (`routes/events.ts`)
+
+The `IncomingEvent` shape: `eventId`, `agentDid`, `action`, `outcome` (`success`, `error`, `anomaly`, or `blocked`), `withinScope`, `durationMs`, `timestamp` (ISO 8601), `signature`, optional `error`, optional `meta`.
+
+Ingestion steps for `POST /` and `POST /batch` (batch up to 500 events, all for the same agent):
+
+1. Validate the event shape and reject timestamps skewed more than five minutes from now.
+2. Look up the agent by DID, scoped to the caller's API key or user.
+3. **Re check scope on the server.** The result is stored in `server_within_scope` regardless of what the agent reported in `withinScope`.
+4. **Verify the signature.**
+   - Version 1: HMAC-SHA256 over `eventId:agentDid:action:outcome:timestamp`, compared with a timing safe comparison.
+   - Version 2: the server computes `partial_A` from its stored key part, takes `partial_B` from the event meta, then checks the event signature against `HMAC(partial_A || partial_B, "dts_binding")`. This is a key binding construction, not a plain XOR.
+5. Apply a per agent rate limit (100 events per minute). Over the limit, events are still accepted but flagged in meta.
+6. Detect anomalies (scope violation, signature failure, hardware fingerprint conflict, rate limit exceeded) and record them.
+7. Insert into `events`, update the agent's `last_seen`, and queue a reputation recalculation.
+
+Listing and export: `GET /` paginates with `limit` (max 100) and a `cursor`. `GET /export` produces CSV, JSON, or OpenTelemetry log format, filtered by agent and type, gated by the plan's `export` feature (the founder account is exempt).
+
+Sensitive meta fields (hardware fingerprints, key parts, internal flags) are stripped before any event is returned through the API.
+
+### Public live proof (`routes/proof.ts`)
+
+A read only window onto one hardcoded demo agent, rate limited to 30 requests per minute per IP. Stats are cached for 60 seconds, the event list for 10 seconds. Every query selects only safe columns, so signatures, secrets, full DIDs, user ids, and payloads are never returned.
+
+| Endpoint | Returns |
+|---|---|
+| `GET /public/stats` | Counters (total, success, error, gated, anomaly), agent age in days, latest seal root, and a real `sample_event_id` to try in the verifier. |
+| `GET /public/events?limit=50` | Recent events, anonymized, max 100. |
+| `GET /public/download/:type` | CSV of `good` (success), `bad` (error), or `gated` (out of scope) events, up to 50 rows. |
+| `POST /public/verify` | Recomputes the hash of the given event id and checks it against the sealed anchor root. Returns `{ verified, root, timestamp, action }`. |
+
+## Services
+
+| File | Purpose |
+|---|---|
+| `services/reputation.ts` | Computes the trust score and maintains `reputation_snapshots`. Recalculation is debounced and batched. |
+| `services/sync-public-reputation.ts` | Mirrors score and trust level into a public reputation table. |
+| `services/anomaly-detector.ts` | Records anomalies (capped per agent), archives and cleans old ones. |
+| `services/pattern-detector.ts` | ARIA Spectrum: turns raw anomalies into described behavioral patterns. |
+| `services/temporal-anchor.ts` | Folds recent events into a running hash chain anchor and verifies individual events against it. |
+| `services/shadow-witness.ts` | Cross checks agent reported counts against an external source. |
+| `services/zeroproof.ts` | Builds Merkle backed proofs of behavior. |
+| `services/webhook.ts` | Delivers outbound webhook notifications. |
+| `services/oauth.ts` | OAuth flows for Google and GitHub. |
+| `services/email.ts` | Transactional email through Resend. |
+
+### Trust score (`services/reputation.ts`)
+
+The score runs from 0 to 95 and is based on the last 30 days of behavior, across five rate based dimensions. Rate based means volume does not change the outcome: a million events at a 6% violation rate scores the same as a thousand events at the same rate.
+
+| Dimension | Weight |
+|---|---|
+| Success rate | 40% |
+| Scope compliance | 30% |
+| Behavioral consistency | 15% |
+| Clean history | 10% |
+| Recent trend | 5% |
+
+| Score | Level |
+|---|---|
+| 80 to 95 | TRUSTED |
+| 50 to 79 | NEUTRAL |
+| 0 to 49 | UNTRUSTED |
+
+The score never reaches 100 by design. The behavior is locked in by `src/tests/scoring.test.ts`.
+
+### Temporal anchoring and event sealing (`services/temporal-anchor.ts`)
+
+Each event is hashed over `event_id:action:outcome:client_ts:signature:agent_id`. Anchoring folds the agent's recent event hashes into a running chain hash and stores the resulting `anchor_hash` in `temporal_anchors`, with per event proofs in `temporal_proofs`. To verify an event later, the stored record is rehashed and compared against the sealed proof. If any field of the record changed, the hashes diverge. The public verifier on `/proof` and `POST /v1/temporal/verify/:eventId` both use this mechanism. The `anchor_hash` is what the UI presents as the Merkle or seal root.
+
+## Authentication (`middleware/auth.ts`)
+
+API keys arrive as `Authorization: Bearer <key>`. Verification:
+
+1. Check an in memory cache (5 minute TTL, capped at 10,000 entries) for an O(1) hit.
+2. On a miss, compute the SHA-256 of the key and look it up by the `key_sha256` index, then confirm with a bcrypt comparison against `key_hash`. Double storage gives a fast index lookup plus a slow, safe verification.
+3. A legacy slow path exists for old keys without a SHA-256, limited in scope to avoid abuse, and self heals matched keys by filling in their SHA-256.
+
+The middleware attaches `apiKeyId` and `ownerEmail` to the request.
+
+## Plans and billing (`config/plans.ts`, `middleware/plans.ts`, `routes/billing.ts`)
+
+Plans are Free, Professional, Business, and Enterprise, each defining agent and monthly event limits, history retention, an overage rate, and a set of feature flags (gate, zeroproof, export, webhooks, batch events, spectrum, temporal anchor, shadow witness, api access). `requireFeature(name)` blocks a route when the caller's plan lacks that feature. Event counts are tracked per user against the monthly limit. Billing is handled by Lemon Squeezy: checkout links live on the pricing page, and a signature verified webhook updates the user's plan.
+
+## Database
+
+The base tables are defined in `src/db/schema.sql`. Everything added later lives in `src/db/migrations/`, applied in numeric order. The base file is the historical starting point and does not reflect later additions on its own, so always read the migrations alongside it.
+
+Core tables from the base schema:
+
+- **api_keys**: `id`, `key_hash` (bcrypt), `key_sha256` (fast lookup), `label`, `owner_email`, `created_at`, `revoked_at`.
+- **agents**: `id`, `did`, `name`, `scope` (text array), `api_key_id`, `public_key`, `secret_hash`, `hmac_key` (encrypted), `meta`, `signing_version`, `created_at`, `last_seen`.
+- **events**: `id`, `event_id`, `agent_id`, `action`, `outcome`, `within_scope`, `server_within_scope`, `duration_ms`, `signature`, `signature_valid`, `error`, `meta`, `recorded_at`, `client_ts`. The `outcome` check allows `success`, `error`, `anomaly`, and `blocked` (the last added in migration 022). Database rules turn any `UPDATE` or `DELETE` on this table into a no op, so history is append only at the database level.
+- **anomalies**: `id`, `event_id`, `agent_id`, `action`, `detected_at`, `acknowledged`.
+
+Feature tables added by migrations (see the named file for exact columns):
+
+| Area | Migration |
+|---|---|
+| Users and accounts | `007_users.sql`, `012_agent_user_id.sql` |
+| Anomaly archive | `008_anomalies_archive.sql` |
+| Email verification | `009_email_verification.sql` |
+| Webhooks | `010_webhooks.sql` |
+| Reputation score columns | `011_reputation_score.sql` |
+| Gate | `013_gate.sql` |
+| Spectrum | `014_spectrum.sql` |
+| Shadow Witness | `015_witness.sql` |
+| Temporal anchors and proofs | `016_temporal.sql` |
+| ZeroProof | `017_zeroproof.sql` |
+| Admin | `018_admin.sql` |
+| Password reset | `019_password_reset.sql` |
+| OAuth | `020_oauth.sql` |
+| Plans | `021_plans.sql` |
+| Blocked outcome | `022_blocked_outcome.sql` |
+| Billing | `023_billing.sql`, `024_billing_lemonsqueezy.sql`, `025_business_tier.sql` |
+
+### Connection pool (`db/pool.ts`)
+
+- `max`: configurable via `DB_POOL_MAX`, default 8 per instance.
+- `statement_timeout`: 10 seconds.
+- `idleTimeoutMillis`: 30 seconds.
+- `connectionTimeoutMillis`: 2 seconds.
+- `ssl`: in production, `{ rejectUnauthorized: false }` (Railway). Disabled locally.
+
+`query(text, values)` runs a parameterized query. `transaction(fn)` wraps work in BEGIN, COMMIT, and ROLLBACK and always releases the client. `checkHealth()` returns whether the database is reachable.
+
+## Security features
+
+1. Default-deny public edge: only allowlisted paths are forwarded, scanners are detected and banned, and methods are restricted.
+2. API key auth with SHA-256 fast lookup plus bcrypt verification, and timing safe failure handling.
+3. HMAC-SHA256 event signatures with timing safe comparison, plus the version 2 key binding mode.
+4. Server side scope re check that never trusts the agent's own claim.
+5. Append only event log enforced by database rules.
+6. AES-256-GCM encryption with context bound additional data for stored secrets.
+7. Replay protection through a five minute timestamp window.
+8. Redis backed rate limiting at the edge, on the API, and per agent.
+9. Two factor authentication on accounts.
+10. Parameterized SQL throughout.
+
+## Environment variables
+
+Required:
+
+- `DATABASE_URL`: PostgreSQL connection string.
+- `SETUP_KEY`: secret for the bootstrap endpoint. There is no default; the internal API refuses to start without it.
+- `ENCRYPTION_KEY`: 32 byte hex key for AES-256-GCM.
+
+Common:
+
+- `PORT`: membrane external port, default 8080.
+- `INTERNAL_PORT`: internal API port, default 3000.
+- `NODE_ENV`: `development` or `production`.
+- `ALLOWED_ORIGINS`: comma separated CORS allowlist.
+- `APP_URL`: base URL used in emails and redirects.
+- `REDIS_URL`: Redis connection string. If absent, rate limiters fall back to in memory counters.
+- `DB_POOL_MAX`: pool size per instance, default 8.
+
+Optional, feature dependent:
+
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`: OAuth. Buttons are visible but the endpoints return 503 if unset.
+- `RESEND_API_KEY`: transactional email.
+- Lemon Squeezy keys and webhook secret: billing.
+
+## Local development
+
+```bash
+cd server
+npm install
+cp .env.example .env     # fill in DATABASE_URL, SETUP_KEY, ENCRYPTION_KEY
+# apply src/db/migrations in order against your database
+npm start                # runs the internal API and the membrane together
+```
+
+The public surface is the membrane port (`PORT`, default 8080). The internal API listens on `INTERNAL_PORT` (default 3000) bound to localhost. When testing through the public edge, send requests to the membrane port so the allowlist and rate limiting are exercised.
+
+## Tests
+
+```bash
+npm test
+```
+
+The suite runs in this order: encryption helpers (`test:crypto`), HMAC signing (`test:hmac`), the public API contract against the live server (`test:api`), the trust score math (`test:scoring`), and the membrane allowlist with its anti drift guardrail (`test:membrane`).
+
+## Technology stack
+
+- Runtime: Node, TypeScript run directly through `tsx`.
+- Framework: Express 5.
+- Database: PostgreSQL via `pg`.
+- Cache and rate limiting: Redis via `ioredis`.
+- Cryptography: `crypto` (HMAC-SHA256, HKDF, AES-256-GCM), bcrypt, Shamir's Secret Sharing.
+- Email: Resend. Billing: Lemon Squeezy.
+- Hosting: Railway behind Cloudflare.

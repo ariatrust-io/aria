@@ -3,7 +3,7 @@ $did = $env:ARIA_TEST_AGENT_DID
 $base = $env:ARIA_BASE_URL
 $sk = $env:ARIA_SETUP_KEY
 
-if (-not $base) { $base = "http://127.0.0.1:3001" }
+if (-not $base) { $base = "http://127.0.0.1:8080" }
 if (-not $api) { throw "Set ARIA_API_KEY before running this script." }
 if (-not $sk) { throw "Set ARIA_SETUP_KEY before running this script." }
 
