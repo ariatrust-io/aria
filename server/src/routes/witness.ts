@@ -48,7 +48,7 @@ witnessRouter.post('/sources', requireFeature('shadowWitness'), async (req, res)
     let agentId: string | null = null;
     if (agentDid) {
       const agentResult = await query<{ id: string }>(
-        'SELECT id FROM agents WHERE did = $1 AND user_id = $2',
+        'SELECT id FROM agents WHERE did = $1 AND user_id = $2 AND deleted_at IS NULL',
         [agentDid, userId]
       );
       agentId = agentResult.rows[0]?.id ?? null;
@@ -185,7 +185,8 @@ witnessRouter.get('/agents/:did', async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 

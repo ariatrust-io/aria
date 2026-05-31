@@ -76,6 +76,14 @@ export function generateProof(
         hash: layer[siblingIndex]!,
         position: isRightNode ? 'left' : 'right'
       });
+    } else {
+      // Last node of an odd-length layer. buildMerkleTree pairs it with itself
+      // (right = left), so the proof must replay that self-pairing. Omitting it
+      // made every non power-of-two tree fail to reconstruct the root.
+      siblings.push({
+        hash: layer[currentIndex]!,
+        position: 'right'
+      });
     }
 
     currentIndex = Math.floor(currentIndex / 2);

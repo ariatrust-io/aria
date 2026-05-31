@@ -322,7 +322,8 @@ eventsRouter.post("/batch", requireFeature('batchEvents'), checkEventLimit, asyn
          SELECT user_id FROM api_keys
          WHERE id = $2 AND user_id IS NOT NULL
        )
-     )`,
+     )
+     AND deleted_at IS NULL`,
     [firstEvent.agentDid, req.apiKeyId],
   );
 
@@ -879,7 +880,8 @@ async function ingestEvent(event: IncomingEvent, apiKeyId: string): Promise<{
          SELECT user_id FROM api_keys
          WHERE id = $2 AND user_id IS NOT NULL
        )
-     )`,
+     )
+     AND deleted_at IS NULL`,
     [event.agentDid, apiKeyId],
   );
 

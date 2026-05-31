@@ -265,7 +265,8 @@ gateRouter.post('/request', gateRequestLimiter, requireApiKey, requireFeature('g
       `SELECT id, name, did FROM agents
        WHERE did = $1 AND (
          user_id = $2 OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [agentDid, userId, req.apiKeyId]
     );
 

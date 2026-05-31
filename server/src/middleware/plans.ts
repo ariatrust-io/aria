@@ -136,7 +136,7 @@ export async function checkAgentLimit(
 
     const countResult = await query<{ count: string }>(
       `SELECT COUNT(*) AS count FROM agents
-       WHERE user_id = $1`,
+       WHERE user_id = $1 AND deleted_at IS NULL`,
       [userPlan.userId]
     );
 

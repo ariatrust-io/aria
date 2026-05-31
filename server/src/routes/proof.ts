@@ -4,6 +4,11 @@ import rateLimit from 'express-rate-limit';
 import { query } from '../db/pool.js';
 import { getRedisClient } from '../utils/redis.js';
 import { createRedisStore } from '../utils/network.js';
+import { verifyProof, type MerkleProof } from '../utils/merkle.js';
+
+function sha256(data: string): string {
+  return createHash('sha256').update(data).digest('hex');
+}
 
 /**
  * PUBLIC "LIVE PROOF" API
@@ -356,6 +361,7 @@ proofRouter.post('/public/verify', async (req, res) => {
       agent_id: string;
       event_hash: string | null;
       anchor_hash: string | null;
+      proof_chain: unknown;
     } | undefined;
 
     try {
@@ -367,6 +373,7 @@ proofRouter.post('/public/verify', async (req, res) => {
                 e.signature,
                 e.agent_id::text   AS agent_id,
                 tp.event_hash,
+                tp.proof_chain,
                 ta.anchor_hash
          FROM events e
          LEFT JOIN temporal_proofs  tp ON tp.event_id = e.event_id
@@ -418,6 +425,36 @@ proofRouter.post('/public/verify', async (req, res) => {
       agent_id: row.agent_id
     });
 
+    // v2 proofs carry a Merkle sibling path: prove the event is actually a leaf
+    // of the anchor root (real inclusion), not just that the row still hashes
+    // to its own stored fingerprint.
+    const pc = row.proof_chain as {
+      v?: number;
+      merkle_root?: string;
+      leaf_index?: number;
+      siblings?: MerkleProof['siblings'];
+      event_hash?: string;
+    } | null;
+
+    if (pc && pc.v === 2 && Array.isArray(pc.siblings) && pc.merkle_root) {
+      const integrityOk = recomputed === pc.event_hash;
+      const inclusionOk = verifyProof({
+        leaf: sha256(recomputed),
+        leafIndex: pc.leaf_index ?? 0,
+        siblings: pc.siblings,
+        root: pc.merkle_root
+      });
+      const verified = integrityOk && inclusionOk;
+      return res.json({
+        verified,
+        root: pc.merkle_root,
+        timestamp: row.client_ts,
+        action: row.action,
+        ...(verified ? {} : { reason: 'Merkle inclusion failed — event data may have been altered' })
+      });
+    }
+
+    // Legacy (v1) proofs: row-integrity comparison against the stored fingerprint.
     const verified = recomputed === row.event_hash;
 
     return res.json({

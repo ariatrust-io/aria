@@ -177,6 +177,7 @@ agentsRouter.get("/", async (req, res) => {
         OR
         (a.api_key_id = $2 AND $1 IS NULL)
       )
+      AND a.deleted_at IS NULL
     `;
 
     if (name && typeof name === "string" && name.trim().length > 0) {
@@ -260,7 +261,8 @@ agentsRouter.post("/bulk-delete", async (req, res) => {
     const agentResult = await query<{ id: string }>(
       `SELECT id FROM agents
        WHERE did = ANY($1::text[])
-       AND (user_id = $2 OR api_key_id = $3)`,
+       AND (user_id = $2 OR api_key_id = $3)
+       AND deleted_at IS NULL`,
       [dids, userId, req.apiKeyId]
     );
 
@@ -273,12 +275,13 @@ agentsRouter.post("/bulk-delete", async (req, res) => {
       });
     }
 
+    // Soft-delete: the event log is append-only and legally immutable, so we
+    // never destroy it. We tombstone the agent (hidden everywhere, plan slot
+    // freed) and clear operational state that is safe to remove.
     await transaction(async (client) => {
-      await client.query('DELETE FROM anomalies_archive WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-      await client.query('DELETE FROM anomalies WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-      await client.query('DELETE FROM events WHERE agent_id = ANY($1::uuid[])', [agentIds]);
-      await client.query('DELETE FROM agents WHERE id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM gate_requests WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('DELETE FROM gate_rules WHERE agent_id = ANY($1::uuid[])', [agentIds]);
+      await client.query('UPDATE agents SET deleted_at = NOW() WHERE id = ANY($1::uuid[])', [agentIds]);
     });
 
     return res.json({
@@ -308,7 +311,8 @@ agentsRouter.delete("/:did", async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
@@ -318,14 +322,11 @@ agentsRouter.delete("/:did", async (req, res) => {
 
     const agentId = agentResult.rows[0].id;
 
+    // Soft-delete: keep the immutable event log, drop only operational state.
     await transaction(async (client) => {
       await client.query('DELETE FROM gate_requests WHERE agent_id = $1', [agentId]);
       await client.query('DELETE FROM gate_rules WHERE agent_id = $1', [agentId]);
-      await client.query('DELETE FROM anomalies_archive WHERE agent_id = $1', [agentId]);
-      await client.query('DELETE FROM anomalies WHERE agent_id = $1', [agentId]);
-      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [agentId]);
-      await client.query('DELETE FROM events WHERE agent_id = $1', [agentId]);
-      await client.query('DELETE FROM agents WHERE id = $1', [agentId]);
+      await client.query('UPDATE agents SET deleted_at = NOW() WHERE id = $1', [agentId]);
     });
 
     return res.status(204).send();
@@ -354,7 +355,8 @@ agentsRouter.get("/:did/secret", secretRateLimiter, async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
@@ -423,7 +425,8 @@ agentsRouter.get("/:did/patterns", async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
@@ -504,7 +507,8 @@ agentsRouter.get("/:did", async (req, res) => {
          (a.user_id = $3 AND $3 IS NOT NULL)
          OR
          (a.api_key_id = $2 AND $3 IS NULL)
-       )`,
+       )
+       AND a.deleted_at IS NULL`,
       [req.params.did, req.apiKeyId, userId],
     );
 

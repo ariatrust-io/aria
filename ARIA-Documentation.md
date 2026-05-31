@@ -89,7 +89,11 @@ All routers are mounted under `/v1` except the page routes and `/health`. Routes
 `POST /` registers an agent. Input is `name`, `scope` (array of `verb:resource` strings), an optional `hardwareFingerprint`, and optional `meta`. Two credential modes:
 
 - **Classic (signing version 1).** No hardware fingerprint. The server generates a `secret`, stores its bcrypt hash and an encrypted HMAC key, and returns the secret to the client for signing.
-- **DTS, distributed trusted signing (signing version 2).** A hardware fingerprint is provided. The master secret is split with Shamir's Secret Sharing (threshold 2 of 3). The server keeps a derived key part, the client receives its own key part, and a valid signature requires both parts to agree.
+- **DTS, distributed trusted signing (signing version 2).** A hardware fingerprint is provided. ARIA generates three shares with Shamir's Secret Sharing and derives a key part from each: share A becomes the server side `partialAKey` (stored encrypted), share B is returned to the client, and share C is derived from the hardware fingerprint and stored server side. A valid signature is `HMAC(partial_A || partial_B, "dts_binding")`, so both the server key part and the client key part must agree, and the hardware derived part is checked separately as a binding. This is a split key signing construction; the underlying secret is never reconstructed from the threshold, so the security comes from the dual part HMAC plus the hardware binding rather than from threshold recovery.
+
+The whole signing model is symmetric (shared HMAC secret), so there is no asymmetric key pair. The `public_key` column is not a cryptographic public key: it is a stable fingerprint of the agent's declared scope (the sorted scope joined by `|`), kept for change detection.
+
+Agents are **soft-deleted**: `DELETE /:did` and `bulk-delete` set `deleted_at` rather than removing rows. The event log is append-only and immutable, so the audit trail is never destroyed; the tombstoned agent is hidden from every listing, lookup, ingestion, and gate path, and its plan slot is freed. Operational state (gate requests and rules) is cleared. A hard delete was impossible anyway: events cannot be deleted (database rule) and `events.agent_id` references `agents(id)` without cascade.
 
 `GET /` lists the caller's agents with masked DIDs and summary stats. `GET /:did` returns full detail for one agent including reputation aggregates and top actions.
 
@@ -132,9 +136,9 @@ A read only window onto one hardcoded demo agent, rate limited to 30 requests pe
 | `services/sync-public-reputation.ts` | Mirrors score and trust level into a public reputation table. |
 | `services/anomaly-detector.ts` | Records anomalies (capped per agent), archives and cleans old ones. |
 | `services/pattern-detector.ts` | ARIA Spectrum: turns raw anomalies into described behavioral patterns. |
-| `services/temporal-anchor.ts` | Folds recent events into a running hash chain anchor and verifies individual events against it. |
+| `services/temporal-anchor.ts` | Builds a Merkle tree over each batch of recent events, stores the root as the anchor, and verifies an event's Merkle inclusion against it. |
 | `services/shadow-witness.ts` | Cross checks agent reported counts against an external source. |
-| `services/zeroproof.ts` | Builds Merkle backed proofs of behavior. |
+| `services/zeroproof.ts` | Builds Merkle committed proofs of behavior; verification rebuilds the root from the immutable event log rather than trusting the stored value. |
 | `services/webhook.ts` | Delivers outbound webhook notifications. |
 | `services/oauth.ts` | OAuth flows for Google and GitHub. |
 | `services/email.ts` | Transactional email through Resend. |
@@ -161,7 +165,7 @@ The score never reaches 100 by design. The behavior is locked in by `src/tests/s
 
 ### Temporal anchoring and event sealing (`services/temporal-anchor.ts`)
 
-Each event is hashed over `event_id:action:outcome:client_ts:signature:agent_id`. Anchoring folds the agent's recent event hashes into a running chain hash and stores the resulting `anchor_hash` in `temporal_anchors`, with per event proofs in `temporal_proofs`. To verify an event later, the stored record is rehashed and compared against the sealed proof. If any field of the record changed, the hashes diverge. The public verifier on `/proof` and `POST /v1/temporal/verify/:eventId` both use this mechanism. The `anchor_hash` is what the UI presents as the Merkle or seal root.
+Each event is hashed over `event_id:action:outcome:client_ts:signature:agent_id`. Anchoring builds a Merkle tree over the batch of recent event hashes (up to 500 per anchor) and stores the tree root as `anchor_hash` in `temporal_anchors`. Each event gets a `temporal_proofs` row whose `proof_chain` carries its Merkle sibling path (`{ v: 2, merkle_root, leaf_index, siblings, event_hash }`). To verify an event later, the stored record is rehashed and the sibling path is walked to confirm the leaf actually reconstructs the anchor root. If any field of the record changed, the recomputed leaf no longer rebuilds the root. The public verifier on `/proof` and `POST /v1/temporal/verify/:eventId` both do this real inclusion check, with a fallback to a row integrity comparison for legacy v1 proofs created before the Merkle scheme. `getAnchorSummary` reports `chain_intact` by rebuilding the latest anchor root from its stored leaves, not as a hardcoded value.
 
 ## Authentication (`middleware/auth.ts`)
 
@@ -208,6 +212,7 @@ Feature tables added by migrations (see the named file for exact columns):
 | Plans | `021_plans.sql` |
 | Blocked outcome | `022_blocked_outcome.sql` |
 | Billing | `023_billing.sql`, `024_billing_lemonsqueezy.sql`, `025_business_tier.sql` |
+| Agent soft-delete | `026_agent_soft_delete.sql` |
 
 ### Connection pool (`db/pool.ts`)
 

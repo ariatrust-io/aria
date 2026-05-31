@@ -145,19 +145,13 @@ adminRouter.post('/users/:userId/suspend', async (req, res) => {
 // DELETE /v1/admin/agents/:agentId
 adminRouter.delete('/agents/:agentId', async (req, res) => {
   try {
+    // Soft-delete: the event log is append-only and immutable, so a hard
+    // DELETE FROM events is a no-op and DELETE FROM agents would then fail the
+    // foreign key. We tombstone the agent and clear only operational state.
     await transaction(async (client) => {
       await client.query('DELETE FROM gate_requests WHERE agent_id = $1', [req.params.agentId]);
       await client.query('DELETE FROM gate_rules WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM behavior_patterns WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM witness_checks WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM temporal_proofs WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM temporal_anchors WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM zero_proofs WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM anomalies_archive WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM anomalies WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM reputation_snapshots WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM events WHERE agent_id = $1', [req.params.agentId]);
-      await client.query('DELETE FROM agents WHERE id = $1', [req.params.agentId]);
+      await client.query('UPDATE agents SET deleted_at = NOW() WHERE id = $1', [req.params.agentId]);
     });
 
     await logAdminAction(

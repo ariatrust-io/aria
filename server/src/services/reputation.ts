@@ -258,6 +258,16 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
         effectiveTotal) * 100).toFixed(2)
     : null;
 
+  // Capture the previous score BEFORE the upsert overwrites it, so the
+  // critical-score alert can detect a real downward crossing. Reading it after
+  // the upsert always returned the just-written score, so the alert never fired.
+  const prevSnap = await query<{ prev_score: string | null }>(
+    `SELECT final_score AS prev_score
+     FROM reputation_snapshots WHERE agent_id = $1`,
+    [agentId]
+  );
+  const prevScore = parseFloat(prevSnap.rows[0]?.prev_score ?? '100');
+
   // ── UPSERT SNAPSHOT ──────────────────────────────
   await query(`
     INSERT INTO reputation_snapshots
@@ -303,26 +313,23 @@ async function computeReputationIncremental(agentId: string): Promise<void> {
   });
   setImmediate(async () => {
     try {
-      const countResult = await query<{ count: string }>(
-        `SELECT total_events FROM reputation_snapshots
-         WHERE agent_id = $1`,
+      // Anchor once at least 100 events have accumulated since the last anchor.
+      // (The old code read a non-existent `count` column, so eventCount was
+      // always 0 and 0 % 100 === 0 anchored on every single recompute.)
+      const totalEvents = parseInt(totals.total_events ?? '0');
+      const lastAnchor = await query<{ event_count: number }>(
+        `SELECT event_count FROM temporal_anchors
+         WHERE agent_id = $1 ORDER BY anchor_time DESC LIMIT 1`,
         [agentId]
       );
-      const eventCount = parseInt(countResult.rows[0]?.count ?? '0');
-      if (eventCount % 100 === 0) {
+      const alreadyAnchored = lastAnchor.rows[0]?.event_count ?? 0;
+      if (totalEvents - alreadyAnchored >= 100) {
         await createTemporalAnchor(agentId);
       }
     } catch {}
   });
 
-  // Critical score alert
-  const lastSnap = await query<{ prev_score: string | null }>(
-    `SELECT final_score AS prev_score
-     FROM reputation_snapshots WHERE agent_id = $1`,
-    [agentId]
-  );
-  const prevScore = parseFloat(lastSnap.rows[0]?.prev_score ?? '100');
-
+  // Critical score alert — uses prevScore captured before the upsert above.
   if (finalScore < 20 && prevScore >= 20) {
     const agentInfo = await query<{
       user_id: string | null; did: string; name: string

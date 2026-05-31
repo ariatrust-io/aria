@@ -25,7 +25,8 @@ temporalRouter.post('/anchor/:did', requireFeature('temporalAnchor'), async (req
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
@@ -114,7 +115,8 @@ temporalRouter.get('/anchors/:did', async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
@@ -155,7 +157,8 @@ temporalRouter.get('/anchors/:did/list', async (req, res) => {
        WHERE did = $1 AND (
          (user_id = $2 AND $2 IS NOT NULL)
          OR api_key_id = $3
-       )`,
+       )
+       AND deleted_at IS NULL`,
       [req.params.did, userId, req.apiKeyId]
     );
 
