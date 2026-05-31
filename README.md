@@ -45,8 +45,8 @@ The results have been costly:
 | **ARIA Gate** | Pause destructive actions, require human approval |
 | **ARIA Spectrum** | Detect behavioral patterns automatically |
 | **Shadow Witness** | Cross-verify actions against external sources |
-| **Temporal Anchor** | Cryptographic timestamp proofs |
-| **ZeroProof** | Prove behavior without revealing data |
+| **Temporal Anchor** | Merkle inclusion proofs sealing every event |
+| **ZeroProof** | Merkle-committed behavioral proofs an auditor can recompute |
 
 ---
 
@@ -189,7 +189,7 @@ last 7 days. This pattern suggests a bug in a nightly scheduled job."*
 
 ## ZeroProof — Behavioral Proofs
 
-Prove agent behavior without revealing sensitive data:
+Provable claims about agent behavior that any outside auditor can recompute:
 
 ```bash
 # Proof of Innocence
@@ -208,8 +208,10 @@ POST /v1/zeroproof/limits
 # → "Agent never exceeded 100 events/hour"
 ```
 
-All proofs use Merkle tree commitments —
-cryptographically verifiable by any auditor.
+Each proof commits the underlying event log to a Merkle root,
+so any auditor can recompute that root and confirm the claim.
+Today these are honest Merkle commitments, not zero-knowledge proofs:
+hiding the underlying numbers is the planned zk-SNARK upgrade (Phase 7b).
 
 ---
 
