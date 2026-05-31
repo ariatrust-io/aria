@@ -1,61 +1,101 @@
-# ARIA
+# ARIA — Trust Infrastructure for AI Agents
 
-**Your AI agents take real actions on their own. Do you actually know what they did?**
+> Observe. Verify. Control. Stop damage before it happens.
 
-ARIA is the black box for your AI agents. The risk with an autonomous agent is not that it turns evil one day. The risk is that it makes thousands of decisions you never see, and when one of them is wrong you have no way to know what really happened or to prove it to anyone else. ARIA records every action an agent takes into an immutable, cryptographically sealed log, so you always have a precise and tamper proof answer to what was done, when, by which agent, and under whose configuration. It is the flight recorder for autonomous software: when a decision goes wrong, you have the record instead of a guess.
+ARIA is an open-source trust and enforcement infrastructure
+for AI agents. Every agent gets a cryptographic identity,
+an immutable audit trail, a verified trust score, and
+human-in-the-loop enforcement before critical actions execute.
 
-On top of that record, ARIA gives every agent a verifiable identity, a live trust score based on real behavior, and an optional human approval gate for the few actions you decide are too risky to run unattended. Control and auditability first, with prevention where you ask for it.
-
-It is a normal B2B SaaS product. You talk to it over an HTTPS API with an API key, you watch your agents from a web dashboard, and you pay a monthly subscription. There is no blockchain, no token, and no wallet. Just an API, a database, and a dashboard.
-
-[![npm](https://img.shields.io/npm/v/@ariatrust-io/aria-sdk)](https://www.npmjs.com/package/@ariatrust-io/aria-sdk)
+[![npm version](https://img.shields.io/npm/v/@ariatrust-io/aria-sdk)](https://www.npmjs.com/package/@ariatrust-io/aria-sdk)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
 
-## See it working on real data
+---
 
-Before reading another word, look at a real agent under ARIA, with live and verifiable data:
+## Why ARIA Exists
 
-**[ariatrust.org/proof](https://ariatrust.org/proof)**
+AI agents are being deployed to production environments
+where they can take real actions — deleting data, sending
+emails, moving funds, modifying configurations — with
+minimal human oversight.
 
-That page shows tens of thousands of real actions from a production agent: successes, errors, and actions ARIA blocked. You can download the logs as CSV and paste any event ID into the verifier to recompute its cryptographic seal yourself. Nothing on that page is mocked.
+The results have been costly:
 
-## The problem ARIA solves
+- A coding agent executed `DROP DATABASE` on a production
+  system, then fabricated system logs to cover its tracks.
+  There was no audit trail.
+- An internal AI agent exposed sensitive company data due
+  to a scope error — accessing resources it was never
+  authorized to touch.
+- An autonomous agent platform was compromised, giving
+  attackers full control over every agent action. Users
+  lost funds with no cryptographic proof of what occurred.
 
-An autonomous agent can delete a production database, move money, or touch customer records, and then report whatever it wants about what it did. When something goes wrong at scale, across thousands of agents making decisions on their own, the hard question is not "what is my agent allowed to do". The hard question is "what did it actually do, and can I prove it to an auditor, a regulator, or a customer". Without a record you control and cannot alter, it is your word against the algorithm's.
+**ARIA exists to solve exactly this.**
 
-ARIA answers that question with four things working together:
+---
 
-1. **Identity.** Every agent gets an unforgeable decentralized identifier (`did:agentrust:...`).
-2. **Sealed audit trail.** Every action is signed and written to an append only log that cannot be edited or deleted, then sealed into a hash chain.
-3. **Enforcement.** ARIA checks each action against the scope the agent was declared with, and can pause destructive actions for human approval.
-4. **Reputation.** Each agent earns a trust score from its verified behavior over time.
+## What ARIA Does
 
-## Quickstart (using ARIA in your app)
+| Feature | Description |
+|---------|-------------|
+| **Cryptographic Identity** | Every agent gets a DID (`did:agentrust:<uuid>`) |
+| **Immutable Audit Trail** | Every action signed with HMAC-SHA256 |
+| **Trust Score** | 5-dimension behavioral score (0-95) |
+| **ARIA Gate** | Pause destructive actions, require human approval |
+| **ARIA Spectrum** | Detect behavioral patterns automatically |
+| **Shadow Witness** | Cross-verify actions against external sources |
+| **Temporal Anchor** | Cryptographic timestamp proofs |
+| **ZeroProof** | Prove behavior without revealing data |
+
+---
+
+## Quick Start
+
+### 1. Install the SDK
 
 ```bash
 npm install @ariatrust-io/aria-sdk
 ```
 
+### 2. Register your agent
+
 ```typescript
 import { createClient } from '@ariatrust-io/aria-sdk';
 
-const aria = createClient({ apiKey: process.env.ARIA_API_KEY });
-
-// Register your agent once. The scope is the list of actions it is allowed to do.
-const agent = await aria.registerAgent({
-  name: 'invoice-processor',
-  scope: ['read:invoices', 'send:email', 'write:database']
+const aria = createClient({
+  baseUrl: 'https://ariatrust.org',
+  apiKey: process.env.ARIA_API_KEY
 });
 
-// Wrap any action in one line. ARIA signs it, checks scope, and records it.
-await aria.track(agent.did, agent.secret, 'read:invoices',
-  () => fetchInvoices()
+const agent = await aria.registerAgent({
+  name: 'my-agent',
+  scope: ['read:data', 'write:orders', 'send:email']
+});
+
+// Save these — required for tracking
+console.log(agent.did);    // did:agentrust:...
+console.log(agent.secret); // keep this secret
+```
+
+### 3. Track agent actions
+
+```typescript
+// Default mode — blocking, returns insights
+const result = await aria.track(
+  agent.did,
+  agent.secret,
+  'read:data',
+  async () => fetchUserData(userId)
+);
+
+// Light mode — fire and forget, zero latency
+await aria.track(did, secret, 'read:data', fn,
+  { mode: 'light' }
 );
 ```
 
-After that, the agent has a cryptographic identity, an immutable record of every action, a trust score that updates in real time, and automatic scope enforcement.
-
-### Stop destructive actions before they happen
+### 4. Require human approval for critical actions
 
 ```typescript
 import { GateDeniedException } from '@ariatrust-io/aria-sdk';
@@ -65,21 +105,32 @@ try {
     agent.did,
     agent.secret,
     'delete:records',
-    () => deleteRecords(ids),
-    { mode: 'gate' }
+    async () => deleteRecords(ids),
+    {
+      mode: 'gate',
+      gate: {
+        requireApproval: ['delete:*'],
+        autoBlock: ['drop:*', 'truncate:*'],
+        timeoutMs: 5 * 60 * 1000
+      }
+    }
   );
 } catch (err) {
   if (err instanceof GateDeniedException) {
-    console.log('Owner denied the action. Records are safe.');
+    console.log('Owner denied — action blocked');
   }
 }
 ```
 
-When a gated action fires, execution pauses immediately, the owner gets a notification, and nothing runs until a human approves or denies it from the dashboard. If there is no response within five minutes, the action is denied by default.
+When a gated action is triggered:
+1. Execution pauses immediately
+2. Owner receives a notification
+3. Owner approves or denies from their dashboard
+4. If no response in 5 minutes → automatically denied
 
-A note on how enforcement actually works, because this is security infrastructure and the distinction matters. The block happens inside the SDK, in your agent's own process: `track()` runs the scope check and the gate *before* it ever calls your function, so a denied or out-of-scope action never executes. That is real pre-execution prevention, not after-the-fact detection. But it is cooperative. ARIA enforces the actions you route through the SDK in `enforce` or `gate` mode. It is not a network-level kill switch that can stop an agent from doing something it never wrapped with `track()`. For anything outside that wrapper, ARIA's guarantee is the audit trail: it records and can flag what happened, but it did not stand in front of it. The `light` mode is detection only by design, running the scope check in the background so it adds no latency while your function runs regardless.
+---
 
-### LangChain
+## LangChain Integration
 
 ```typescript
 import { wrapTools } from '@ariatrust-io/aria-sdk/langchain';
@@ -91,184 +142,178 @@ const tools = wrapTools(
 );
 ```
 
-Every tool call is tracked automatically. No other changes to your agent code are needed.
-
-## How it is built
-
-ARIA runs as two processes that talk over localhost.
-
-```
-Internet
-   |
-[ Cloudflare ]
-   |
-[ membrane.ts ]      public edge on port 8080
-   |  default-deny path allowlist (config/public-routes.ts)
-   |  rate limiting, scanner blocking, IP bans
-   v
-[ index.ts ]         internal API on port 3000, never exposed directly
-   |
-[ PostgreSQL ]  +  [ Redis ]
-```
-
-**The membrane** is the only thing the public can reach. It forwards a request to the internal API only if the path is on an explicit allowlist, and rejects everything else with a 404 before it touches application code. The allowlist lives in one file, `server/src/config/public-routes.ts`, and a test in `server/src/tests/membrane.test.ts` fails the build if a route is exposed or removed without a matching, reviewed change. That turns "I forgot to expose a new route" into a loud test failure instead of a silent production 404.
-
-**The internal API** holds all the real logic: agents, events, gating, scoring, billing, and the rest. It assumes it is never reached except through the membrane.
-
-Stack: Node with TypeScript (run directly through `tsx`), Express 5, PostgreSQL through `pg`, Redis through `ioredis`, deployed on Railway behind Cloudflare. Payments run through Lemon Squeezy. The web dashboard and landing pages are plain HTML served from `server/src/public`.
-
-### Repository layout
-
-```
-server/        Express API, membrane, dashboard, landing pages
-  src/
-    index.ts             internal API entry
-    membrane.ts          public edge / proxy
-    config/              plans, public route allowlist
-    routes/              agents, events, gate, proof, billing, ...
-    services/            reputation, anomaly detection, temporal anchor, ...
-    db/                  pool, schema.sql, migrations/
-    public/              landing, dashboard, /proof, legal pages
-    tests/               crypto, hmac, api, scoring, membrane
-sdk/           TypeScript SDK published as @ariatrust-io/aria-sdk
-simulator/     load and behavior simulator used to generate demo traffic
-```
-
-## How the cryptography actually works
-
-Nothing here requires you to trust ARIA's word. Each piece is independently checkable.
-
-**Signed events.** Each event is signed with the agent's HMAC key over a fixed payload (event id, agent DID, action, outcome, timestamp). The server verifies the signature with a timing safe comparison. There is also a stronger split key signing mode (version 2) where the final signature only validates if both a server side key part and a client side key part agree.
-
-**Server side scope check.** The agent reports whether an action was in scope, but the server does not trust that flag. It re checks the action against the scope stored in the database and records its own verdict in `server_within_scope`. An action outside scope is flagged no matter what the agent claimed.
-
-**Immutable log.** The `events` table has database rules that turn any `UPDATE` or `DELETE` into a no op. History cannot be rewritten, even by the application.
-
-**Temporal anchors.** Periodically ARIA folds an agent's recent events into a running hash chain and stores the resulting anchor hash. To verify an event later, ARIA recomputes its hash from the stored record and checks it against that sealed anchor. If a single byte of the record were altered, the hashes would no longer match. This is exactly what the public verifier on `/proof` does.
-
-## Public live proof API
-
-A read only, anonymized view of one demo agent, hardcoded to a single identity and rate limited to 30 requests per minute per IP. Every query selects only safe columns, so signatures, secrets, full DIDs, user ids, and payloads are never returned.
-
-| Endpoint | Returns |
-|---|---|
-| `GET /v1/proof/public/stats` | Aggregate counters, agent age, latest seal root, and a sample event id to try |
-| `GET /v1/proof/public/events?limit=50` | Recent events, anonymized |
-| `GET /v1/proof/public/download/:type` | CSV of `good`, `bad`, or `gated` events (up to 50 rows) |
-| `POST /v1/proof/public/verify` | Recomputes an event hash and checks it against the sealed root |
+---
 
 ## Trust Score
 
-Every agent gets a score from 0 to 95 based on its last 30 days of behavior, across five dimensions, all rate based rather than count based.
+Every agent has a score from 0 to 95 based on behavior
+over the last 30 days. Calculated across 5 dimensions:
 
-| Dimension | Weight |
-|---|---|
-| Success rate | 40% |
-| Scope compliance | 30% |
-| Behavioral consistency | 15% |
-| Clean history | 10% |
-| Recent trend | 5% |
+| Dimension | Weight | Description |
+|-----------|--------|-------------|
+| Success Rate | 40% | Rate of successful actions |
+| Scope Compliance | 30% | Actions within declared scope |
+| Consistency | 15% | Behavioral stability over time |
+| Clean History | 10% | No critical security incidents |
+| Recent Trend | 5% | Improving or worsening pattern |
 
-Because the dimensions are rate based, an agent with a million events and a 6% violation rate scores the same as one with a thousand events at the same rate. Volume does not inflate the penalty. The score never reaches a perfect 100, because perfect certainty is not something this system claims to offer.
+Score is based on **rates**, not counts.
+An agent with 1,000 events and 6% violations
+scores the same as one with 1,000,000 events
+and 6% violations.
 
 | Score | Level |
-|---|---|
-| 80 to 95 | TRUSTED |
-| 50 to 79 | NEUTRAL |
-| 0 to 49 | UNTRUSTED |
+|-------|-------|
+| 80-95 | TRUSTED |
+| 50-79 | NEUTRAL |
+| 0-49  | UNTRUSTED |
 
-## More capabilities
+---
 
-<details>
-<summary>ARIA Spectrum: behavioral pattern detection</summary>
+## ARIA Spectrum — Behavioral Pattern Detection
 
-Instead of a bare "anomaly detected", ARIA describes the pattern in plain language, for example: your agent attempts `delete:records` outside its declared scope between 11pm and 1am, 8 times in 7 days, which looks like a bug in a nightly cron job. It detects repeated action failures, time of day clustering, repeated scope violations, and sudden frequency spikes that suggest a runaway loop.
+ARIA automatically detects patterns across agent behavior:
 
-</details>
+- **Action Failure Patterns** — specific actions failing repeatedly
+- **Temporal Patterns** — failures clustering at specific hours
+- **Scope Violation Patterns** — unauthorized actions attempted repeatedly
+- **Frequency Spikes** — sudden burst of events (possible runaway loop)
 
-<details>
-<summary>ZeroProof: prove behavior without revealing data</summary>
+Instead of: *"Anomaly detected on delete:records"*
 
-```bash
-POST /v1/zeroproof/innocence    # prove an agent never ran a forbidden action
-POST /v1/zeroproof/consistency  # prove a success rate stayed above a threshold
-POST /v1/zeroproof/limits       # prove a rate limit was never exceeded
-```
+You get: *"Your agent attempts delete:records outside its declared
+scope consistently between 11pm and 1am. 8 occurrences in the
+last 7 days. This pattern suggests a bug in a nightly scheduled job."*
 
-Each proof is backed by a Merkle commitment that an external auditor can check without access to your system.
+---
 
-</details>
+## ZeroProof — Behavioral Proofs
 
-<details>
-<summary>Shadow Witness: external cross verification</summary>
-
-Register an outside source to check what your agent reports against what actually happened. If the agent says it sent 100 emails but your email provider reports 47, ARIA flags the discrepancy.
+Prove agent behavior without revealing sensitive data:
 
 ```bash
-POST /v1/witness/sources      # register an external source
-POST /v1/witness/confirm/:id  # submit the external count
+# Proof of Innocence
+POST /v1/zeroproof/innocence
+{ "agentDid": "...", "forbidden_pattern": "delete:*" }
+# → "Agent never executed delete:* in last 30 days"
+
+# Proof of Consistency  
+POST /v1/zeroproof/consistency
+{ "agentDid": "...", "min_success_rate": 90 }
+# → "Agent maintained ≥90% success rate"
+
+# Proof of Limits
+POST /v1/zeroproof/limits
+{ "agentDid": "...", "max_events_per_hour": 100 }
+# → "Agent never exceeded 100 events/hour"
 ```
 
-</details>
+All proofs use Merkle tree commitments —
+cryptographically verifiable by any auditor.
 
-<details>
-<summary>SIEM export (OpenTelemetry)</summary>
+---
 
-```bash
-GET /v1/events/export?format=otel&agentDid=did:agentrust:...
+## API Reference
+
+Base URL: `https://ariatrust.org`  
+Auth: `Authorization: Bearer <api-key>`
+
+**Agents**
+```
+POST   /v1/agents                    Register agent
+GET    /v1/agents                    List agents
+GET    /v1/agents/:did               Agent details + trust score
+GET    /v1/agents/:did/patterns      Behavioral patterns (Spectrum)
+GET    /v1/agents/:did/secret        Recover agent secret
+DELETE /v1/agents/:did               Delete agent
 ```
 
-Each event becomes an OpenTelemetry log record with typed attributes (agent DID and name, action, outcome, in scope flag, signature validity, duration, trust score at export). Severity maps as success to INFO, blocked to WARN, error and anomaly to ERROR. Works with any OTEL capable destination, including Splunk, Datadog, AWS CloudWatch, Grafana Loki, and Elastic.
-
-</details>
-
-## Running it locally
-
-You need Node 20+, a PostgreSQL database, and optionally Redis (the rate limiters fall back to memory if Redis is absent).
-
-```bash
-cd server
-npm install
-cp .env.example .env        # then fill in DATABASE_URL, SETUP_KEY, and the rest
-# apply the SQL in src/db/migrations in order against your database
-npm start                   # runs the internal API and the membrane together
+**Events**
+```
+POST   /v1/events                    Track single event
+POST   /v1/events/batch              Track up to 500 events
+GET    /v1/events                    List events
+GET    /v1/events/export             Export as CSV or JSON
 ```
 
-`npm start` launches `index.ts` and `membrane.ts` side by side. The public surface is the membrane port (`PORT`, default 8080), and the internal API listens on `INTERNAL_PORT` (default 3000) bound to localhost.
-
-### Tests
-
-```bash
-npm test
+**ARIA Gate**
+```
+POST   /v1/gate/request              Request human approval
+GET    /v1/gate/request/:id          Check approval status
+POST   /v1/gate/approve/:id          Approve action
+POST   /v1/gate/deny/:id             Deny action
+GET    /v1/gate/pending              List pending approvals
 ```
 
-The suite covers HMAC signing, the encryption helpers, the trust score math, the public API contract against the live server, and the membrane route allowlist (including the guardrail that prevents silent route exposure or removal).
+**ZeroProof**
+```
+POST   /v1/zeroproof/innocence       Proof of Innocence
+POST   /v1/zeroproof/consistency     Proof of Consistency
+POST   /v1/zeroproof/limits          Proof of Limits
+GET    /v1/zeroproof/verify/:id      Verify a proof
+GET    /v1/zeroproof/list/:did       List proofs for agent
+```
+
+**Webhooks**
+```
+POST   /v1/webhooks                  Register webhook
+GET    /v1/webhooks                  List webhooks
+DELETE /v1/webhooks/:id              Remove webhook
+```
+
+---
+
+## Roadmap
+
+- [x] **Phase 1** — Core: DID, HMAC signing, audit trail, trust score
+- [x] **Phase 2** — Production: Dashboard, 2FA, webhooks, Redis, security hardening
+- [x] **Phase 3** — ARIA Gate: Human-in-the-loop enforcement
+- [x] **Phase 4** — ARIA Spectrum: Behavioral pattern detection
+- [x] **Phase 5** — Shadow Witness: Independent action verification
+- [x] **Phase 6** — Temporal Anchor: Cryptographic timestamp proofs
+- [x] **Phase 7** — ZeroProof: Merkle tree behavioral proofs
+- [ ] **Phase 7b** — ZeroProof ZK: Full zk-SNARKs implementation
+- [ ] **Phase 8** — ARIA Shadow Witness: External source connectors
+- [ ] **Python SDK** — `pip install aria-sdk`
+- [ ] **Go SDK** — `go get ariatrust.org/go-sdk`
+- [ ] **SOC 2 Type II** — Enterprise compliance certification
+- [ ] **Docker Compose** — Self-hosting for enterprise
+
+---
 
 ## Security
 
-- AES-256-GCM encryption with context bound additional data
-- HMAC-SHA256 signatures with timing safe comparison, plus an optional split key signing mode
-- Append only event log enforced at the database level
-- Two factor authentication on accounts
-- Redis backed rate limiting at both the edge and per agent
-- Replay protection with a five minute timestamp window
-- A default-deny public edge that blocks and bans scanners
+- AES-256-GCM encryption with AAD context binding
+- HMAC-SHA256 with timing-safe comparison
+- 2FA on all user logins
+- Redis-backed rate limiting on all endpoints
+- IP blocking via Membrane security proxy
+- Replay attack protection (5-minute window)
+- 34/34 internal security tests passing
+- 0 known vulnerabilities (npm audit clean)
 
-Report a security issue to dhdez3149@gmail.com.
+Report security issues to: security@ariatrust.org
 
-## Status
+---
 
-In production at [ariatrust.org](https://ariatrust.org). Shipped so far: DID identity, HMAC signing, immutable audit trail, trust score, dashboard with 2FA, webhooks, ARIA Gate, ARIA Spectrum, Shadow Witness, Temporal Anchor, ZeroProof with Merkle commitments, subscription billing, and the public live proof page. On the roadmap: zk-SNARK backed proofs, a Python SDK, a Go SDK, and SOC 2 Type II.
+## Stack
 
-## Links
+Node.js · TypeScript · Express · PostgreSQL · Redis ·
+Cloudflare · Railway
 
-- Website: https://ariatrust.org
-- Live proof: https://ariatrust.org/proof
-- Dashboard: https://ariatrust.org/app
-- Docs: https://ariatrust.org/docs
-- Pricing: https://ariatrust.org/pricing
-- npm: https://www.npmjs.com/package/@ariatrust-io/aria-sdk
+---
 
 ## License
 
-BUSL-1.1. Free for non production use. Contact dhdez3149@gmail.com for commercial licensing.
+BUSL-1.1 — See [LICENSE](LICENSE) for details.
+
+---
+
+## Links
+
+- **Website**: https://ariatrust.org
+- **Dashboard**: https://ariatrust.org/app
+- **Docs**: https://ariatrust.org/docs
+- **Pricing**: https://ariatrust.org/pricing
+- **npm**: https://www.npmjs.com/package/@ariatrust-io/aria-sdk
+- **GitHub**: https://github.com/ariatrust-io/aria
