@@ -4,6 +4,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { getRedisClient } from './utils/redis.js';
+import { isPublicPath } from './config/public-routes.js';
 
 const app = express();
 const INTERNAL_PORT = parseInt(process.env.INTERNAL_PORT || "3000", 10);
@@ -108,39 +109,11 @@ app.use((req, res, next) => {
   next();
 });
 
-const ALLOWED_PATHS = [
-  "/",
-  "/app",
-  "/privacy",
-  "/terms",
-  "/acceptable-use",
-  "/cookies",
-  "/docs",
-  "/pricing",
-  "/proof",
-  "/reset-password",
-  "/health",
-  "/v1/setup",
-  "/v1/agents",
-  "/v1/events",
-  "/v1/auth",
-  "/v1/api-keys",
-  "/v1/webhooks",
-  "/v1/gate",
-  "/v1/witness",
-  "/v1/temporal",
-  "/v1/zeroproof",
-  "/v1/admin",
-  "/v1/billing",
-  "/v1/proof",
-];
-
+// Allowlist lives in config/public-routes.ts (single source of truth, shared
+// with the guardrail test). Default-deny: anything not listed is 404'd here
+// before reaching the internal API.
 app.use((req, res, next) => {
-  // "/" must be exact-matched — startsWith("/") would pass everything
-  const allowed = ALLOWED_PATHS.some((p) =>
-    p === "/" ? req.path === "/" : req.path.startsWith(p)
-  );
-  if (!allowed) {
+  if (!isPublicPath(req.path)) {
     res.status(404).json({ error: 'Not Found', code: 'NOT_FOUND' });
     return;
   }
