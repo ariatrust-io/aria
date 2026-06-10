@@ -6,167 +6,171 @@
 <title>Pricing — ARIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --black:#030507;
-  --navy:#06080f;
-  --gold:#c9a84c;
-  --gold-lt:#e8c87a;
-  --gold-dim:rgba(201,168,76,0.15);
-  --white:#f8f4ee;
-  --gray:rgba(248,244,238,0.45);
-  --surface:#07090f;
-  --border:rgba(255,255,255,0.06);
-  --border-gold:rgba(201,168,76,0.2);
+  --paper:       oklch(98% 0.003 150);
+  --paper-shade: oklch(95.5% 0.006 150);
+  --ink:         oklch(24% 0.015 160);
+  --ink-soft:    oklch(42% 0.015 160);
+  --ink-faint:   oklch(55% 0.012 160);
+  --green:       oklch(38% 0.085 155);
+  --green-deep:  oklch(31% 0.07 155);
+  --green-wash:  oklch(94% 0.02 155);
+  --rule:        oklch(86% 0.01 150);
+  --rule-strong: oklch(70% 0.012 150);
+  --on-green:        oklch(98% 0.005 150);
+  --on-green-soft:   oklch(86% 0.03 152);
+  --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --z-nav: 100;
+  --z-menu: 90;
 }
 html{scroll-behavior:smooth}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden}
+body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--green);color:var(--on-green)}
+h1,h2,h3{text-wrap:balance}
+a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(4,6,13,0.6);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.1);z-index:1000;transition:background .3s,border-color .3s}
-nav.scrolled{background:rgba(4,6,13,0.96);border-bottom-color:rgba(201,168,76,0.2)}
+nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:color-mix(in oklch, var(--paper) 92%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);z-index:var(--z-nav);transition:background-color .3s}
+nav.scrolled{background:var(--paper)}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-text{font-weight:600;font-size:16px;letter-spacing:6px;color:var(--gold-lt)}
+.nav-logo-text{font-weight:800;font-size:18px;letter-spacing:0.14em;color:var(--ink)}
 .nav-links{display:flex;align-items:center;gap:32px;list-style:none}
-.nav-links a{font-size:14px;color:rgba(248,244,238,0.55);text-decoration:none;transition:color .2s}
-.nav-links a:hover{color:var(--white)}
-.nav-links a.active{color:var(--gold-lt)}
+.nav-links a{font-size:14px;font-weight:500;color:var(--ink-soft);text-decoration:none;transition:color .15s ease}
+.nav-links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.nav-links a.active{color:var(--ink);font-weight:600}
 .nav-actions{display:flex;align-items:center;gap:12px}
-.btn-sm-outline{padding:7px 18px;border:1px solid rgba(201,168,76,0.4);background:transparent;color:var(--gold-lt);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s}
-.btn-sm-outline:hover{border-color:var(--gold);background:rgba(201,168,76,0.07)}
-.btn-sm-gold{padding:7px 18px;background:linear-gradient(135deg,#c9a84c,#e8c87a);color:#04060d;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;border-radius:4px;cursor:pointer;text-decoration:none;transition:opacity .2s,transform .15s}
-.btn-sm-gold:hover{opacity:.88;transform:translateY(-1px)}
-.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
-.hamburger span{display:block;width:22px;height:2px;background:var(--gold-lt);transition:all .3s}
-.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:rgba(4,6,13,0.98);border-bottom:1px solid rgba(201,168,76,0.15);padding:24px 32px;flex-direction:column;gap:20px;z-index:999}
+.btn-sm-outline{padding:8px 18px;border:1px solid var(--rule-strong);background:transparent;color:var(--ink);font-family:var(--font-sans);font-size:13px;font-weight:500;border-radius:3px;cursor:pointer;text-decoration:none;transition:border-color .15s ease}
+.btn-sm-outline:hover{border-color:var(--ink)}
+.btn-sm-solid{padding:8px 18px;background:var(--green);color:var(--on-green);font-family:var(--font-sans);font-size:13px;font-weight:600;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:background-color .15s ease}
+.btn-sm-solid:hover{background:var(--green-deep)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;background:none;border:none}
+.hamburger span{display:block;width:22px;height:2px;background:var(--ink)}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--paper);border-bottom:1px solid var(--rule);padding:24px 40px;flex-direction:column;gap:18px;z-index:var(--z-menu)}
 .mobile-menu.open{display:flex}
-.mobile-menu a{color:rgba(248,244,238,0.75);text-decoration:none;font-size:16px}
+.mobile-menu a{color:var(--ink-soft);text-decoration:none;font-size:16px;font-weight:500}
+.mobile-menu a:hover{color:var(--ink)}
 
 /* HERO */
-.pricing-hero{padding:130px 24px 72px;text-align:center;background:radial-gradient(ellipse 100% 60% at 50% 0%,rgba(6,9,20,1) 0%,var(--black) 65%);position:relative;overflow:hidden}
-.pricing-hero::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(201,168,76,0.05) 0%,transparent 70%);pointer-events:none}
-.pricing-hero-label{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);border-radius:100px;font-size:12px;font-weight:500;color:var(--gold-lt);letter-spacing:.5px;margin-bottom:28px;opacity:0;animation:fadeUp .6s ease .1s forwards}
-.pricing-hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,6vw,72px);font-weight:600;line-height:1.06;letter-spacing:-1px;color:var(--white);margin-bottom:18px;opacity:0;animation:fadeUp .7s ease .2s forwards}
-.pricing-hero p{font-size:17px;font-weight:300;color:var(--gray);max-width:440px;margin:0 auto;line-height:1.7;opacity:0;animation:fadeUp .7s ease .3s forwards}
+.pricing-hero{padding:148px 24px 64px;text-align:center}
+.pricing-hero h1{font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.08;letter-spacing:-0.02em;color:var(--ink);margin-bottom:18px}
+.pricing-hero p{font-size:16.5px;color:var(--ink-soft);max-width:48ch;margin:0 auto;line-height:1.7}
 
 /* PLANS */
-.plans-section{padding:80px 24px 0}
+.plans-section{padding:24px 24px 0}
 .plans-inner{max-width:1320px;margin:0 auto}
 .plans-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;align-items:stretch}
 
-.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px 24px;display:flex;flex-direction:column;position:relative;transition:transform .25s,box-shadow .25s}
-.plan-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,0.5)}
-.plan-card.featured{border-color:var(--border-gold);background:linear-gradient(160deg,#090c14 0%,#07090f 100%)}
-.plan-card.featured::before{content:'';position:absolute;inset:0;border-radius:10px;border:1px solid rgba(201,168,76,0.3);pointer-events:none}
+.plan-card{background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;padding:36px 28px;display:flex;flex-direction:column;position:relative}
+.plan-card.featured{border-color:var(--green)}
+.plan-flag{position:absolute;top:-1px;right:20px;background:var(--green);color:var(--on-green);font-family:var(--font-mono);font-size:9.5px;font-weight:600;letter-spacing:0.12em;padding:4px 10px;border-radius:0 0 3px 3px;text-transform:uppercase}
 
-.plan-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;width:fit-content}
-.badge-free{background:rgba(248,244,238,0.06);border:1px solid rgba(248,244,238,0.15);color:rgba(248,244,238,0.4)}
-.badge-popular{background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.35);color:var(--gold-lt)}
-.badge-business{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.28);color:var(--gold)}
-.badge-enterprise{background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);color:rgba(201,168,76,0.7)}
+.plan-name{font-size:15px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);margin-bottom:8px}
+.plan-price{font-size:42px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin-bottom:4px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.plan-price .currency{font-size:22px;font-weight:600;vertical-align:top;margin-top:6px;display:inline-block}
+.plan-price .period{font-size:14px;font-weight:500;color:var(--ink-soft);letter-spacing:0}
+.plan-price.ent{font-size:34px;line-height:1.2;padding-top:8px}
+.plan-desc{font-size:13.5px;color:var(--ink-soft);margin-bottom:26px;margin-top:6px;line-height:1.6}
 
-.plan-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--white);margin-bottom:8px}
-.plan-price{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:600;line-height:1;margin-bottom:4px}
-.plan-price .currency{font-size:24px;font-weight:400;vertical-align:top;margin-top:10px;display:inline-block}
-.plan-price .period{font-size:16px;font-weight:300;color:var(--gray)}
-.plan-price.starter{color:rgba(248,244,238,0.55)}
-.plan-price.pro{color:var(--gold-lt)}
-.plan-price.biz{color:var(--gold-lt)}
-.plan-price.ent{color:rgba(201,168,76,0.65);font-size:36px;line-height:1.2;padding-top:8px}
-.plan-desc{font-size:13.5px;color:var(--gray);margin-bottom:28px;margin-top:6px;line-height:1.6}
-
-.plan-divider{height:1px;background:var(--border);margin-bottom:24px}
+.plan-divider{height:1px;background:var(--rule);margin-bottom:22px}
 .plan-features{list-style:none;display:flex;flex-direction:column;gap:11px;flex:1;margin-bottom:32px}
-.plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:rgba(248,244,238,0.6);line-height:1.45}
-.plan-features li svg{flex-shrink:0;margin-top:2px}
-.plan-features li.dim{color:rgba(248,244,238,0.25)}
-.plan-features li.section-hdr{color:rgba(248,244,238,0.35);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.plan-features li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--ink);line-height:1.5}
+.plan-features li svg{flex-shrink:0;margin-top:3px}
+.plan-features li svg path{stroke:var(--green)}
+.plan-features li.dim{color:var(--ink-faint)}
+.plan-features li.dim svg path{stroke:var(--ink-faint)}
+.feat-overage{font-family:var(--font-mono);font-size:12px;color:var(--green)}
 
-.plan-cta{display:block;text-align:center;padding:12px 24px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer}
-.cta-starter{border:1px solid rgba(248,244,238,0.2);color:rgba(248,244,238,0.65);background:transparent}
-.cta-starter:hover{border-color:rgba(248,244,238,0.4);color:var(--white);background:rgba(255,255,255,0.04)}
-.cta-pro{background:linear-gradient(135deg,#c9a84c,#e8c87a);color:#04060d}
-.cta-pro:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.2)}
-.cta-biz{background:linear-gradient(135deg,#b8922e,#d4a84a);color:#04060d}
-.cta-biz:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.25)}
-.cta-ent{border:1px solid rgba(201,168,76,0.35);color:rgba(201,168,76,0.8);background:rgba(201,168,76,0.04)}
-.cta-ent:hover{border-color:var(--gold);color:var(--gold-lt);background:rgba(201,168,76,0.08)}
+.plan-cta{display:block;text-align:center;padding:13px 24px;border-radius:3px;font-family:var(--font-sans);font-size:14px;font-weight:600;text-decoration:none;transition:background-color .15s ease,border-color .15s ease;cursor:pointer}
+.cta-starter{border:1px solid var(--rule-strong);color:var(--ink);background:transparent}
+.cta-starter:hover{border-color:var(--ink)}
+.cta-pro{background:var(--green);color:var(--on-green)}
+.cta-pro:hover{background:var(--green-deep)}
+.cta-biz{background:var(--green);color:var(--on-green)}
+.cta-biz:hover{background:var(--green-deep)}
+.cta-ent{background:var(--ink);color:var(--paper)}
+.cta-ent:hover{background:oklch(32% 0.015 160)}
 
-.cta-note{font-size:11.5px;color:rgba(248,244,238,0.3);text-align:center;margin-top:10px;line-height:1.5}
-.cta-note a{color:var(--gold-lt);text-decoration:none}
-.cta-note a:hover{text-decoration:underline}
+.cta-note{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:10px;line-height:1.5}
+.cta-note a{color:var(--green);font-weight:600;text-decoration:none}
+.cta-note a:hover{text-decoration:underline;text-underline-offset:3px}
 
 /* COMPARISON NOTE */
-.compare-note{max-width:1040px;margin:32px auto 0;padding:18px 28px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.14);border-radius:8px;text-align:center;font-size:13.5px;color:rgba(248,244,238,0.5);line-height:1.7}
-.compare-note strong{color:rgba(201,168,76,0.75);font-weight:500}
+.compare-note{max-width:1040px;margin:32px auto 0;padding:18px 28px;background:var(--green-wash);border:1px solid color-mix(in oklch, var(--green) 25%, var(--paper));border-radius:4px;text-align:center;font-size:13.5px;color:var(--ink-soft);line-height:1.7}
+.compare-note strong{color:var(--green);font-weight:600}
 
 /* COMPARE TABLE */
-.compare-section{padding:100px 24px 0}
+.compare-section{padding:104px 24px 0}
 .compare-inner{max-width:900px;margin:0 auto}
-.sec-label{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);text-align:center;margin-bottom:12px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,46px);font-weight:600;text-align:center;color:var(--white);margin-bottom:48px;line-height:1.1}
-.compare-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.sec-title{font-size:clamp(28px,4vw,44px);font-weight:700;text-align:center;color:var(--ink);margin-bottom:48px;line-height:1.12;letter-spacing:-0.015em}
+.compare-wrap{background:var(--paper);border:1px solid var(--rule-strong);border-radius:4px;overflow-x:auto}
 .compare-table{width:100%;border-collapse:collapse;font-size:13.5px}
-.compare-table thead th{padding:14px 20px;text-align:left;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(248,244,238,0.28);border-bottom:1px solid var(--border);background:#060810}
+.compare-table thead th{padding:14px 20px;text-align:left;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-faint);border-bottom:1px solid var(--rule-strong);background:var(--paper-shade)}
 .compare-table thead th:first-child{width:32%}
 .compare-table thead th:not(:first-child){text-align:center;width:17%}
-.compare-table thead th.col-pro{color:var(--gold)}
-.compare-table thead th.col-biz{color:var(--gold-lt)}
-.compare-table tbody tr{border-bottom:1px solid rgba(255,255,255,0.03)}
+.compare-table thead th.col-pro{color:var(--green)}
+.compare-table thead th.col-biz{color:var(--green)}
+.compare-table tbody tr{border-bottom:1px solid var(--rule)}
 .compare-table tbody tr:last-child{border-bottom:none}
-.compare-table tbody tr:hover{background:rgba(255,255,255,0.015)}
-.compare-table tbody tr.group-hdr td{padding:10px 20px 6px;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,0.4);background:rgba(201,168,76,0.02);border-top:1px solid rgba(255,255,255,0.04)}
-.compare-table td{padding:13px 20px;vertical-align:middle;color:var(--gray)}
-.compare-table td:first-child{color:rgba(248,244,238,0.65);font-size:13.5px}
+.compare-table tbody tr.group-hdr td{padding:12px 20px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-faint);background:var(--paper-shade);border-top:1px solid var(--rule)}
+.compare-table td{padding:13px 20px;vertical-align:middle;color:var(--ink-soft)}
+.compare-table td:first-child{color:var(--ink);font-size:13.5px}
 .compare-table td:not(:first-child){text-align:center}
-.compare-table td.val-pro{color:var(--gold-lt)}
-.check-yes{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:rgba(92,200,126,0.1);border-radius:50%}
+.compare-table td.val-pro{color:var(--green);font-weight:600}
+.compare-table td.val-biz{color:var(--green);font-weight:600}
+.check-yes{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:var(--green-wash);border-radius:50%}
+.check-yes svg path{stroke:var(--green)}
 .check-no{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px}
-.check-soon{font-size:10px;font-weight:500;color:rgba(201,168,76,0.5);letter-spacing:.5px}
+.check-no svg path{stroke:var(--rule-strong)}
+.check-soon{font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase}
 
 /* FAQ */
-.faq-section{padding:100px 24px}
+.faq-section{padding:104px 24px}
 .faq-inner{max-width:720px;margin:0 auto}
-.faq-list{display:flex;flex-direction:column;gap:2px;margin-top:0}
-.faq-item{border:1px solid var(--border);border-radius:6px;overflow:hidden;transition:border-color .2s}
-.faq-item.open{border-color:rgba(201,168,76,0.2)}
-.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;background:none;border:none;color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;text-align:left;cursor:pointer;transition:background .2s}
-.faq-q:hover{background:rgba(255,255,255,0.02)}
-.faq-item.open .faq-q{color:var(--gold-lt)}
-.faq-icon{flex-shrink:0;width:20px;height:20px;border:1px solid rgba(248,244,238,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .25s,border-color .2s}
-.faq-item.open .faq-icon{transform:rotate(45deg);border-color:rgba(201,168,76,0.4)}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease}
-.faq-item.open .faq-a{max-height:300px}
-.faq-a-inner{padding:0 24px 20px;font-size:14px;color:var(--gray);line-height:1.75}
-.faq-a-inner a{color:var(--gold-lt);text-decoration:none}
-.faq-a-inner a:hover{text-decoration:underline}
+.faq-list{display:flex;flex-direction:column;border-top:1px solid var(--rule-strong)}
+.faq-item{border-bottom:1px solid var(--rule)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 4px;background:none;border:none;color:var(--ink);font-family:var(--font-sans);font-size:15.5px;font-weight:600;text-align:left;cursor:pointer}
+.faq-item.open .faq-q{color:var(--green)}
+.faq-icon{flex-shrink:0;width:20px;height:20px;border:1px solid var(--rule-strong);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .25s,border-color .2s;color:var(--ink-soft)}
+.faq-item.open .faq-icon{transform:rotate(45deg);border-color:var(--green);color:var(--green)}
+.faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.faq-item.open .faq-a{grid-template-rows:1fr}
+.faq-a-inner{overflow:hidden;min-height:0;padding:0 4px;font-size:14.5px;color:var(--ink-soft);line-height:1.75}
+.faq-item.open .faq-a-inner{padding-bottom:22px}
+.faq-a-inner strong{color:var(--ink)}
+.faq-a-inner a{color:var(--green);font-weight:600;text-decoration:none}
+.faq-a-inner a:hover{text-decoration:underline;text-underline-offset:3px}
 
-/* CTA STRIP */
-.cta-strip{padding:100px 24px 120px;text-align:center;position:relative;overflow:hidden}
-.cta-strip::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:320px;background:radial-gradient(ellipse,rgba(201,168,76,0.055) 0%,transparent 65%);pointer-events:none}
-.cta-strip h2{font-family:'Cormorant Garamond',serif;font-size:clamp(34px,5vw,62px);font-weight:600;color:var(--white);line-height:1.08;margin-bottom:18px;position:relative}
-.cta-strip p{font-size:16px;color:var(--gray);max-width:400px;margin:0 auto 40px;line-height:1.65;position:relative}
-.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
-.btn-gold{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:linear-gradient(135deg,#c9a84c,#e8c87a);color:#04060d;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;border:none;border-radius:5px;cursor:pointer;text-decoration:none;transition:opacity .2s,transform .2s,box-shadow .2s}
-.btn-gold:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,168,76,0.22)}
-.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border:1px solid rgba(201,168,76,0.3);background:transparent;color:rgba(248,244,238,0.75);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;border-radius:5px;cursor:pointer;text-decoration:none;transition:all .2s}
-.btn-outline:hover{border-color:var(--gold);color:var(--white);background:rgba(201,168,76,0.06);transform:translateY(-2px)}
+/* CTA STRIP (green band, like the landing's final CTA) */
+.cta-strip{padding:104px 24px 112px;text-align:center;background:var(--green);color:var(--on-green)}
+.cta-strip h2{font-size:clamp(32px,5vw,56px);font-weight:800;color:var(--on-green);line-height:1.1;letter-spacing:-0.02em;margin-bottom:18px}
+.cta-strip h2 span{color:var(--on-green-soft)}
+.cta-strip p{font-size:16px;color:var(--on-green-soft);max-width:46ch;margin:0 auto 40px;line-height:1.65}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-solid{display:inline-flex;align-items:center;gap:8px;padding:14px 30px;background:var(--paper);color:var(--ink);font-family:var(--font-sans);font-size:14px;font-weight:600;border:none;border-radius:3px;cursor:pointer;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+.btn-solid:hover{transform:translateY(-1px);box-shadow:0 6px 16px -8px oklch(0% 0 0 / 0.5)}
+.btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 30px;border:1px solid oklch(100% 0 0 / 0.4);background:transparent;color:var(--on-green);font-family:var(--font-sans);font-size:14px;font-weight:500;border-radius:3px;cursor:pointer;text-decoration:none;transition:border-color .15s ease,background-color .15s ease}
+.btn-outline:hover{border-color:oklch(100% 0 0 / 0.8);background:oklch(100% 0 0 / 0.06)}
 
 /* FOOTER */
-footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;background:#030408;flex-wrap:wrap;gap:24px}
+footer{padding:44px 40px 40px;border-top:1px solid var(--rule-strong);display:flex;align-items:center;justify-content:space-between;background:var(--paper);flex-wrap:wrap;gap:24px}
 .footer-brand{display:flex;align-items:center;gap:12px}
-.footer-brand-name{font-weight:600;font-size:14px;letter-spacing:5px;color:var(--gold-lt)}
-.footer-tagline{font-size:11.5px;color:rgba(248,244,238,0.22);margin-top:2px;letter-spacing:.4px}
+.footer-brand-name{font-weight:800;font-size:15px;letter-spacing:0.14em;color:var(--ink)}
+.footer-tagline{font-size:11.5px;color:var(--ink-faint);margin-top:2px;letter-spacing:0.02em}
 .footer-links{display:flex;gap:24px;flex-wrap:wrap}
-.footer-links a{font-size:13px;color:rgba(248,244,238,0.3);text-decoration:none;transition:color .2s}
-.footer-links a:hover{color:rgba(248,244,238,0.65)}
-.footer-copy{font-size:12px;color:rgba(248,244,238,0.18)}
+.footer-links a{font-size:13px;color:var(--ink-soft);text-decoration:none;transition:color .15s}
+.footer-links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.footer-copy{font-size:12px;color:var(--ink-faint)}
 
-/* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  nav,.nav-links a,.btn-sm-outline,.btn-sm-solid,.plan-cta,.faq-icon,.faq-a,.btn-solid,.btn-outline,.footer-links a{transition:none}
+  .btn-solid:hover{transform:none}
+}
 
 /* RESPONSIVE */
 @media(max-width:1100px){
@@ -184,6 +188,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
   nav{padding:0 24px}
   .nav-links,.nav-actions{display:none}
   .hamburger{display:flex}
+  .pricing-hero{padding:128px 24px 48px}
   footer{flex-direction:column;align-items:flex-start;padding:36px 24px}
 }
 </style>
@@ -191,40 +196,39 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <body>
 
 <!-- NAV -->
-<nav id="nav">
+<nav id="nav" aria-label="Main">
   <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(201,168,76,0.12)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(201,168,76,0.2)" stroke-width="0.75"/>
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
+      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
     </svg>
     <span class="nav-logo-text">ARIA</span>
   </a>
   <ul class="nav-links">
     <li><a href="/#how">How it works</a></li>
-    <li><a href="/#what">Security</a></li>
+    <li><a href="/#features">Security</a></li>
     <li><a href="/docs">Docs</a></li>
     <li><a href="/pricing" class="active">Pricing</a></li>
   </ul>
   <div class="nav-actions">
     <a href="/app" class="btn-sm-outline">Sign In</a>
-    <a href="/app" class="btn-sm-gold">Get Started</a>
+    <a href="/app" class="btn-sm-solid">Get Started</a>
   </div>
-  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
 <div class="mobile-menu" id="mobile-menu">
   <a href="/#how">How it works</a>
-  <a href="/#what">Security</a>
+  <a href="/#features">Security</a>
   <a href="/docs">Docs</a>
   <a href="/pricing">Pricing</a>
-  <a href="/app" style="color:var(--gold-lt)">Sign In / Get Started</a>
+  <a href="/app" style="color:var(--green);font-weight:600">Sign In / Get Started</a>
 </div>
 
 <!-- HERO -->
 <section class="pricing-hero">
-  <div class="pricing-hero-label">Pricing</div>
   <h1>Simple, transparent<br>pricing for every team.</h1>
   <p>Start free. Upgrade as your agents scale. No hidden fees.</p>
 </section>
@@ -236,9 +240,8 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 
       <!-- FREE -->
       <div class="plan-card">
-        <div class="plan-badge badge-free">Free</div>
-        <div class="plan-name">Free</div>
-        <div class="plan-price starter"><span class="currency">$</span>0<span class="period"> / forever</span></div>
+        <h3 class="plan-name">Free</h3>
+        <div class="plan-price"><span class="currency">$</span>0<span class="period"> / forever</span></div>
         <div class="plan-desc">Everything you need to get started. No credit card required.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
@@ -258,16 +261,16 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 
       <!-- PROFESSIONAL -->
       <div class="plan-card featured">
-        <div class="plan-badge badge-popular">Most Popular</div>
-        <div class="plan-name">Professional</div>
-        <div class="plan-price pro"><span class="currency" style="color:var(--gold)">$</span>49<span class="period"> / month</span></div>
+        <span class="plan-flag">Most Popular</span>
+        <h3 class="plan-name">Professional</h3>
+        <div class="plan-price"><span class="currency">$</span>49<span class="period"> / month</span></div>
         <div class="plan-desc">For small teams with agents in production. Full trust infrastructure included.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Free, plus:</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>5 agents</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>500,000 events / month</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="color:rgba(201,168,76,0.7);font-size:12px">Overage: $1.00 / 100K extra</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="feat-overage">Overage: $1.00 / 100K extra</span></li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>12-month event history</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ARIA Gate (human-in-the-loop)</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>ZeroProof behavioral proofs</li>
@@ -276,37 +279,33 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Batch events (up to 500/call)</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Email support</li>
         </ul>
-        <!-- TODO: replace ariatrust with your Lemon Squeezy store slug (e.g. ariatrust) -->
         <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/5c1caa35-6528-461c-86e1-2689e8819f49?checkout[custom][plan]=professional&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="plan-cta cta-pro lemonsqueezy-button">Get Started</a>
         <p class="cta-note">Secure checkout · No redirects · <a href="/app">Already have an account?</a></p>
       </div>
 
       <!-- BUSINESS -->
       <div class="plan-card">
-        <div class="plan-badge badge-business">Business</div>
-        <div class="plan-name">Business</div>
-        <div class="plan-price biz"><span class="currency" style="color:var(--gold)">$</span>149<span class="period"> / month</span></div>
+        <h3 class="plan-name">Business</h3>
+        <div class="plan-price"><span class="currency">$</span>149<span class="period"> / month</span></div>
         <div class="plan-desc">For companies running multiple agents at scale. Heavy workloads, fair pricing.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Professional, plus:</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>20 agents</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>5,000,000 events / month</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="color:rgba(201,168,76,0.7);font-size:12px">Overage: $0.75 / 100K extra</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="feat-overage">Overage: $0.75 / 100K extra</span></li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Covers heavy agents (customer service, pipelines)</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Never blocks on overage — pay as you grow</li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Never blocks on overage: pay as you grow</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority email support</li>
         </ul>
-        <!-- TODO: replace ariatrust with your Lemon Squeezy store slug (e.g. ariatrust) -->
         <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/7fcb5f39-5d30-49d5-b1a0-96cc3d15288a?checkout[custom][plan]=business&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="plan-cta cta-biz lemonsqueezy-button">Get Started</a>
         <p class="cta-note">Secure checkout · No redirects · <a href="/app">Already have an account?</a></p>
       </div>
 
       <!-- ENTERPRISE -->
       <div class="plan-card">
-        <div class="plan-badge badge-enterprise">Enterprise</div>
-        <div class="plan-name">Enterprise</div>
-        <div class="plan-price ent">$599+<span class="period" style="font-size:14px"> / month</span></div>
+        <h3 class="plan-name">Enterprise</h3>
+        <div class="plan-price ent">$599+<span class="period"> / month</span></div>
         <div class="plan-desc">For regulated industries where compliance and scale are non-negotiable.</div>
         <div class="plan-divider"></div>
         <ul class="plan-features">
@@ -319,7 +318,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom integrations</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Invoice billing</li>
           <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Priority support</li>
-          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 <span style="font-size:11px;color:rgba(201,168,76,0.4);margin-left:4px">(coming soon)</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke="rgba(201,168,76,0.55)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>SOC 2 <span class="check-soon" style="margin-left:4px">(coming soon)</span></li>
         </ul>
         <a href="mailto:dhdez3149@gmail.com" class="plan-cta cta-ent">Contact Us</a>
       </div>
@@ -336,7 +335,6 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <!-- COMPARE TABLE -->
 <section class="compare-section">
   <div class="compare-inner">
-    <div class="sec-label">Compare</div>
     <h2 class="sec-title">Plan comparison</h2>
     <div class="compare-wrap">
       <table class="compare-table">
@@ -357,28 +355,28 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
             <td>Agents</td>
             <td>1</td>
             <td class="val-pro">5</td>
-            <td style="color:var(--gold-lt)">20</td>
+            <td class="val-biz">20</td>
             <td>Unlimited</td>
           </tr>
           <tr>
             <td>Events / month</td>
             <td>50,000</td>
             <td class="val-pro">500,000</td>
-            <td style="color:var(--gold-lt)">5,000,000</td>
+            <td class="val-biz">5,000,000</td>
             <td>50M+</td>
           </tr>
           <tr>
             <td>Overage rate</td>
             <td><span class="check-no"><svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M4 4l6 6M10 4l-6 6" stroke="rgba(248,244,238,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg></span></td>
             <td class="val-pro">$1.00 / 100K</td>
-            <td style="color:var(--gold-lt)">$0.75 / 100K</td>
+            <td class="val-biz">$0.75 / 100K</td>
             <td>Custom</td>
           </tr>
           <tr>
             <td>Event history</td>
             <td>30 days</td>
             <td class="val-pro">12 months</td>
-            <td style="color:var(--gold-lt)">12 months</td>
+            <td class="val-biz">12 months</td>
             <td>Unlimited</td>
           </tr>
           <tr class="group-hdr">
@@ -499,7 +497,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
             <td>Support</td>
             <td>Community</td>
             <td class="val-pro">Email</td>
-            <td style="color:var(--gold-lt)">Priority Email</td>
+            <td class="val-biz">Priority Email</td>
             <td>Priority</td>
           </tr>
         </tbody>
@@ -511,7 +509,6 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <!-- FAQ -->
 <section class="faq-section">
   <div class="faq-inner">
-    <div class="sec-label" style="text-align:center">FAQ</div>
     <h2 class="sec-title">Common questions</h2>
     <div class="faq-list">
 
@@ -520,7 +517,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           Can I upgrade or downgrade anytime?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Upgrades take effect immediately — your new limits are active the moment the payment is confirmed. Downgrades take effect at the start of the next billing cycle.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. Upgrades take effect immediately: your new limits are active the moment the payment is confirmed. Downgrades take effect at the start of the next billing cycle.</div></div>
       </div>
 
       <div class="faq-item">
@@ -528,7 +525,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           What happens if I exceed my event limit?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">It depends on your plan. <strong style="color:var(--white)">Free:</strong> new events are rejected once you reach 50,000. Your existing data is safe and events resume automatically on the 1st of next month. <strong style="color:var(--white)">Professional &amp; Business:</strong> your service <em>never stops</em>. Events beyond the base limit continue normally and are billed as overage at the end of the month.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">It depends on your plan. <strong>Free:</strong> new events are rejected once you reach 50,000. Your existing data is safe and events resume automatically on the 1st of next month. <strong>Professional &amp; Business:</strong> your service <em>never stops</em>. Events beyond the base limit continue normally and are billed as overage at the end of the month.</div></div>
       </div>
 
       <div class="faq-item">
@@ -536,7 +533,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           How does overage billing work?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">If you exceed your monthly base limit, each additional 100,000 events is charged at your plan's overage rate — <strong style="color:var(--white)">$1.00/100K</strong> for Professional and <strong style="color:var(--white)">$0.75/100K</strong> for Business. For example: a Business customer who uses 5.3M events pays $149 + (300K / 100K × $0.75) = <strong style="color:var(--white)">$151.25</strong> that month. Your agents never go offline.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">If you exceed your monthly base limit, each additional 100,000 events is charged at your plan's overage rate: <strong>$1.00/100K</strong> for Professional and <strong>$0.75/100K</strong> for Business. For example: a Business customer who uses 5.3M events pays $149 + (300K / 100K × $0.75) = <strong>$151.25</strong> that month. Your agents never go offline.</div></div>
       </div>
 
       <div class="faq-item">
@@ -544,7 +541,7 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
           What is the difference between Professional and Business?
           <span class="faq-icon"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="5" y1="1" x2="5" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="5" x2="9" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>
         </button>
-        <div class="faq-a"><div class="faq-a-inner">Both plans include the full ARIA feature set. The difference is scale: Professional supports up to 5 agents and 500K events/month — ideal for startups with a few production agents. Business supports up to 20 agents and 5M events/month, designed for teams running heavy workloads like customer service bots, data pipelines, or multi-agent orchestrators. Business also gets a lower overage rate ($0.75 vs $1.00 per 100K).</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Both plans include the full ARIA feature set. The difference is scale: Professional supports up to 5 agents and 500K events/month, ideal for startups with a few production agents. Business supports up to 20 agents and 5M events/month, designed for teams running heavy workloads like customer service bots, data pipelines, or multi-agent orchestrators. Business also gets a lower overage rate ($0.75 vs $1.00 per 100K).</div></div>
       </div>
 
       <div class="faq-item">
@@ -569,10 +566,10 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 
 <!-- CTA STRIP -->
 <section class="cta-strip">
-  <h2>Start free.<br><span style="color:var(--gold-lt)">Scale when you're ready.</span></h2>
+  <h2>Start free.<br><span>Scale when you're ready.</span></h2>
   <p>No credit card required. Free plan forever. Paid plans include a 30-day trial.</p>
   <div class="cta-btns">
-    <a href="/app" class="btn-gold">Create Free Account →</a>
+    <a href="/app" class="btn-solid">Create Free Account →</a>
     <a href="mailto:dhdez3149@gmail.com" class="btn-outline">Talk to Sales</a>
   </div>
 </section>
@@ -580,9 +577,9 @@ footer{padding:44px 48px 40px;border-top:1px solid rgba(255,255,255,0.05);displa
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand">
-    <svg width="22" height="22" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(201,168,76,0.14)"/>
+    <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
     </svg>
     <div>
       <div class="footer-brand-name">ARIA</div>
@@ -610,8 +607,14 @@ window.addEventListener('scroll', () => {
 // Mobile menu
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobile-menu');
-hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+hamburger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  mobileMenu.classList.remove('open');
+  hamburger.setAttribute('aria-expanded', 'false');
+}));
 
 // FAQ accordion
 function toggleFaq(btn) {

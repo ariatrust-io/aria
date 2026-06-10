@@ -7,201 +7,277 @@
 <meta name="description" content="Live, anonymized proof from a real ARIA-protected agent: thousands of cryptographically sealed actions, gated violations, and a verifier you can run yourself.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-black: #030712;
-  --bg-dark: #070a13;
-  --bg-card: rgba(15, 23, 42, 0.45);
-  --accent-primary: #6366f1;
-  --accent-secondary: #a855f7;
-  --accent-teal: #14b8a6;
-  --gold: #f59e0b;
-  --gold-lt: #fbbf24;
-  --green: #22c55e;
-  --amber: #eab308;
-  --red: #ef4444;
-  --white: #f8fafc;
-  --muted: #94a3b8;
-  --border-muted: rgba(255, 255, 255, 0.06);
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --paper:       oklch(98% 0.003 150);
+  --paper-shade: oklch(95.5% 0.006 150);
+  --ink:         oklch(24% 0.015 160);
+  --ink-soft:    oklch(42% 0.015 160);
+  --ink-faint:   oklch(55% 0.012 160);
+  --green:       oklch(38% 0.085 155);
+  --green-deep:  oklch(31% 0.07 155);
+  --green-wash:  oklch(94% 0.02 155);
+  --red:         oklch(46% 0.16 27);
+  --red-wash:    oklch(94% 0.025 27);
+  --amber:       oklch(50% 0.11 85);
+  --rule:        oklch(86% 0.01 150);
+  --rule-strong: oklch(70% 0.012 150);
+  --panel:       oklch(20% 0.02 160);
+  --panel-edge:  oklch(32% 0.025 160);
+  --panel-text:  oklch(90% 0.01 150);
+  --panel-soft:  oklch(68% 0.015 150);
+  --on-green:    oklch(98% 0.005 150);
+  --p-green:     oklch(80% 0.13 150);  /* success on dark panel */
+  --p-amber:     oklch(85% 0.1 85);    /* error on dark panel */
+  --p-red:       oklch(74% 0.15 25);   /* gated on dark panel */
+  --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --z-nav: 100;
 }
 
 html { scroll-behavior: smooth; }
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-black);
-  color: var(--white);
+  background: var(--paper);
+  color: var(--ink);
   line-height: 1.6;
   overflow-x: hidden;
-  position: relative;
 }
-body::before {
-  content: ''; position: fixed; inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
-  background-size: 24px 24px; pointer-events: none; z-index: 1;
+::selection { background: var(--green); color: var(--on-green); }
+h1,h2 { text-wrap: balance; }
+a:focus-visible, button:focus-visible, input:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
-.bg-glow-1 { position:absolute; top:-10%; left:-10%; width:50vw; height:50vw; background:radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%); pointer-events:none; z-index:0; }
-.bg-glow-2 { position:absolute; top:40%; right:-10%; width:60vw; height:60vw; background:radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%); pointer-events:none; z-index:0; }
 
 /* NAV */
 nav {
   position: fixed; top: 0; left: 0; right: 0; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 48px; background: rgba(3,7,18,0.85);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255,255,255,0.04); z-index: 1000;
+  padding: 0 40px;
+  background: color-mix(in oklch, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  z-index: var(--z-nav);
 }
-.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.nav-logo-text { font-weight:800; font-size:20px; letter-spacing:2px; color:var(--white); }
-.nav-links { display:flex; align-items:center; gap:32px; list-style:none; }
-.nav-links a { font-size:14px; font-weight:500; color:var(--muted); text-decoration:none; transition:color 0.2s; }
-.nav-links a:hover { color:var(--white); }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-text { font-weight: 800; font-size: 18px; letter-spacing: 0.14em; color: var(--ink); }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-soft); text-decoration: none; transition: color 0.15s ease; }
+.nav-links a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .nav-cta {
-  display:inline-flex; align-items:center; padding:9px 22px;
-  background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);
-  color:var(--white); font-size:13px; font-weight:600; text-decoration:none; border-radius:6px;
+  display: inline-flex; align-items: center; padding: 9px 20px;
+  background: var(--green); color: var(--on-green);
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  border-radius: 3px; letter-spacing: 0.02em;
+  transition: background-color 0.15s ease;
 }
+.nav-cta:hover { background: var(--green-deep); }
 
 /* WRAP */
-.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
-section { position: relative; z-index: 2; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
 
 /* HEADER */
-.proof-hero { padding: 140px 0 40px; text-align: center; }
+.proof-hero { padding: 148px 0 0; text-align: center; }
 .live-badge {
-  display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono);
-  font-size:12px; font-weight:500; letter-spacing:2px; color:var(--green);
-  text-transform:uppercase; margin-bottom:24px; background:rgba(34,197,94,0.08);
-  border:1px solid rgba(34,197,94,0.25); padding:6px 14px; border-radius:100px;
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.14em; color: var(--green);
+  text-transform: uppercase; margin-bottom: 24px; background: var(--green-wash);
+  border: 1px solid color-mix(in oklch, var(--green) 25%, var(--paper)); padding: 6px 14px; border-radius: 3px;
 }
-.live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:pulse 1.6s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
-.proof-hero h1 { font-size:clamp(34px,5vw,56px); font-weight:800; letter-spacing:-1.5px; line-height:1.08; margin-bottom:18px; }
-.proof-hero h1 .accent { background:linear-gradient(to right,#818cf8,#a78bfa,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.proof-hero p { font-size:17px; color:var(--muted); max-width:620px; margin:0 auto; }
-.agent-chip { font-family:var(--font-mono); font-size:13px; color:var(--accent-teal); background:rgba(20,184,166,0.06); border:1px solid rgba(20,184,166,0.18); border-radius:8px; padding:8px 16px; display:inline-block; margin-top:24px; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.proof-hero h1 { font-size: clamp(34px, 5vw, 56px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; margin-bottom: 18px; }
+.proof-hero h1 .accent { color: var(--green); }
+.proof-hero p { font-size: 16.5px; color: var(--ink-soft); max-width: 62ch; margin: 0 auto; line-height: 1.7; }
+.agent-chip {
+  font-family: var(--font-mono); font-size: 13px; color: var(--green);
+  background: var(--green-wash); border: 1px solid color-mix(in oklch, var(--green) 25%, var(--paper));
+  border-radius: 3px; padding: 8px 16px; display: inline-block; margin-top: 24px; overflow-wrap: anywhere;
+}
 
-/* SECTION LABELS */
+/* SECTION HEADS */
 .sec-head { margin: 0 0 28px; }
-.sec-label { font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:3px; color:var(--accent-primary); text-transform:uppercase; display:block; margin-bottom:10px; }
-.sec-title { font-size:clamp(24px,3.5vw,34px); font-weight:800; letter-spacing:-1px; }
-.sec-sub { font-size:15px; color:var(--muted); margin-top:8px; max-width:680px; }
+.sec-title { font-size: clamp(24px, 3.5vw, 34px); font-weight: 700; letter-spacing: -0.015em; line-height: 1.15; }
+.sec-sub { font-size: 15px; color: var(--ink-soft); margin-top: 10px; max-width: 65ch; line-height: 1.7; }
 
-/* COUNTERS */
-.counters { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin: 24px 0 16px; }
-.counter { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:14px; padding:28px 20px; text-align:center; backdrop-filter:blur(12px); }
-.counter .num { font-family:var(--font-mono); font-size:clamp(26px,3vw,40px); font-weight:700; line-height:1; letter-spacing:-1px; margin-bottom:10px; }
-.counter .lbl { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; line-height:1.4; }
-.counter.total .num { color:var(--white); }
-.counter.ok .num    { color:var(--green); }
-.counter.gate .num  { color:var(--red); }
-.counter.anom .num  { color:var(--gold-lt); }
-.counter.err .num   { color:var(--amber); }
-.uptime-line { text-align:center; font-family:var(--font-mono); font-size:13px; color:var(--muted); margin-top:8px; }
-.uptime-line b { color:var(--green); }
+/* COUNTERS (verification ledger) */
+.counters {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  margin: 48px 0 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  text-align: left;
+}
+.counter { padding: 30px 22px; border-right: 1px solid var(--rule); }
+.counter:last-child { border-right: none; }
+.counter .num {
+  font-family: var(--font-mono); font-size: clamp(24px, 2.6vw, 34px); font-weight: 600;
+  line-height: 1.15; font-variant-numeric: tabular-nums; margin-bottom: 8px;
+}
+.counter .lbl { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+.counter.total .num { color: var(--ink); }
+.counter.ok .num    { color: var(--green); }
+.counter.gate .num  { color: var(--red); }
+.counter.anom .num  { color: var(--amber); }
+.counter.err .num   { color: var(--ink-soft); }
+.uptime-line { text-align: center; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-faint); letter-spacing: 0.03em; padding: 16px 0 0; }
+.uptime-line b { color: var(--green); font-weight: 600; }
 
 /* SECTION BLOCKS */
-.block { padding: 56px 0; border-top: 1px solid var(--border-muted); }
+.block { padding: 72px 0 0; }
+.block:last-of-type { padding-bottom: 24px; }
 
-/* EVENT STREAM */
-.stream-wrap { background:#020617; border:1px solid rgba(99,102,241,0.15); border-radius:12px; overflow:hidden; }
-.stream-bar { padding:12px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); background:rgba(15,23,42,0.5); }
-.stream-bar .t { font-family:var(--font-mono); font-size:11px; color:rgba(148,163,184,0.7); letter-spacing:1px; }
-.stream-refresh { font-family:var(--font-mono); font-size:11px; color:var(--muted); display:flex; align-items:center; gap:7px; }
-table.stream { width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:12.5px; }
-table.stream th { text-align:left; padding:11px 16px; color:#64748b; font-weight:500; font-size:11px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,0.05); }
-table.stream td { padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.03); color:#cbd5e1; white-space:nowrap; }
-table.stream tr:last-child td { border-bottom:none; }
-table.stream tr.row-success { box-shadow: inset 3px 0 0 var(--green); }
-table.stream tr.row-error   { box-shadow: inset 3px 0 0 var(--amber); }
-table.stream tr.row-gated   { box-shadow: inset 3px 0 0 var(--red); }
-.badge { display:inline-block; padding:2px 9px; border-radius:5px; font-size:11px; font-weight:600; letter-spacing:.5px; }
-.badge.success { background:rgba(34,197,94,0.12); color:#4ade80; }
-.badge.error   { background:rgba(234,179,8,0.12); color:#facc15; }
-.badge.blocked { background:rgba(239,68,68,0.12); color:#f87171; }
-.badge.anomaly { background:rgba(245,158,11,0.14); color:var(--gold-lt); }
-.scope-ok  { color:#4ade80; }
-.scope-bad { color:#f87171; }
-.act { color:#e2e8f0; }
-.muted-cell { color:#64748b; }
-.stream-empty { padding:32px; text-align:center; color:var(--muted); font-family:var(--font-mono); font-size:13px; }
+/* EVENT STREAM (dark evidence panel) */
+.stream-wrap { background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 6px; overflow: hidden; }
+.stream-bar {
+  padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--panel-edge);
+}
+.stream-bar .t { font-family: var(--font-mono); font-size: 11px; color: var(--panel-soft); letter-spacing: 0.1em; }
+.stream-refresh { font-family: var(--font-mono); font-size: 11px; color: var(--panel-soft); display: flex; align-items: center; gap: 7px; }
+.stream-refresh .live-dot { background: var(--p-green); }
+table.stream { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; }
+table.stream th {
+  text-align: left; padding: 11px 16px; color: var(--panel-soft); font-weight: 500;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  border-bottom: 1px solid var(--panel-edge);
+}
+table.stream td { padding: 10px 16px; border-bottom: 1px solid oklch(28% 0.02 160); color: var(--panel-text); white-space: nowrap; }
+table.stream tr:last-child td { border-bottom: none; }
+table.stream tr.row-gated td { background: oklch(70% 0.17 25 / 0.07); }
+table.stream tr.row-error td { background: oklch(85% 0.1 85 / 0.05); }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 3px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid transparent; }
+.badge.success { background: oklch(80% 0.13 150 / 0.12); border-color: oklch(80% 0.13 150 / 0.3); color: var(--p-green); }
+.badge.error   { background: oklch(85% 0.1 85 / 0.1);   border-color: oklch(85% 0.1 85 / 0.3);   color: var(--p-amber); }
+.badge.blocked { background: oklch(74% 0.15 25 / 0.12);  border-color: oklch(74% 0.15 25 / 0.32); color: var(--p-red); }
+.badge.anomaly { background: oklch(85% 0.1 85 / 0.12);  border-color: oklch(85% 0.1 85 / 0.32);  color: var(--p-amber); }
+.scope-ok  { color: var(--p-green); }
+.scope-bad { color: var(--p-red); }
+.act { color: var(--panel-text); }
+.muted-cell { color: var(--panel-soft); }
+.stream-empty { padding: 32px; text-align: center; color: var(--panel-soft); font-family: var(--font-mono); font-size: 13px; }
 
 /* DOWNLOADS */
-.dl-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
-.dl-btn { display:flex; flex-direction:column; gap:6px; padding:22px 24px; background:var(--bg-card); border:1px solid var(--border-muted); border-radius:12px; cursor:pointer; text-align:left; color:var(--white); transition:all .2s ease; font-family:var(--font-sans); }
-.dl-btn:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-2px); background:rgba(15,23,42,0.65); }
-.dl-btn .dl-title { font-size:15px; font-weight:700; display:flex; align-items:center; gap:9px; }
-.dl-btn .dl-desc { font-size:12.5px; color:var(--muted); }
-.dl-btn .dot { width:9px; height:9px; border-radius:50%; }
-.dl-btn.good .dot { background:var(--green); } .dl-btn.bad .dot { background:var(--amber); } .dl-btn.gated .dot { background:var(--red); }
+.dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.dl-btn {
+  display: flex; flex-direction: column; gap: 6px; padding: 22px 24px;
+  background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 4px;
+  cursor: pointer; text-align: left; color: var(--ink);
+  transition: border-color 0.15s ease, background-color 0.15s ease; font-family: var(--font-sans);
+}
+.dl-btn:hover { border-color: var(--ink); background: var(--paper-shade); }
+.dl-btn .dl-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
+.dl-btn .dl-desc { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); letter-spacing: 0.02em; }
+.dl-btn .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.dl-btn.good .dot { background: var(--green); }
+.dl-btn.bad .dot { background: var(--amber); }
+.dl-btn.gated .dot { background: var(--red); }
 
-/* GATE DEMO */
-.gate-flow { display:grid; grid-template-columns:1fr; gap:0; max-width:760px; margin:0 auto; position:relative; }
-.gate-line { position:absolute; left:23px; top:24px; bottom:24px; width:2px; background:linear-gradient(to bottom,var(--accent-primary),rgba(239,68,68,0.4)); z-index:0; }
-.gstep { display:grid; grid-template-columns:48px 1fr; gap:22px; padding:14px 0; position:relative; z-index:1; }
-.gstep .gn { width:48px; height:48px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:600; font-size:14px; background:#070a13; border:1px solid rgba(99,102,241,0.3); flex-shrink:0; }
-.gstep.deny .gn { border-color:rgba(239,68,68,0.4); color:#f87171; }
-.gstep.allow .gn { border-color:rgba(34,197,94,0.4); color:#4ade80; }
-.gstep .gtitle { font-size:16px; font-weight:700; margin-bottom:4px; }
-.gstep .gdesc { font-size:13.5px; color:var(--muted); }
-.gstep .gcode { font-family:var(--font-mono); font-size:12px; color:var(--accent-teal); background:rgba(20,184,166,0.05); border:1px solid rgba(20,184,166,0.14); border-radius:6px; padding:6px 12px; display:inline-block; margin-top:8px; }
-.gstep .gcode.crit { color:#f87171; background:rgba(239,68,68,0.05); border-color:rgba(239,68,68,0.18); }
+/* GATE DEMO (real sequence: keeps its numbers) */
+.gate-flow { max-width: 760px; margin: 0 auto; }
+.gstep {
+  display: grid; grid-template-columns: 56px 1fr; gap: 24px;
+  padding: 28px 0; border-top: 1px solid var(--rule);
+}
+.gstep:last-child { border-bottom: 1px solid var(--rule); }
+.gstep .gn {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+  color: var(--ink-faint); padding-top: 4px;
+}
+.gstep.deny .gn { color: var(--red); }
+.gstep .gtitle { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+.gstep .gdesc { font-size: 14px; color: var(--ink-soft); line-height: 1.7; max-width: 58ch; }
+.gstep .gcode {
+  font-family: var(--font-mono); font-size: 12px; color: var(--green);
+  background: var(--green-wash); border: 1px solid color-mix(in oklch, var(--green) 25%, var(--paper));
+  border-radius: 3px; padding: 6px 12px; display: inline-block; margin-top: 10px; overflow-wrap: anywhere;
+}
+.gstep .gcode.crit {
+  color: var(--red); background: var(--red-wash);
+  border-color: color-mix(in oklch, var(--red) 28%, var(--paper));
+}
+.gstep code { font-family: var(--font-mono); }
 
 /* VERIFIER */
-.verify-box { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:14px; padding:32px; backdrop-filter:blur(12px); }
-.verify-row { display:flex; gap:12px; flex-wrap:wrap; }
-.verify-input { flex:1; min-width:240px; font-family:var(--font-mono); font-size:13px; padding:14px 16px; background:#020617; border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:var(--white); }
-.verify-input:focus { outline:none; border-color:var(--accent-primary); }
-.verify-btn { padding:14px 32px; border:none; border-radius:8px; font-family:var(--font-sans); font-size:14px; font-weight:600; color:var(--white); background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%); cursor:pointer; transition:transform .2s ease; }
-.verify-btn:hover { transform:translateY(-2px); }
-.verify-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
-.sample-row { font-family:var(--font-mono); font-size:12px; color:var(--muted); margin-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.sample-id { color:var(--accent-teal); word-break:break-all; }
-.copy-btn { background:rgba(255,255,255,0.04); border:1px solid var(--border-muted); color:var(--muted); font-size:11px; padding:3px 10px; border-radius:5px; cursor:pointer; font-family:var(--font-mono); }
-.copy-btn:hover { color:var(--white); border-color:rgba(255,255,255,0.2); }
-.verify-result { margin-top:20px; padding:18px 20px; border-radius:10px; font-family:var(--font-mono); font-size:13.5px; display:none; }
-.verify-result.show { display:block; }
-.verify-result.ok  { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.3); color:#4ade80; }
-.verify-result.bad { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); color:#f87171; }
-.verify-result .vr-line { display:block; margin-top:6px; color:#cbd5e1; font-size:12.5px; }
-.verify-result .vr-root { color:var(--gold-lt); word-break:break-all; }
+.verify-box { background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 4px; padding: 32px; }
+.verify-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.verify-input {
+  flex: 1; min-width: 240px; font-family: var(--font-mono); font-size: 13px;
+  padding: 14px 16px; background: var(--paper); border: 1px solid var(--rule-strong);
+  border-radius: 3px; color: var(--ink);
+}
+.verify-input::placeholder { color: var(--ink-soft); }
+.verify-input:focus { outline: none; border-color: var(--green); }
+.verify-btn {
+  padding: 14px 32px; border: none; border-radius: 3px; font-family: var(--font-sans);
+  font-size: 14px; font-weight: 600; color: var(--on-green); background: var(--green);
+  cursor: pointer; transition: background-color 0.15s ease;
+}
+.verify-btn:hover:not(:disabled) { background: var(--green-deep); }
+.verify-btn:disabled { opacity: .5; cursor: not-allowed; }
+.sample-row { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); margin-top: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sample-id { color: var(--green); word-break: break-all; }
+.copy-btn {
+  background: none; border: 1px solid var(--rule-strong); color: var(--ink-soft);
+  font-size: 11px; padding: 3px 10px; border-radius: 3px; cursor: pointer; font-family: var(--font-mono);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.copy-btn:hover { color: var(--ink); border-color: var(--ink); }
+.verify-result { margin-top: 20px; padding: 18px 20px; border-radius: 3px; font-family: var(--font-mono); font-size: 13.5px; display: none; }
+.verify-result.show { display: block; }
+.verify-result.ok  { background: var(--green-wash); border: 1px solid color-mix(in oklch, var(--green) 30%, var(--paper)); color: var(--green); }
+.verify-result.bad { background: var(--red-wash); border: 1px solid color-mix(in oklch, var(--red) 30%, var(--paper)); color: var(--red); }
+.verify-result .vr-line { display: block; margin-top: 6px; color: var(--ink-soft); font-size: 12.5px; }
+.verify-result .vr-root { color: var(--green); word-break: break-all; }
 
 /* FOOTER */
-footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.03); padding:48px 0; text-align:center; margin-top:40px; position:relative; z-index:2; }
-footer p { font-size:13px; color:var(--muted); }
-footer a { color:var(--accent-primary); text-decoration:none; }
+footer { border-top: 1px solid var(--rule-strong); padding: 40px 0 36px; text-align: center; margin-top: 72px; }
+footer p { font-size: 13.5px; color: var(--ink-soft); }
+footer a { color: var(--green); font-weight: 600; text-decoration: none; }
+footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.footer-fine { margin-top: 8px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); letter-spacing: 0.03em; }
 
-@media (max-width:860px) {
-  nav { padding:0 24px; } .nav-links { gap:18px; }
-  .counters { grid-template-columns:repeat(2,1fr); }
-  .dl-grid { grid-template-columns:1fr; }
-  table.stream { font-size:11.5px; } table.stream .hide-sm { display:none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .live-dot { animation: none; }
+  .nav-links a, .nav-cta, .dl-btn, .verify-btn, .copy-btn { transition: none; }
 }
-@media (max-width:480px) {
-  .wrap { padding:0 20px; } .counters { grid-template-columns:1fr; }
+
+@media (max-width: 860px) {
+  nav { padding: 0 24px; } .nav-links { gap: 18px; }
+  .counters { grid-template-columns: repeat(2, 1fr); }
+  .counter:nth-child(2n) { border-right: none; }
+  .counter { border-bottom: 1px solid var(--rule); }
+  .counter:nth-last-child(-n+1) { border-bottom: none; }
+  .dl-grid { grid-template-columns: 1fr; }
+  table.stream { font-size: 11.5px; } table.stream .hide-sm { display: none; }
+}
+@media (max-width: 480px) {
+  .wrap { padding: 0 20px; }
+  .counters { grid-template-columns: 1fr; }
+  .counter { border-right: none; }
+  .gstep { grid-template-columns: 40px 1fr; gap: 14px; }
 }
 </style>
 </head>
 <body>
-<div class="bg-glow-1"></div>
-<div class="bg-glow-2"></div>
 
-<nav>
+<nav aria-label="Main">
   <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#6366f1" stroke-width="2"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(99,102,241,0.15)"/>
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
+      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
     </svg>
     <span class="nav-logo-text">ARIA</span>
   </a>
   <ul class="nav-links">
     <li><a href="/">Home</a></li>
     <li><a href="/docs">Docs</a></li>
-    <li><a href="/#pricing">Pricing</a></li>
+    <li><a href="/pricing">Pricing</a></li>
   </ul>
   <a href="/app" class="nav-cta">Get Access &rarr;</a>
 </nav>
@@ -210,16 +286,16 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 <section class="proof-hero">
   <div class="wrap">
     <span class="live-badge"><span class="live-dot"></span> Live · Real Data</span>
-    <h1>THIS IS A REAL AGENT.<br><span class="accent">EVERY ACTION IS SEALED.</span></h1>
-    <p>No mockups. The numbers below come straight from a live, ARIA-protected agent — anonymized, but cryptographically real. Download the logs. Verify a seal yourself.</p>
+    <h1>This is a real agent.<br><span class="accent">Every action is sealed.</span></h1>
+    <p>No mockups. The numbers below come straight from a live, ARIA-protected agent: anonymized, but cryptographically real. Download the logs. Verify a seal yourself.</p>
     <div class="agent-chip" id="agent-chip">agent: demo-agent-01 · did:agentrust:20c1...</div>
 
     <div class="counters">
-      <div class="counter total"><div class="num" id="c-total">—</div><div class="lbl">Total<br>Events</div></div>
-      <div class="counter ok"><div class="num" id="c-success">—</div><div class="lbl">Successful<br>Actions</div></div>
-      <div class="counter gate"><div class="num" id="c-gated">—</div><div class="lbl">Gated /<br>Out-of-scope</div></div>
-      <div class="counter anom"><div class="num" id="c-anom">—</div><div class="lbl">Anomalies<br>Detected</div></div>
-      <div class="counter err"><div class="num" id="c-error">—</div><div class="lbl">Errors<br>Logged</div></div>
+      <div class="counter total"><div class="num" id="c-total">···</div><div class="lbl">Total<br>Events</div></div>
+      <div class="counter ok"><div class="num" id="c-success">···</div><div class="lbl">Successful<br>Actions</div></div>
+      <div class="counter gate"><div class="num" id="c-gated">···</div><div class="lbl">Gated /<br>Out-of-scope</div></div>
+      <div class="counter anom"><div class="num" id="c-anom">···</div><div class="lbl">Anomalies<br>Detected</div></div>
+      <div class="counter err"><div class="num" id="c-error">···</div><div class="lbl">Errors<br>Logged</div></div>
     </div>
     <div class="uptime-line" id="uptime-line">Operating 24/7 &middot; <b>0 tamperable</b></div>
   </div>
@@ -229,13 +305,12 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 <section class="block">
   <div class="wrap">
     <div class="sec-head">
-      <span class="sec-label">Section 02 — Live Feed</span>
       <h2 class="sec-title">Live event stream</h2>
-      <p class="sec-sub">The last 50 actions this agent took, refreshing automatically. Green = success, amber = error, red = gated or out-of-scope. Every row is signed and sealed.</p>
+      <p class="sec-sub">The last 50 actions this agent took, refreshing automatically. Each row states its outcome (success, error, or gated), and every row is signed and sealed.</p>
     </div>
     <div class="stream-wrap">
       <div class="stream-bar">
-        <span class="t">demo-agent-01 — RECENT ACTIVITY</span>
+        <span class="t">demo-agent-01 · RECENT ACTIVITY</span>
         <span class="stream-refresh"><span class="live-dot"></span> auto-refresh 15s</span>
       </div>
       <div style="overflow-x:auto;">
@@ -259,9 +334,8 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 <section class="block">
   <div class="wrap">
     <div class="sec-head">
-      <span class="sec-label">Section 03 — Evidence</span>
       <h2 class="sec-title">Download the proof</h2>
-      <p class="sec-sub">Anonymized CSV exports (up to 50 rows each) of real, sealed events. No signatures, no secrets, no payloads — just the auditable trail.</p>
+      <p class="sec-sub">Anonymized CSV exports (up to 50 rows each) of real, sealed events. No signatures, no secrets, no payloads: just the auditable trail.</p>
     </div>
     <div class="dl-grid">
       <button class="dl-btn good" onclick="downloadCsv('good')">
@@ -284,12 +358,10 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 <section class="block">
   <div class="wrap">
     <div class="sec-head">
-      <span class="sec-label">Section 04 — How Gating Works</span>
-      <h2 class="sec-title">How ARIA gated a <code style="font-family:var(--font-mono);color:#f87171;">delete:database</code></h2>
+      <h2 class="sec-title">How ARIA gated a <code style="font-family:var(--font-mono);color:var(--red);">delete:database</code></h2>
       <p class="sec-sub">A walkthrough of the exact flow that turns a catastrophic action into a logged, denied, non-event.</p>
     </div>
     <div class="gate-flow">
-      <div class="gate-line"></div>
       <div class="gstep">
         <div class="gn">01</div>
         <div>
@@ -302,7 +374,7 @@ footer a { color:var(--accent-primary); text-decoration:none; }
         <div class="gn">02</div>
         <div>
           <div class="gtitle">Scope check + interception</div>
-          <div class="gdesc">ARIA compares the action against the agent's declared scope on the server. <code style="color:#f87171;font-family:var(--font-mono)">delete:database</code> is destructive and matches a gate rule — execution is halted.</div>
+          <div class="gdesc">ARIA compares the action against the agent's declared scope on the server. <code style="color:var(--red);font-family:var(--font-mono)">delete:database</code> is destructive and matches a gate rule: execution is halted.</div>
           <div class="gcode crit">scope violation: DETECTED · gate active: HALTING EXECUTION</div>
         </div>
       </div>
@@ -310,7 +382,7 @@ footer a { color:var(--accent-primary); text-decoration:none; }
         <div class="gn">03</div>
         <div>
           <div class="gtitle">Human-in-the-loop alert</div>
-          <div class="gdesc">The owner is notified instantly and the action waits. Nothing runs until a human decides — or it times out and is denied by default.</div>
+          <div class="gdesc">The owner is notified instantly and the action waits. Nothing runs until a human decides, or it times out and is denied by default.</div>
           <div class="gcode">owner notified in 0.1s · awaiting approval</div>
         </div>
       </div>
@@ -318,7 +390,7 @@ footer a { color:var(--accent-primary); text-decoration:none; }
         <div class="gn">✕</div>
         <div>
           <div class="gtitle">Denied &amp; sealed</div>
-          <div class="gdesc">The owner denies it. The database is untouched, and the blocked attempt is recorded as an immutable, Merkle-sealed event — provable forever.</div>
+          <div class="gdesc">The owner denies it. The database is untouched, and the blocked attempt is recorded as an immutable, Merkle-sealed event, provable forever.</div>
           <div class="gcode crit">outcome: blocked · database: SECURE · event cryptographically sealed</div>
         </div>
       </div>
@@ -330,12 +402,12 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 <section class="block">
   <div class="wrap">
     <div class="sec-head">
-      <span class="sec-label">Section 05 — Verify It Yourself</span>
       <h2 class="sec-title">Merkle verifier</h2>
-      <p class="sec-sub">Paste a real event ID. ARIA recomputes its hash from the stored record and checks it against the sealed Merkle/anchor root — live, against the database. Tamper with one byte and it fails.</p>
+      <p class="sec-sub">Paste a real event ID. ARIA recomputes its hash from the stored record and checks it against the sealed Merkle/anchor root: live, against the database. Tamper with one byte and it fails.</p>
     </div>
     <div class="verify-box">
       <div class="verify-row">
+        <label for="verify-input" class="sr-only" style="position:absolute;left:-9999px;">Event ID</label>
         <input class="verify-input" id="verify-input" type="text" placeholder="Paste an event ID…" autocomplete="off" spellcheck="false">
         <button class="verify-btn" id="verify-btn" onclick="runVerify()">Verify</button>
       </div>
@@ -351,8 +423,8 @@ footer a { color:var(--accent-primary); text-decoration:none; }
 
 <footer>
   <div class="wrap">
-    <p>ARIA — cryptographic trust infrastructure for AI agents. &nbsp;·&nbsp; <a href="/">Back to home</a> &nbsp;·&nbsp; <a href="/app">Get access &rarr;</a></p>
-    <p style="margin-top:8px;font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,0.25);">All data anonymized. Signatures, secrets, full DIDs and payloads are never exposed.</p>
+    <p>ARIA · cryptographic trust infrastructure for AI agents. &nbsp;·&nbsp; <a href="/">Back to home</a> &nbsp;·&nbsp; <a href="/app">Get access &rarr;</a></p>
+    <p class="footer-fine">All data anonymized. Signatures, secrets, full DIDs and payloads are never exposed.</p>
   </div>
 </footer>
 
@@ -470,7 +542,7 @@ footer a { color:var(--accent-primary); text-decoration:none; }
           '<span class="vr-line">Action: <b>' + esc(d.action) + '</b></span>' +
           '<span class="vr-line">Sealed at: ' + esc(d.timestamp) + '</span>' +
           '<span class="vr-line">Merkle root: <span class="vr-root">' + esc(rootShort) + '</span></span>' +
-          '<span class="vr-line">The stored record hashes exactly to the sealed root — untampered.</span>';
+          '<span class="vr-line">The stored record hashes exactly to the sealed root: untampered.</span>';
       } else {
         out.classList.add('bad');
         var reason = (d && d.reason) ? d.reason : 'could not verify';
@@ -480,7 +552,7 @@ footer a { color:var(--accent-primary); text-decoration:none; }
       }
     }).catch(function () {
       out.className = 'verify-result show bad';
-      out.innerHTML = '❌ <b>Verification failed.</b><span class="vr-line">Network or service error — try again.</span>';
+      out.innerHTML = '❌ <b>Verification failed.</b><span class="vr-line">Network or service error. Try again.</span>';
     }).finally(function () {
       btn.disabled = false; btn.textContent = 'Verify';
     });

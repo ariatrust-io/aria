@@ -7,459 +7,589 @@
 <meta name="description" content="Cryptographic identity, immutable audit trail, and human-in-the-loop enforcement for autonomous AI agent fleets. Built for the era of agentic AI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-black: #030712;
-  --bg-dark: #070a13;
-  --bg-card: rgba(15, 23, 42, 0.45);
-  --accent-primary: #6366f1;
-  --accent-secondary: #a855f7;
-  --accent-teal: #14b8a6;
-  --gold: #f59e0b;
-  --gold-lt: #fbbf24;
-  --white: #f8fafc;
-  --muted: #94a3b8;
-  --border-glow: rgba(99, 102, 241, 0.15);
-  --border-muted: rgba(255, 255, 255, 0.06);
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Forensic-document palette. Ink on paper; one committed verification green; oxide red for critical. */
+  --paper:       oklch(98% 0.003 150);
+  --paper-shade: oklch(95.5% 0.006 150);
+  --ink:         oklch(24% 0.015 160);
+  --ink-soft:    oklch(42% 0.015 160);
+  --ink-faint:   oklch(55% 0.012 160);
+  --green:       oklch(38% 0.085 155);
+  --green-deep:  oklch(31% 0.07 155);
+  --green-wash:  oklch(94% 0.02 155);
+  --red:         oklch(46% 0.16 27);
+  --red-wash:    oklch(94% 0.025 27);
+  --rule:        oklch(86% 0.01 150);
+  --rule-strong: oklch(70% 0.012 150);
+  --panel:       oklch(20% 0.02 160);   /* dark listing panel */
+  --panel-edge:  oklch(32% 0.025 160);
+  --panel-text:  oklch(90% 0.01 150);
+  --panel-soft:  oklch(68% 0.015 150);
+  --on-green:        oklch(98% 0.005 150);
+  --on-green-soft:   oklch(86% 0.03 152);
+  --syn-key:     oklch(80% 0.09 155);
+  --syn-str:     oklch(85% 0.07 85);
+  --syn-com:     oklch(60% 0.015 150);
+  --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --z-nav: 100;
+  --z-menu: 90;
 }
 
 html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-black);
-  color: var(--white);
+  background: var(--paper);
+  color: var(--ink);
   line-height: 1.6;
   overflow-x: hidden;
-  position: relative;
+  font-kerning: normal;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: radial-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
-  z-index: 1;
+::selection { background: var(--green); color: var(--on-green); }
+
+h1,h2,h3 { text-wrap: balance; }
+
+a:focus-visible, button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 18px; z-index: 200; font-size: 14px; text-decoration: none;
 }
+.skip-link:focus { left: 0; }
 
-.bg-glow-1 { position:absolute; top:-10%; left:-10%; width:50vw; height:50vw; background:radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%); pointer-events:none; z-index:0; }
-.bg-glow-2 { position:absolute; top:30%; right:-10%; width:60vw; height:60vw; background:radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%); pointer-events:none; z-index:0; }
-.bg-glow-3 { position:absolute; bottom:10%; left:10%; width:50vw; height:50vw; background:radial-gradient(circle, rgba(20,184,166,0.06) 0%, transparent 70%); pointer-events:none; z-index:0; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
 
 /* ── NAV ── */
 nav {
-  position: fixed; top: 0; left: 0; right: 0; height: 72px;
+  position: fixed; top: 0; left: 0; right: 0; height: 64px;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 64px;
-  background: rgba(3,7,18,0.6);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-  z-index: 1000;
-  transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+  padding: 0 40px;
+  background: color-mix(in oklch, var(--paper) 92%, transparent);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--rule);
+  z-index: var(--z-nav);
 }
-nav.scrolled {
-  background: rgba(3,7,18,0.92);
-  border-bottom: 1px solid rgba(99,102,241,0.25);
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.7);
-  height: 64px;
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-text {
+  font-weight: 800; font-size: 18px; letter-spacing: 0.14em; color: var(--ink);
 }
-.nav-logo { display:flex; align-items:center; gap:12px; text-decoration:none; }
-.nav-logo svg { transition: transform 0.3s ease; }
-.nav-logo:hover svg { transform: rotate(10deg) scale(1.05); }
-.nav-logo-text { font-weight:800; font-size:20px; letter-spacing:2px; background:linear-gradient(135deg,var(--white) 0%,#cbd5e1 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.nav-links { display:flex; align-items:center; gap:40px; list-style:none; }
-.nav-links a { font-size:14px; font-weight:500; color:var(--muted); text-decoration:none; letter-spacing:0.3px; transition:color 0.2s ease; }
-.nav-links a:hover { color:var(--white); }
+.nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--ink-soft); text-decoration: none;
+  transition: color 0.15s ease;
+}
+.nav-links a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
 .nav-cta {
-  display:inline-flex; align-items:center; padding:10px 24px;
-  background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);
-  color:var(--white); font-size:13px; font-weight:600; text-decoration:none;
-  border-radius:6px; letter-spacing:0.5px;
-  box-shadow:0 4px 20px -5px rgba(99,102,241,0.4);
-  transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
-  border:1px solid rgba(255,255,255,0.08);
+  display: inline-flex; align-items: center; padding: 9px 20px;
+  background: var(--green); color: var(--on-green);
+  font-size: 13px; font-weight: 600; text-decoration: none;
+  border-radius: 3px; letter-spacing: 0.02em;
+  transition: background-color 0.15s ease;
 }
-.nav-cta:hover { transform:translateY(-2px); box-shadow:0 12px 24px -6px rgba(99,102,241,0.6); }
-.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; background:none; border:none; }
-.hamburger span { display:block; width:22px; height:2px; background:var(--white); transition:all 0.3s ease; }
+.nav-cta:hover { background: var(--green-deep); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; background: none; border: none; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); }
 .mobile-menu {
-  display:none; position:fixed; top:72px; left:0; right:0;
-  background:rgba(3,7,18,0.98); border-bottom:1px solid rgba(255,255,255,0.05);
-  padding:28px 40px; flex-direction:column; gap:20px; z-index:999;
-  backdrop-filter:blur(20px);
+  display: none; position: fixed; top: 64px; left: 0; right: 0;
+  background: var(--paper); border-bottom: 1px solid var(--rule);
+  padding: 24px 40px; flex-direction: column; gap: 18px; z-index: var(--z-menu);
 }
-.mobile-menu.open { display:flex; }
-.mobile-menu a { color:var(--muted); text-decoration:none; font-size:16px; font-weight:500; }
-.mobile-menu a:hover { color:var(--white); }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { color: var(--ink-soft); text-decoration: none; font-size: 16px; font-weight: 500; }
+.mobile-menu a:hover { color: var(--ink); }
 
 /* ── HERO ── */
 #hero {
-  position:relative; min-height:100vh;
-  display:grid; grid-template-columns:55fr 45fr;
-  align-items:center; padding:140px 64px 80px; gap:40px; z-index:2;
+  background: var(--green);
+  color: var(--on-green);
+  padding: 152px 40px 88px;
 }
-.hero-left { position:relative; z-index:2; }
-.hero-label {
-  display:inline-flex; align-items:center; gap:8px;
-  font-family:var(--font-mono); font-size:12px; font-weight:500;
-  letter-spacing:2px; color:var(--accent-teal); text-transform:uppercase;
-  margin-bottom:24px; background:rgba(20,184,166,0.08);
-  border:1px solid rgba(20,184,166,0.2); padding:6px 14px; border-radius:100px;
-  opacity:0; animation:fadeUp 0.6s ease 0.1s forwards;
+.hero-grid {
+  max-width: 1160px; margin: 0 auto;
+  display: grid; grid-template-columns: 54fr 46fr; gap: 56px; align-items: center;
 }
-.hero-label::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent-teal); box-shadow:0 0 8px var(--accent-teal); }
 .hero-h1 {
-  font-size:clamp(48px,6.5vw,84px); font-weight:800; line-height:1.05;
-  letter-spacing:-2px; color:var(--white); margin-bottom:28px;
-  opacity:0; animation:fadeUp 0.7s ease 0.25s forwards;
+  font-size: clamp(38px, 5.6vw, 72px);
+  font-weight: 800; line-height: 1.04; letter-spacing: -0.02em;
+  margin-bottom: 26px;
 }
-.hero-h1 .accent { background:linear-gradient(to right,#818cf8,#a78bfa,#f472b6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.hero-sub { font-size:18px; font-weight:400; color:var(--muted); max-width:540px; line-height:1.7; margin-bottom:40px; opacity:0; animation:fadeUp 0.7s ease 0.4s forwards; }
-.hero-btns { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:48px; opacity:0; animation:fadeUp 0.7s ease 0.55s forwards; }
-.btn-primary-gradient {
-  display:inline-flex; align-items:center; gap:10px; padding:16px 36px;
-  background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%);
-  color:var(--white); font-size:14px; font-weight:600; text-decoration:none;
-  border-radius:8px; letter-spacing:0.5px;
-  box-shadow:0 10px 25px -5px rgba(99,102,241,0.4);
-  transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
-  border:1px solid rgba(255,255,255,0.08);
+.hero-h1 .line { display: block; overflow: hidden; }
+.hero-h1 .line > span {
+  display: block;
+  transform: translateY(110%);
+  animation: lineUp 0.9s var(--ease-out) forwards;
 }
-.btn-primary-gradient:hover { transform:translateY(-3px); box-shadow:0 20px 35px -6px rgba(99,102,241,0.6); }
-.btn-outline-glass {
-  display:inline-flex; align-items:center; gap:10px; padding:16px 36px;
-  border:1px solid var(--border-muted); background:rgba(255,255,255,0.02);
-  color:var(--white); font-size:14px; font-weight:500; text-decoration:none;
-  border-radius:8px; letter-spacing:0.5px;
-  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
-  transition:all 0.2s ease;
+.hero-h1 .line:nth-child(2) > span { animation-delay: 0.12s; }
+.hero-h1 .line:nth-child(3) > span { animation-delay: 0.24s; }
+.hero-h1 em { font-style: normal; color: var(--on-green-soft); }
+.hero-sub {
+  font-size: 17px; color: var(--on-green-soft); max-width: 52ch;
+  line-height: 1.7; margin-bottom: 36px;
+  opacity: 0; animation: fadeIn 0.8s ease 0.45s forwards;
 }
-.btn-outline-glass:hover { border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); transform:translateY(-1px); }
-.hero-stats { display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-family:var(--font-mono); font-size:12px; color:rgba(255,255,255,0.3); letter-spacing:0.5px; opacity:0; animation:fadeUp 0.7s ease 0.7s forwards; }
-.hero-sep { color:rgba(99,102,241,0.3); }
+.hero-btns {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 44px;
+  opacity: 0; animation: fadeIn 0.8s ease 0.6s forwards;
+}
+.btn-solid {
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px;
+  background: var(--paper); color: var(--ink);
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  border-radius: 3px; transition: transform 0.15s var(--ease-out), box-shadow 0.15s ease;
+}
+.btn-solid:hover { transform: translateY(-1px); box-shadow: 0 6px 16px -8px oklch(0% 0 0 / 0.5); }
+.btn-line {
+  display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px;
+  border: 1px solid oklch(100% 0 0 / 0.4); color: var(--on-green);
+  font-size: 14px; font-weight: 500; text-decoration: none;
+  border-radius: 3px; transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.btn-line:hover { border-color: oklch(100% 0 0 / 0.8); background: oklch(100% 0 0 / 0.06); }
+.hero-facts {
+  display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em;
+  color: var(--on-green-soft);
+  opacity: 0; animation: fadeIn 0.8s ease 0.75s forwards;
+}
+.hero-sep { opacity: 0.5; }
 
-/* ── TERMINAL ── */
-.hero-right { position:relative; z-index:2; }
-.terminal-box {
-  background:#020617; border:1px solid rgba(99,102,241,0.2); border-radius:12px;
-  overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.6),0 0 40px rgba(99,102,241,0.06);
-  opacity:0; animation:fadeUp 0.8s ease 0.5s forwards;
+/* ── EVENT RECORD (hero artifact) ── */
+.record {
+  background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 6px;
+  overflow: hidden;
+  opacity: 0; animation: fadeIn 0.9s var(--ease-out) 0.5s forwards;
 }
-.term-titlebar { height:40px; padding:0 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.04); background:rgba(15,23,42,0.6); }
-.term-dots { display:flex; gap:8px; }
-.term-dot { width:11px; height:11px; border-radius:50%; }
-.term-dot.r { background:#ef4444; } .term-dot.y { background:#eab308; } .term-dot.g { background:#22c55e; }
-.term-title-txt { font-family:var(--font-mono); font-size:11px; color:rgba(148,163,184,0.6); letter-spacing:1px; }
-.term-body { padding:24px; font-family:var(--font-mono); font-size:13px; line-height:1.9; min-height:320px; color:#cbd5e1; }
-.tline { display:block; }
-.tcode { color:#e2e8f0; } .tgate-hdr { color:var(--gold-lt); font-weight:600; }
-.tlbl { color:#64748b; } .tcrit { color:#f87171; font-weight:500; }
-.twait { color:rgba(148,163,184,0.4); } .tok { color:#4ade80; }
-.tcursor { display:inline-block; width:8px; height:14px; background:var(--accent-primary); vertical-align:text-bottom; margin-left:2px; animation:blink 0.9s step-end infinite; }
+.record-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; border-bottom: 1px solid var(--panel-edge);
+}
+.record-title {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em;
+  color: var(--panel-soft); text-transform: uppercase;
+}
+.record-live {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  color: var(--syn-key); display: inline-flex; align-items: center; gap: 6px;
+}
+.record-live::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+}
+.record-body {
+  padding: 22px 24px; font-family: var(--font-mono); font-size: 13px;
+  line-height: 1.9; min-height: 330px; color: var(--panel-text);
+}
+.tline { display: block; min-height: 1.9em; }
+.tcode { color: var(--panel-text); }
+.tgate-hdr { color: var(--syn-str); font-weight: 600; }
+.tlbl { color: var(--panel-soft); }
+.tcrit { color: oklch(72% 0.16 27); font-weight: 500; }
+.twait { color: var(--syn-com); }
+.tok { color: var(--syn-key); }
+.tcursor {
+  display: inline-block; width: 8px; height: 14px; background: var(--syn-key);
+  vertical-align: text-bottom; margin-left: 2px; animation: blink 0.9s step-end infinite;
+}
 
-/* ── STATS BAR ── */
-#statsbar {
-  padding:60px 64px; background:rgba(7,10,19,0.5);
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-  border-top:1px solid rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.04);
-  position:relative; z-index:2;
+/* ── VERIFICATION LEDGER ── */
+#ledger { border-bottom: 1px solid var(--rule); background: var(--paper); }
+.ledger-rows {
+  max-width: 1160px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
 }
-.stats-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:32px; }
-.stat-item { text-align:center; padding:0 16px; border-right:1px solid rgba(255,255,255,0.04); }
-.stat-item:last-child { border-right:none; }
-.stat-num { font-family:var(--font-mono); font-size:clamp(36px,4.5vw,56px); font-weight:700; background:linear-gradient(135deg,var(--gold-lt) 0%,var(--gold) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; margin-bottom:12px; letter-spacing:-1px; }
-.stat-label { font-size:11px; font-weight:600; color:var(--muted); letter-spacing:2px; text-transform:uppercase; line-height:1.5; }
+.ledger-cell {
+  padding: 36px 28px;
+  border-right: 1px solid var(--rule);
+}
+.ledger-cell:last-child { border-right: none; }
+.ledger-num {
+  font-family: var(--font-mono); font-size: clamp(26px, 3vw, 36px); font-weight: 600;
+  color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.15;
+}
+.ledger-label {
+  font-size: 13px; color: var(--ink-soft); margin-top: 6px;
+}
+.ledger-foot {
+  max-width: 1160px; margin: 0 auto; padding: 16px 28px 22px;
+  border-top: 1px solid var(--rule);
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
+}
+.ledger-note { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); letter-spacing: 0.03em; }
+.ledger-link { font-size: 14px; font-weight: 600; color: var(--green); text-decoration: none; }
+.ledger-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* ── SECTION COMMON ── */
-.sec-label { font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:3px; color:var(--accent-primary); text-transform:uppercase; margin-bottom:16px; display:block; }
-.sec-title { font-size:clamp(32px,5vw,56px); font-weight:800; color:var(--white); line-height:1.1; letter-spacing:-1.5px; margin-bottom:20px; }
-.sec-sub { font-size:16px; font-weight:400; color:var(--muted); line-height:1.8; max-width:640px; }
+section { scroll-margin-top: 72px; }
+.sec { padding: 104px 40px; }
+.sec-title {
+  font-size: clamp(30px, 4vw, 46px); font-weight: 700; line-height: 1.12;
+  letter-spacing: -0.015em; margin-bottom: 18px;
+}
+.sec-sub { font-size: 16.5px; color: var(--ink-soft); line-height: 1.75; max-width: 62ch; }
 
-/* ── PROBLEM ── */
-#problem { padding:120px 64px; position:relative; z-index:2; }
-.problem-hdr { text-align:center; margin-bottom:72px; }
-.problem-hdr .sec-sub { margin:0 auto; }
-.problem-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:32px; }
-.prob-term { background:#020617; border-radius:12px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.4); transition:transform 0.3s ease,box-shadow 0.3s ease; }
-.prob-term.bad { border:1px solid rgba(239,68,68,0.2); }
-.prob-term.bad:hover { transform:translateY(-2px); box-shadow:0 15px 40px rgba(239,68,68,0.1); }
-.prob-term.good { border:1px solid rgba(34,197,94,0.2); }
-.prob-term.good:hover { transform:translateY(-2px); box-shadow:0 15px 40px rgba(34,197,94,0.08); }
-.prob-bar { padding:14px 20px; display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:11px; letter-spacing:1.5px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.03); }
-.prob-term.bad .prob-bar { background:rgba(239,68,68,0.05); color:#ef4444; }
-.prob-term.good .prob-bar { background:rgba(34,197,94,0.05); color:#22c55e; }
-.prob-body { padding:28px; font-family:var(--font-mono); font-size:13px; line-height:2; }
-.prob-term.bad .px { color:#ef4444; } .prob-term.good .px { color:#22c55e; }
-.pb { color:#94a3b8; } .pv { color:var(--gold-lt); } .pevt { color:var(--accent-primary); }
+/* ── EXHIBITS (the incident) ── */
+#problem { background: var(--paper-shade); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.exhibit-grid {
+  max-width: 1160px; margin: 56px auto 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+}
+.exhibit {
+  background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 4px;
+  overflow: hidden;
+}
+.exhibit-bar {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 14px 22px; border-bottom: 1px solid var(--rule);
+}
+.exhibit-id {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.exhibit.bad  .exhibit-id { color: var(--red); }
+.exhibit.good .exhibit-id { color: var(--green); }
+.exhibit-name { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.exhibit-body { padding: 24px 22px; font-family: var(--font-mono); font-size: 12.5px; line-height: 2.1; }
+.exhibit .px { font-weight: 600; }
+.exhibit.bad  .px { color: var(--red); }
+.exhibit.good .px { color: var(--green); }
+.pb { color: var(--ink-soft); }
+.pv { color: var(--ink); font-weight: 500; }
+.exhibit-verdict {
+  border-top: 1px solid var(--rule); padding: 13px 22px;
+  font-size: 13px; font-weight: 600;
+}
+.exhibit.bad  .exhibit-verdict { color: var(--red); background: var(--red-wash); }
+.exhibit.good .exhibit-verdict { color: var(--green); background: var(--green-wash); }
 
 /* ── HOW IT WORKS ── */
-#how { padding:120px 64px; background:rgba(7,10,19,0.4); position:relative; z-index:2; }
-.how-wrap { max-width:860px; margin:48px auto 0; position:relative; }
-.how-line { position:absolute; left:28px; top:10px; bottom:80px; width:2px; background:linear-gradient(to bottom,var(--accent-primary),rgba(99,102,241,0.05)); z-index:0; }
-.how-step { display:grid; grid-template-columns:58px 1fr; gap:32px; margin-bottom:64px; position:relative; z-index:1; }
-.how-step:last-child { margin-bottom:0; }
-.step-num { width:58px; height:58px; border:1px solid rgba(99,102,241,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:14px; font-weight:600; color:var(--white); background:#070a13; box-shadow:0 0 15px rgba(99,102,241,0.1); flex-shrink:0; transition:border-color 0.3s ease; }
-.how-step:hover .step-num { border-color:var(--accent-teal); box-shadow:0 0 20px rgba(20,184,166,0.15); }
-.step-body { padding-top:8px; }
-.step-title { font-size:24px; font-weight:700; color:var(--white); margin-bottom:10px; }
-.step-desc { font-size:15px; color:var(--muted); line-height:1.7; max-width:600px; margin-bottom:20px; }
-.step-did { font-family:var(--font-mono); font-size:12px; color:var(--accent-teal); background:rgba(20,184,166,0.05); border:1px solid rgba(20,184,166,0.15); border-radius:6px; padding:10px 18px; display:inline-block; margin-bottom:16px; font-weight:500; }
-.step-code { background:#020617; border:1px solid rgba(255,255,255,0.03); border-left:3px solid var(--accent-primary); border-radius:8px; padding:18px 24px; font-family:var(--font-mono); font-size:12.5px; color:#cbd5e1; line-height:1.8; overflow-x:auto; white-space:pre; }
-.sk { color:var(--accent-primary); } .ss { color:var(--gold-lt); } .sf { color:var(--white); } .sc { color:#475569; }
+.steps { max-width: 880px; margin: 56px auto 0; }
+.step {
+  display: grid; grid-template-columns: 72px 1fr; gap: 28px;
+  padding: 40px 0; border-top: 1px solid var(--rule);
+}
+.step > div { min-width: 0; }
+.hero-grid > div { min-width: 0; }
+.step:last-child { border-bottom: 1px solid var(--rule); }
+.step-num {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink-faint);
+  padding-top: 6px;
+}
+.step-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.01em; }
+.step-desc { font-size: 15px; color: var(--ink-soft); line-height: 1.7; max-width: 58ch; margin-bottom: 18px; }
+.step-did {
+  font-family: var(--font-mono); font-size: 12px; color: var(--green);
+  background: var(--green-wash); border: 1px solid color-mix(in oklch, var(--green) 25%, var(--paper));
+  border-radius: 3px; padding: 9px 14px; display: inline-block; margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+.listing {
+  background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 5px;
+  padding: 18px 22px; font-family: var(--font-mono); font-size: 12.5px;
+  color: var(--panel-text); line-height: 1.85; overflow-x: auto; white-space: pre;
+}
+.sk { color: var(--syn-key); } .ss { color: var(--syn-str); } .sf { color: oklch(96% 0.005 150); } .sc { color: var(--syn-com); }
 
-/* ── FEATURES ── */
-#features { padding:120px 64px; position:relative; z-index:2; }
-.features-grid { max-width:1200px; margin:64px auto 0; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
-.feat-card { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:12px; padding:40px 32px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); transition:all 0.3s cubic-bezier(0.16,1,0.3,1); position:relative; overflow:hidden; }
-.feat-card::before { content:''; position:absolute; inset:0; border-radius:12px; background:linear-gradient(135deg,rgba(99,102,241,0.1) 0%,transparent 100%); opacity:0; transition:opacity 0.3s ease; }
-.feat-card:hover { transform:translateY(-4px); border-color:rgba(99,102,241,0.3); box-shadow:0 15px 35px -10px rgba(0,0,0,0.4); }
-.feat-card:hover::before { opacity:1; }
-.feat-icon { width:48px; height:48px; margin-bottom:24px; color:var(--accent-primary); }
-.feat-title { font-size:16px; font-weight:700; color:var(--white); margin-bottom:12px; letter-spacing:0.3px; }
-.feat-desc { font-size:13.5px; font-weight:400; color:var(--muted); line-height:1.7; }
+/* ── CAPABILITIES (specification index) ── */
+.spec { max-width: 1160px; margin: 56px auto 0; }
+.spec-row {
+  display: grid; grid-template-columns: minmax(220px, 34fr) 66fr; gap: 32px;
+  padding: 30px 0; border-top: 1px solid var(--rule);
+}
+.spec-row:last-child { border-bottom: 1px solid var(--rule); }
+.spec-name { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.spec-proof {
+  display: block; font-family: var(--font-mono); font-size: 11.5px; font-weight: 400;
+  color: var(--green); margin-top: 8px; letter-spacing: 0.02em; overflow-wrap: anywhere;
+}
+.spec-desc { font-size: 15px; color: var(--ink-soft); line-height: 1.7; max-width: 65ch; }
 
-/* ── USE CASES ── */
-#usecases { padding:120px 64px; background:rgba(7,10,19,0.4); position:relative; z-index:2; }
-.uc-grid { max-width:1200px; margin:64px auto 0; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
-.uc-card { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:12px; padding:48px 36px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); transition:all 0.3s ease; }
-.uc-card:hover { border-color:rgba(20,184,166,0.3); transform:translateY(-4px); box-shadow:0 20px 40px -15px rgba(0,0,0,0.5); }
-.uc-tag { font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:2px; color:var(--accent-teal); text-transform:uppercase; margin-bottom:20px; }
-.uc-title { font-size:32px; font-weight:800; color:var(--white); letter-spacing:-0.5px; margin-bottom:16px; }
-.uc-desc { font-size:14px; color:var(--muted); line-height:1.7; }
+/* ── ENVIRONMENTS (dossier rows) ── */
+#usecases { background: var(--paper-shade); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.dossier { max-width: 1160px; margin: 56px auto 0; }
+.dossier-row {
+  display: grid; grid-template-columns: 200px minmax(200px, 320px) 1fr; gap: 32px;
+  padding: 34px 0; border-top: 1px solid var(--rule-strong); align-items: baseline;
+}
+.dossier-row:last-child { border-bottom: 1px solid var(--rule-strong); }
+.dossier-tag { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; color: var(--ink-faint); text-transform: uppercase; }
+.dossier-title { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+.dossier-desc { font-size: 14.5px; color: var(--ink-soft); line-height: 1.7; }
 
-/* ── CODE ── */
-#code { padding:120px 64px; position:relative; z-index:2; }
-.code-wrap { max-width:960px; margin:0 auto; }
-.code-tabs { display:flex; border-bottom:1px solid rgba(255,255,255,0.05); margin-top:48px; }
-.code-tab { padding:14px 28px; font-family:var(--font-sans); font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; border:none; border-bottom:2px solid transparent; background:none; transition:all 0.2s ease; }
-.code-tab:hover:not(.active) { color:var(--white); }
-.code-tab.active { color:var(--accent-primary); border-bottom-color:var(--accent-primary); }
-.code-panel { display:none; background:#020617; border:1px solid rgba(255,255,255,0.03); border-top:none; border-radius:0 0 12px 12px; padding:32px; overflow-x:auto; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
-.code-panel.active { display:block; }
-.code-eg { font-family:var(--font-mono); font-size:13.5px; line-height:1.95; white-space:pre; color:#cbd5e1; }
-.ck { color:var(--accent-primary); } .cs { color:var(--gold-lt); } .cf { color:var(--white); } .cc { color:#475569; }
+/* ── CODE / INTEGRATION ── */
+.code-wrap { max-width: 920px; margin: 0 auto; }
+.code-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--rule-strong); margin-top: 44px; }
+.code-tab {
+  padding: 12px 22px; font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+  color: var(--ink-faint); cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s ease;
+}
+.code-tab:hover:not(.active) { color: var(--ink); }
+.code-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.code-panel {
+  display: none; background: var(--panel); border: 1px solid var(--panel-edge); border-top: none;
+  border-radius: 0 0 6px 6px; padding: 28px; overflow-x: auto;
+}
+.code-panel.active { display: block; }
+.code-eg { font-family: var(--font-mono); font-size: 13px; line-height: 1.95; white-space: pre; color: var(--panel-text); }
+.ck { color: var(--syn-key); } .cs { color: var(--syn-str); } .cf { color: oklch(96% 0.005 150); } .cc { color: var(--syn-com); }
 
 /* ── PRICING ── */
-#pricing { padding:120px 64px; background:rgba(7,10,19,0.4); position:relative; z-index:2; }
-.pricing-grid { max-width:1400px; margin:64px auto 0; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
-.pricing-card { background:var(--bg-card); border:1px solid var(--border-muted); border-radius:16px; padding:48px 36px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); transition:all 0.3s ease; display:flex; flex-direction:column; position:relative; }
-.pricing-card.premium { border-color:rgba(99,102,241,0.4); background:rgba(15,23,42,0.65); }
-.pricing-card.premium::after { content:'POPULAR'; position:absolute; top:20px; right:20px; background:var(--accent-primary); color:var(--white); font-family:var(--font-mono); font-size:10px; font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:1px; }
-.pricing-card:hover { transform:translateY(-4px); border-color:rgba(99,102,241,0.3); box-shadow:0 20px 40px -15px rgba(0,0,0,0.6); }
-.pricing-title { font-size:16px; font-weight:700; color:var(--white); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
-.pricing-price { font-size:48px; font-weight:800; color:var(--white); line-height:1.1; margin:20px 0; }
-.pricing-price span { font-size:15px; font-weight:400; color:var(--muted); }
-.pricing-desc { font-size:14px; color:var(--muted); margin-bottom:32px; }
-.pricing-features { list-style:none; margin-bottom:40px; flex-grow:1; }
-.pricing-features li { font-size:14px; color:#cbd5e1; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
-.pricing-features li::before { content:'✓'; color:var(--accent-teal); font-weight:700; }
-.pricing-btn { display:block; width:100%; text-align:center; padding:14px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; transition:all 0.2s ease; }
-.pricing-btn-primary { background:var(--white); color:var(--bg-black); }
-.pricing-btn-primary:hover { background:#e2e8f0; transform:translateY(-1px); }
-.pricing-btn-gradient { background:linear-gradient(135deg,var(--accent-primary) 0%,var(--accent-secondary) 100%); color:var(--white); box-shadow:0 4px 20px -5px rgba(99,102,241,0.4); }
-.pricing-btn-gradient:hover { box-shadow:0 8px 24px -5px rgba(99,102,241,0.6); transform:translateY(-1px); }
-.pricing-btn-outline { border:1px solid var(--border-muted); color:var(--white); background:rgba(255,255,255,0.01); }
-.pricing-btn-outline:hover { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.15); }
+#pricing { background: var(--paper-shade); border-top: 1px solid var(--rule); }
+.pricing-grid {
+  max-width: 1240px; margin: 56px auto 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+}
+.pricing-card {
+  background: var(--paper); border: 1px solid var(--rule-strong); border-radius: 4px;
+  padding: 36px 30px; display: flex; flex-direction: column; position: relative;
+}
+.pricing-card.featured { border-color: var(--green); }
+.pricing-flag {
+  position: absolute; top: -1px; right: 20px;
+  background: var(--green); color: var(--on-green);
+  font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
+  letter-spacing: 0.12em; padding: 4px 10px; border-radius: 0 0 3px 3px;
+}
+.pricing-title { font-size: 15px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.pricing-price { font-size: 42px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin: 16px 0; font-variant-numeric: tabular-nums; }
+.pricing-price span { font-size: 14px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0; }
+.pricing-desc { font-size: 14px; color: var(--ink-soft); margin-bottom: 26px; line-height: 1.6; }
+.pricing-features { list-style: none; margin-bottom: 34px; flex-grow: 1; }
+.pricing-features li {
+  font-size: 13.5px; color: var(--ink); margin-bottom: 13px;
+  display: flex; align-items: baseline; gap: 10px; line-height: 1.5;
+}
+.pricing-features li::before { content: '·'; color: var(--green); font-weight: 800; }
+.pricing-btn {
+  display: block; width: 100%; text-align: center; padding: 13px;
+  border-radius: 3px; font-size: 14px; font-weight: 600; text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.pricing-btn-solid { background: var(--green); color: var(--on-green); }
+.pricing-btn-solid:hover { background: var(--green-deep); }
+.pricing-btn-ink { background: var(--ink); color: var(--paper); }
+.pricing-btn-ink:hover { background: oklch(32% 0.015 160); }
+.pricing-btn-line { border: 1px solid var(--rule-strong); color: var(--ink); }
+.pricing-btn-line:hover { border-color: var(--ink); }
 
 /* ── CTA ── */
-#cta { padding:160px 64px; text-align:center; position:relative; overflow:hidden; z-index:2; }
-#cta::before { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; height:600px; background:radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%); pointer-events:none; }
-.cta-line1 { font-size:clamp(32px,6vw,64px); font-weight:800; color:var(--white); line-height:1.1; letter-spacing:-1.5px; margin-bottom:12px; }
-.cta-line2 { font-size:clamp(24px,4vw,44px); font-weight:700; color:var(--muted); margin-bottom:56px; }
-.cta-btns { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:36px; }
-.cta-note { font-family:var(--font-mono); font-size:12px; color:rgba(255,255,255,0.2); letter-spacing:1px; }
+#cta { background: var(--green); color: var(--on-green); text-align: center; padding: 120px 40px; }
+.cta-line1 {
+  font-size: clamp(30px, 5vw, 56px); font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.02em; margin-bottom: 12px; overflow-wrap: break-word;
+}
+.cta-line2 { font-size: clamp(18px, 2.6vw, 26px); font-weight: 500; color: var(--on-green-soft); margin-bottom: 48px; }
+.cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+.cta-note { font-family: var(--font-mono); font-size: 12px; color: var(--on-green-soft); letter-spacing: 0.06em; }
 
 /* ── FOOTER ── */
-footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); padding:80px 64px 32px; position:relative; z-index:2; }
-.footer-main { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; padding-bottom:64px; }
-.footer-logo-row { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
-.footer-brand-name { font-weight:800; font-size:22px; letter-spacing:2px; color:var(--white); }
-.footer-desc { font-size:13.5px; color:var(--muted); line-height:1.8; max-width:280px; margin-bottom:24px; }
-.footer-gh { font-family:var(--font-mono); font-size:12px; color:rgba(255,255,255,0.35); text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s; }
-.footer-gh:hover { color:var(--white); }
-.footer-col-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--accent-primary); margin-bottom:24px; }
-.footer-col ul { list-style:none; }
-.footer-col ul li { margin-bottom:12px; }
-.footer-col ul li a { font-size:13.5px; color:var(--muted); text-decoration:none; transition:color 0.2s; }
-.footer-col ul li a:hover { color:var(--white); }
-.footer-bottom { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.03); padding:32px 0 0; flex-wrap:wrap; gap:16px; }
-.footer-copy { font-size:12px; color:rgba(255,255,255,0.25); letter-spacing:0.3px; }
-.footer-domain { font-family:var(--font-mono); font-size:12px; color:rgba(255,255,255,0.25); letter-spacing:1px; }
+footer { background: var(--paper); border-top: 1px solid var(--rule-strong); padding: 72px 40px 28px; }
+.footer-main {
+  max-width: 1160px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 56px;
+}
+.footer-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.footer-brand-name { font-weight: 800; font-size: 20px; letter-spacing: 0.12em; color: var(--ink); }
+.footer-desc { font-size: 13.5px; color: var(--ink-soft); line-height: 1.8; max-width: 30ch; margin-bottom: 22px; }
+.footer-gh {
+  font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px; transition: color 0.15s;
+}
+.footer-gh:hover { color: var(--ink); }
+.footer-col-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); margin-bottom: 20px; }
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 11px; }
+.footer-col ul li a { font-size: 13.5px; color: var(--ink-soft); text-decoration: none; transition: color 0.15s; }
+.footer-col ul li a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.footer-bottom {
+  max-width: 1160px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--rule); padding-top: 26px; flex-wrap: wrap; gap: 14px;
+}
+.footer-copy { font-size: 12.5px; color: var(--ink-faint); }
+.footer-domain { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); letter-spacing: 0.06em; }
 
-/* ── SCROLL REVEAL ── */
-.reveal { opacity:0; transform:translateY(32px); transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-.reveal.visible { opacity:1; transform:translateY(0); }
+/* ── REVEAL (ledger + exhibits only) ── */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* ── ANIMATIONS ── */
-@keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
-@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+@keyframes lineUp { to { transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-h1 .line > span { animation: none; transform: none; }
+  .hero-sub, .hero-btns, .hero-facts, .record { animation: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .tcursor { animation: none; }
+  .btn-solid:hover { transform: none; }
+}
 
 /* ── RESPONSIVE ── */
-@media (max-width:1100px) {
-  #hero { grid-template-columns:1fr; padding:120px 48px 60px; text-align:center; }
-  .hero-left { display:flex; flex-direction:column; align-items:center; }
-  .hero-sub { max-width:600px; }
-  .hero-btns { justify-content:center; }
-  .hero-right { max-width:640px; margin:0 auto; width:100%; }
-  .features-grid { grid-template-columns:repeat(2,1fr); }
-  .uc-grid { grid-template-columns:repeat(2,1fr); }
-  .pricing-grid { grid-template-columns:repeat(2,1fr); max-width:900px; margin-left:auto; margin-right:auto; }
+@media (max-width: 1100px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+  .hero-sub { max-width: 60ch; }
+  .ledger-rows { grid-template-columns: 1fr 1fr; }
+  .ledger-cell:nth-child(2) { border-right: none; }
+  .ledger-cell { border-bottom: 1px solid var(--rule); }
+  .pricing-grid { grid-template-columns: 1fr 1fr; max-width: 860px; }
+  .dossier-row { grid-template-columns: 160px 1fr; }
+  .dossier-desc { grid-column: 2; }
 }
-@media (max-width:768px) {
-  nav { padding:0 28px; }
-  .nav-links, .nav-cta { display:none; }
-  .hamburger { display:flex; }
-  #statsbar { padding:48px 28px; }
-  .stats-inner { grid-template-columns:repeat(2,1fr); gap:24px; }
-  .stat-item { border-right:none; padding:16px 0; }
-  .stat-item:nth-child(odd) { border-right:1px solid rgba(255,255,255,0.04); }
-  .problem-grid { grid-template-columns:1fr; gap:24px; }
-  .how-line { display:none; }
-  .how-step { grid-template-columns:48px 1fr; gap:16px; }
-  .features-grid, .uc-grid, .pricing-grid { grid-template-columns:1fr; }
-  .footer-main { grid-template-columns:1fr 1fr; gap:32px; }
-  footer { padding:60px 28px 24px; }
-  #hero, #problem, #how, #features, #usecases, #code, #pricing, #cta { padding-left:28px; padding-right:28px; }
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  #hero { padding: 128px 24px 64px; }
+  .sec { padding: 72px 24px; }
+  #cta { padding: 88px 24px; }
+  .exhibit-grid { grid-template-columns: 1fr; }
+  .step { grid-template-columns: 48px 1fr; gap: 16px; }
+  .spec-row { grid-template-columns: 1fr; gap: 10px; padding: 24px 0; }
+  .dossier-row { grid-template-columns: 1fr; gap: 8px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .footer-main { grid-template-columns: 1fr 1fr; gap: 32px; }
+  footer { padding: 56px 24px 24px; }
 }
-@media (max-width:480px) {
-  .footer-main { grid-template-columns:1fr; }
-  .hero-btns { flex-direction:column; align-items:stretch; width:100%; }
-  .hero-stats { flex-direction:column; gap:8px; }
-  .stats-inner { grid-template-columns:1fr; }
-  .stat-item { border-right:none !important; border-bottom:1px solid rgba(255,255,255,0.04); }
-  .stat-item:last-child { border-bottom:none; }
-  .cta-btns { flex-direction:column; align-items:stretch; }
+@media (max-width: 480px) {
+  .ledger-rows { grid-template-columns: 1fr; }
+  .ledger-cell { border-right: none; }
+  .hero-btns { flex-direction: column; align-items: stretch; }
+  .cta-btns { flex-direction: column; align-items: center; }
+  .footer-main { grid-template-columns: 1fr; }
 }
 </style>
 <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
 </head>
 <body>
 
-<div class="bg-glow-1"></div>
-<div class="bg-glow-2"></div>
-<div class="bg-glow-3"></div>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- NAV -->
-<nav id="nav">
+<nav id="nav" aria-label="Main">
   <a href="/" class="nav-logo">
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#6366f1" stroke-width="2"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(99,102,241,0.15)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(99,102,241,0.25)" stroke-width="1"/>
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="currentColor" stroke-width="2" style="color:oklch(38% 0.085 155)"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
+      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
     </svg>
     <span class="nav-logo-text">ARIA</span>
   </a>
   <ul class="nav-links">
-    <li><a href="#how">Docs</a></li>
+    <li><a href="/docs">Docs</a></li>
     <li><a href="#pricing">Pricing</a></li>
+    <li><a href="/proof">Live Proof</a></li>
     <li><a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">GitHub</a></li>
   </ul>
   <a href="/app" class="nav-cta">Get Access &rarr;</a>
-  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
 <div class="mobile-menu" id="mobile-menu">
-  <a href="#how">Docs</a>
+  <a href="/docs">Docs</a>
   <a href="#pricing">Pricing</a>
+  <a href="/proof">Live Proof</a>
   <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener">GitHub</a>
-  <a href="/app" style="color:var(--accent-primary)">Get Access &rarr;</a>
+  <a href="/app" style="color:var(--green);font-weight:600">Get Access &rarr;</a>
 </div>
+
+<main id="main">
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-left">
-    <span class="hero-label">Autonomous Trust &amp; Safety</span>
-    <h1 class="hero-h1">YOUR AGENTS<br>ACT.<br>CAN YOU <span class="accent">PROVE</span><br>WHAT THEY DID?</h1>
-    <p class="hero-sub">
-      Cryptographic identity. Immutable audit trail. Human-in-the-loop enforcement.
-      Built for the era of autonomous AI agents.
-    </p>
-    <div class="hero-btns">
-      <a href="/app" class="btn-primary-gradient">Start Gating Free &rarr;</a>
-      <a href="/proof" class="btn-outline-glass">See Live Proof &rarr;</a>
-      <a href="#how" class="btn-outline-glass">How It Works</a>
-    </div>
-    <div class="hero-stats">
-      <span>34 verification groups</span>
-      <span class="hero-sep">&middot;</span>
-      <span>0 known vulnerabilities</span>
-      <span class="hero-sep">&middot;</span>
-      <span>Full Merkle sealing</span>
-    </div>
-  </div>
-  <div class="hero-right">
-    <div class="terminal-box" id="hero-term">
-      <div class="term-titlebar">
-        <div class="term-dots">
-          <div class="term-dot r"></div>
-          <div class="term-dot y"></div>
-          <div class="term-dot g"></div>
-        </div>
-        <span class="term-title-txt">ARIA &mdash; LIVE AGENT MEMBRANE</span>
-        <div></div>
+  <div class="hero-grid">
+    <div>
+      <h1 class="hero-h1">
+        <span class="line"><span>Your agents act.</span></span>
+        <span class="line"><span>Can you <em>prove</em></span></span>
+        <span class="line"><span>what they did?</span></span>
+      </h1>
+      <p class="hero-sub">
+        Cryptographic identity. Immutable audit trail. Human-in-the-loop
+        enforcement. ARIA turns every agent action into signed, verifiable
+        evidence, and stops the destructive ones before they execute.
+      </p>
+      <div class="hero-btns">
+        <a href="/app" class="btn-solid">Start Gating Free &rarr;</a>
+        <a href="/proof" class="btn-line">See Live Proof</a>
+        <a href="#how" class="btn-line">How It Works</a>
       </div>
-      <div class="term-body" id="term-body"><span class="tcursor" id="tcursor"></span></div>
+      <div class="hero-facts">
+        <span>34 verification groups</span>
+        <span class="hero-sep">&middot;</span>
+        <span>0 known vulnerabilities</span>
+        <span class="hero-sep">&middot;</span>
+        <span>Full Merkle sealing</span>
+      </div>
+    </div>
+    <div>
+      <div class="record" id="hero-record">
+        <div class="record-head">
+          <span class="record-title">Signed event record</span>
+          <span class="record-live">Live</span>
+        </div>
+        <div class="record-body" id="term-body"><span class="tcursor" id="tcursor"></span></div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- STATS BAR -->
-<div id="statsbar">
-  <div class="stats-inner">
-    <div class="stat-item">
-      <div class="stat-num" data-target="65000" data-suffix="+">0</div>
-      <div class="stat-label">Events<br>Recorded</div>
+<!-- VERIFICATION LEDGER -->
+<section id="ledger" aria-label="Verification record">
+  <div class="ledger-rows">
+    <div class="ledger-cell reveal">
+      <div class="ledger-num">65,412</div>
+      <div class="ledger-label">Events recorded and sealed</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num" data-target="7">0</div>
-      <div class="stat-label">Phases<br>Complete</div>
+    <div class="ledger-cell reveal">
+      <div class="ledger-num">7 / 7</div>
+      <div class="ledger-label">Build phases complete</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num" data-target="34" data-suffix="/34">0</div>
-      <div class="stat-label">Tests<br>Passing</div>
+    <div class="ledger-cell reveal">
+      <div class="ledger-num">34 / 34</div>
+      <div class="ledger-label">Verification groups passing</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num" data-target="0">0</div>
-      <div class="stat-label">Known<br>Vulnerabilities</div>
+    <div class="ledger-cell reveal">
+      <div class="ledger-num">0</div>
+      <div class="ledger-label">Known vulnerabilities</div>
     </div>
   </div>
-  <div style="text-align:center;margin-top:40px;">
-    <a href="/proof" class="btn-outline-glass">These aren't claims. See Live Proof &rarr;</a>
+  <div class="ledger-foot">
+    <span class="ledger-note">Figures are published, recomputable, and Merkle-sealed.</span>
+    <a class="ledger-link" href="/proof">Verify these numbers yourself &rarr;</a>
   </div>
-</div>
+</section>
 
-<!-- PROBLEM -->
-<section id="problem">
-  <div class="problem-hdr reveal">
-    <span class="sec-label">The Threat</span>
-    <h2 class="sec-title">UNVERIFIED ACTION IS A LIABILITY</h2>
-    <p class="sec-sub">When autonomous agents execute real-world commands&mdash;deleting production instances, modifying financial records, accessing customer data&mdash;how do you guarantee accountability?</p>
+<!-- THE INCIDENT -->
+<section id="problem" class="sec">
+  <div class="wrap">
+    <h2 class="sec-title">Unverified action is a liability.</h2>
+    <p class="sec-sub">When autonomous agents execute real-world commands, deleting production
+    instances, modifying financial records, accessing customer data, accountability cannot
+    rest on logs the agent itself can rewrite. Compare the same incident, twice.</p>
   </div>
-  <div class="problem-grid">
-    <div class="prob-term bad reveal">
-      <div class="prob-bar">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#ef4444" stroke-width="1.2"/><line x1="3" y1="3" x2="7" y2="7" stroke="#ef4444" stroke-width="1.5"/><line x1="7" y1="3" x2="3" y2="7" stroke="#ef4444" stroke-width="1.5"/></svg>
-        WITHOUT ARIA
+  <div class="exhibit-grid">
+    <div class="exhibit bad reveal">
+      <div class="exhibit-bar">
+        <span class="exhibit-id">Exhibit A</span>
+        <span class="exhibit-name">Incident report &middot; no trust layer</span>
       </div>
-      <div class="prob-body">
+      <div class="exhibit-body">
         <div><span class="px">[CRIT]</span> <span class="pb">Agent executed DROP DATABASE</span></div>
         <div><span class="px">[CRIT]</span> <span class="pb">Cluster status: </span><span class="pv">DESTROYED</span></div>
         <div><span class="px">[CRIT]</span> <span class="pb">Log authenticity: </span><span class="pv">UNKNOWN</span></div>
@@ -467,58 +597,62 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
         <div><span class="px">[CRIT]</span> <span class="pb">Detection delay: </span><span class="pv">4.2 hours</span></div>
         <div><span class="px">[CRIT]</span> <span class="pb">Operational downtime: </span><span class="pv">3 days</span></div>
       </div>
+      <div class="exhibit-verdict">Verdict: unprovable. No admissible record exists.</div>
     </div>
-    <div class="prob-term good reveal">
-      <div class="prob-bar">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#22c55e" stroke-width="1.2"/><path d="M3 5l1.5 1.5L7 3.5" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round"/></svg>
-        ENFORCED BY ARIA
+    <div class="exhibit good reveal">
+      <div class="exhibit-bar">
+        <span class="exhibit-id">Exhibit B</span>
+        <span class="exhibit-name">Enforcement record &middot; ARIA active</span>
       </div>
-      <div class="prob-body">
+      <div class="exhibit-body">
         <div><span class="px">[ARIA]</span> <span class="pb">Action intercepted: </span><span class="pv">delete:database</span></div>
         <div><span class="px">[ARIA]</span> <span class="pb">Scope violation: </span><span class="pv">DETECTED</span></div>
         <div><span class="px">[ARIA]</span> <span class="pb">Gate active: </span><span class="pv">HALTING EXECUTION</span></div>
         <div><span class="px">[ARIA]</span> <span class="pb">Admin alerted: </span><span class="pv">0.1s</span></div>
         <div><span class="px">[ARIA]</span> <span class="pb">Human decision: </span><span class="pv">DENIED</span></div>
         <div><span class="px">[ARIA]</span> <span class="pb">Cluster status: </span><span class="pv">SECURE &amp; ACTIVE</span></div>
-        <div><span class="px">[ARIA]</span> <span class="pb">Cryptographic seal: </span><span class="pevt">evt_9f2a1c...</span></div>
+        <div><span class="px">[ARIA]</span> <span class="pb">Cryptographic seal: </span><span class="pv">evt_9f2a1c&hellip;</span></div>
       </div>
+      <div class="exhibit-verdict">Verdict: provable. Every line above is signed and sealed.</div>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section id="how">
-  <div style="max-width:1200px;margin:0 auto;">
-    <span class="sec-label reveal">Infrastructure</span>
-    <h2 class="sec-title reveal">THREE STEPS TO SECURE YOUR AGENTS</h2>
+<section id="how" class="sec">
+  <div class="wrap">
+    <h2 class="sec-title">Three steps to secure your agents.</h2>
+    <p class="sec-sub">A real sequence: identity first, then signed interception, then sealed proof.</p>
   </div>
-  <div class="how-wrap">
-    <div class="how-line"></div>
-    <div class="how-step reveal">
-      <div class="step-num">01</div>
-      <div class="step-body">
-        <h3 class="step-title">Register &amp; Instantiate</h3>
-        <p class="step-desc">Establish a unique, unforgeable Decentralized Identifier (DID) for every agent you deploy. Backed by asymmetric signatures&mdash;no centralized authority required.</p>
+  <div class="steps wrap">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h3 class="step-title">Register &amp; instantiate</h3>
+        <p class="step-desc">Establish a unique, unforgeable Decentralized Identifier (DID) for every
+        agent you deploy. Backed by asymmetric signatures, no centralized authority required.</p>
         <div class="step-did">did:agentrust:72a1e8c9-408b-4a25-b631-f0dc9a6e0e01</div>
-        <div class="step-code"><span class="sf">npm</span> <span class="sk">install</span> <span class="ss">@ariatrust-io/aria-sdk</span></div>
+        <div class="listing"><span class="sf">npm</span> <span class="sk">install</span> <span class="ss">@ariatrust-io/aria-sdk</span></div>
       </div>
     </div>
-    <div class="how-step reveal">
-      <div class="step-num">02</div>
-      <div class="step-body">
-        <h3 class="step-title">Intercept &amp; Sign Actions</h3>
-        <p class="step-desc">Wrap every execution scope. ARIA signs each call with HMAC keys, validating against declared scope boundaries in real-time with sub-millisecond overhead.</p>
-        <div class="step-code"><span class="sk">await</span> aria.<span class="sf">track</span>(agent.did, secret, <span class="ss">'read:invoices'</span>, <span class="sk">async</span> () => {
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h3 class="step-title">Intercept &amp; sign actions</h3>
+        <p class="step-desc">Wrap every execution scope. ARIA signs each call with HMAC keys, validating
+        against declared scope boundaries in real time with sub-millisecond overhead.</p>
+        <div class="listing"><span class="sk">await</span> aria.<span class="sf">track</span>(agent.did, secret, <span class="ss">'read:invoices'</span>, <span class="sk">async</span> () => {
   <span class="sk">return await</span> <span class="sf">fetchInvoices</span>();
 });</div>
       </div>
     </div>
-    <div class="how-step reveal">
-      <div class="step-num">03</div>
-      <div class="step-body">
-        <h3 class="step-title">Gate &amp; Merkle Seal</h3>
-        <p class="step-desc">Block runaway failures with ARIA Gating. Build cryptographic innocence proofs using Merkle root commitments&mdash;verifiable by any external auditor, independently.</p>
-        <div class="step-code"><span class="sk">const</span> proof = <span class="sk">await</span> aria.<span class="sf">getProof</span>(agent.did);
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h3 class="step-title">Gate &amp; Merkle-seal</h3>
+        <p class="step-desc">Block runaway failures with ARIA Gating. Build cryptographic innocence proofs
+        from Merkle root commitments, verifiable by any external auditor, independently.</p>
+        <div class="listing"><span class="sk">const</span> proof = <span class="sk">await</span> aria.<span class="sf">getProof</span>(agent.did);
 <span class="sc">// { verified: true, root: "e86a6fc8...", sealed: true }</span></div>
       </div>
     </div>
@@ -526,114 +660,109 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
 </section>
 
 <!-- CAPABILITIES -->
-<section id="features">
-  <div style="max-width:1200px;margin:0 auto;text-align:center;">
-    <span class="sec-label reveal">Capabilities</span>
-    <h2 class="sec-title reveal">COMPLETE TRUST INFRASTRUCTURE</h2>
+<section id="features" class="sec" style="padding-top:0">
+  <div class="wrap">
+    <h2 class="sec-title">Complete trust infrastructure.</h2>
+    <p class="sec-sub">Every capability produces an artifact you can inspect: a DID, a signature
+    chain, a score, a sealed proof. Nothing here is a dashboard widget without evidence behind it.</p>
   </div>
-  <div class="features-grid">
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <rect x="4" y="15" width="26" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M10 15v-5a7 7 0 0114 0v5" stroke="currentColor" stroke-width="1.5"/>
-        <circle cx="17" cy="23" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-      <h4 class="feat-title">DID Identity Layer</h4>
-      <p class="feat-desc">Cryptographically strong identity per agent. Unforgeable DIDs backed by asymmetric key pairs for robust authentication across distributed environments.</p>
+  <div class="spec wrap">
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">DID identity layer</div>
+        <span class="spec-proof">did:agentrust:&lt;uuid&gt;</span>
+      </div>
+      <p class="spec-desc">Cryptographically strong identity per agent. Unforgeable DIDs backed by
+      asymmetric key pairs for robust authentication across distributed environments.</p>
     </div>
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <rect x="5" y="3" width="24" height="28" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="10" y1="11" x2="24" y2="11" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="10" y1="16" x2="24" y2="16" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="10" y1="21" x2="18" y2="21" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-      <h4 class="feat-title">Immutable Audit Trail</h4>
-      <p class="feat-desc">HMAC-SHA256 signature chains verify payload integrity across every action. Retroactive log manipulation is cryptographically impossible.</p>
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">Immutable audit trail</div>
+        <span class="spec-proof">HMAC-SHA256 signature chain</span>
+      </div>
+      <p class="spec-desc">Signature chains verify payload integrity across every action.
+      Retroactive log manipulation is cryptographically impossible.</p>
     </div>
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <circle cx="17" cy="17" r="12" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="17" y1="17" x2="17" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <line x1="17" y1="17" x2="23" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="17" cy="17" r="1.8" fill="currentColor"/>
-      </svg>
-      <h4 class="feat-title">5-Dimension Trust Score</h4>
-      <p class="feat-desc">Dynamic reputation index scoring agent safety across success rate, behavioral trend, timing consistency, scope compliance, and anomaly frequency.</p>
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">5-dimension trust score</div>
+        <span class="spec-proof">score: 0&ndash;95, recomputed per event</span>
+      </div>
+      <p class="spec-desc">Dynamic reputation index scoring agent safety across success rate, behavioral
+      trend, timing consistency, scope compliance, and anomaly frequency.</p>
     </div>
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <path d="M17 2L4 7v9c0 9 5.5 14.5 13 16 7.5-1.5 13-7 13-16V7L17 2z" stroke="currentColor" stroke-width="1.5" fill="rgba(99,102,241,0.05)"/>
-        <path d="M11 17l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <h4 class="feat-title">ARIA Gating</h4>
-      <p class="feat-desc">Human-in-the-loop enforcement. Pause destructive agent actions, require administrator clearance, and resume or deny with real-time webhook notifications.</p>
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">ARIA Gating</div>
+        <span class="spec-proof">requireApproval: ['delete:*']</span>
+      </div>
+      <p class="spec-desc">Human-in-the-loop enforcement. Pause destructive agent actions, require
+      administrator clearance, and resume or deny with real-time webhook notifications.</p>
     </div>
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <path d="M3 19 Q9 7 17 19 Q25 31 31 19" stroke="currentColor" stroke-width="1.5" fill="none"/>
-        <circle cx="8" cy="15" r="1.8" fill="currentColor"/>
-        <circle cx="17" cy="19" r="1.8" fill="currentColor"/>
-        <circle cx="26" cy="15" r="1.8" fill="currentColor"/>
-      </svg>
-      <h4 class="feat-title">Anomaly Detection</h4>
-      <p class="feat-desc">Identify behavioral loops, off-hours patterns, and scope drift before they escalate into production failures. Real-time alerting with configurable thresholds.</p>
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">Anomaly detection</div>
+        <span class="spec-proof">ARIA Spectrum &middot; behavioral patterns</span>
+      </div>
+      <p class="spec-desc">Identify behavioral loops, off-hours patterns, and scope drift before they
+      escalate into production failures. Real-time alerting with configurable thresholds.</p>
     </div>
-    <div class="feat-card reveal">
-      <svg class="feat-icon" viewBox="0 0 34 34" fill="none">
-        <ellipse cx="17" cy="17" rx="13" ry="7" stroke="currentColor" stroke-width="1.5"/>
-        <circle cx="17" cy="17" r="3" stroke="currentColor" stroke-width="1.5"/>
-        <line x1="4" y1="17" x2="7" y2="17" stroke="currentColor" stroke-width="1"/>
-        <line x1="27" y1="17" x2="30" y2="17" stroke="currentColor" stroke-width="1"/>
-      </svg>
-      <h4 class="feat-title">Shadow Witness</h4>
-      <p class="feat-desc">Inject external consensus verification. Prove reported actions match platform execution with independently auditable Merkle proofs.</p>
+    <div class="spec-row">
+      <div>
+        <div class="spec-name">Shadow Witness</div>
+        <span class="spec-proof">external consensus verification</span>
+      </div>
+      <p class="spec-desc">Inject external consensus verification. Prove reported actions match platform
+      execution with independently auditable Merkle proofs.</p>
     </div>
   </div>
 </section>
 
-<!-- USE CASES -->
-<section id="usecases">
-  <div style="max-width:1200px;margin:0 auto;text-align:center;">
-    <span class="sec-label reveal">Verticals</span>
-    <h2 class="sec-title reveal">BUILT FOR HIGH-STAKES ENVIRONMENTS</h2>
+<!-- ENVIRONMENTS -->
+<section id="usecases" class="sec">
+  <div class="wrap">
+    <h2 class="sec-title">Built for high-stakes environments.</h2>
   </div>
-  <div class="uc-grid">
-    <div class="uc-card reveal">
-      <div class="uc-tag">Fintech &amp; Trading</div>
-      <h3 class="uc-title">SECURE CASH FLOWS</h3>
-      <p class="uc-desc">Ensure agents orchestrating trade settlement or ledger entries cryptographically sign every transaction. Protect databases against phantom orders and unauthorized mutations.</p>
+  <div class="dossier wrap">
+    <div class="dossier-row">
+      <span class="dossier-tag">Fintech &amp; trading</span>
+      <h3 class="dossier-title">Secure cash flows</h3>
+      <p class="dossier-desc">Ensure agents orchestrating trade settlement or ledger entries
+      cryptographically sign every transaction. Protect databases against phantom orders and
+      unauthorized mutations.</p>
     </div>
-    <div class="uc-card reveal">
-      <div class="uc-tag">Healthcare &amp; Compliance</div>
-      <h3 class="uc-title">AUDIT PRIVACY</h3>
-      <p class="uc-desc">HIPAA-grade audit verification. Generate cryptographically sealed innocence proofs demonstrating agents never accessed or modified protected patient records.</p>
+    <div class="dossier-row">
+      <span class="dossier-tag">Healthcare &amp; compliance</span>
+      <h3 class="dossier-title">Audit privacy</h3>
+      <p class="dossier-desc">HIPAA-grade audit verification. Generate cryptographically sealed
+      innocence proofs demonstrating agents never accessed or modified protected patient records.</p>
     </div>
-    <div class="uc-card reveal">
-      <div class="uc-tag">DevOps &amp; Cloud</div>
-      <h3 class="uc-title">GATED INFRASTRUCTURE</h3>
-      <p class="uc-desc">Block automated agents from committing sweeping network interface drops or multi-region tear-downs. Every critical action requires human-in-the-loop approval.</p>
+    <div class="dossier-row">
+      <span class="dossier-tag">DevOps &amp; cloud</span>
+      <h3 class="dossier-title">Gated infrastructure</h3>
+      <p class="dossier-desc">Block automated agents from committing sweeping network interface drops
+      or multi-region tear-downs. Every critical action requires human-in-the-loop approval.</p>
     </div>
   </div>
 </section>
 
 <!-- CODE EXAMPLE -->
-<section id="code">
+<section id="code" class="sec">
   <div class="code-wrap">
-    <span class="sec-label reveal">Integration</span>
-    <h2 class="sec-title reveal" style="margin-bottom:8px">DEVELOPER-FIRST DESIGN</h2>
-    <p style="color:var(--muted);font-size:15px;margin-bottom:0;" class="reveal">Three lines to protect any AI agent. Works with LangChain, AutoGen, CrewAI, and custom agents.</p>
-    <div class="code-tabs reveal">
-      <button class="code-tab active" data-tab="gate">Gate Mode</button>
-      <button class="code-tab" data-tab="light">Light Mode</button>
-      <button class="code-tab" data-tab="langchain">LangChain</button>
+    <h2 class="sec-title">Developer-first design.</h2>
+    <p class="sec-sub">Three lines to protect any AI agent. Works with LangChain, AutoGen, CrewAI,
+    and custom agents.</p>
+    <div class="code-tabs" role="tablist">
+      <button class="code-tab active" data-tab="gate" role="tab" aria-selected="true">Gate Mode</button>
+      <button class="code-tab" data-tab="light" role="tab" aria-selected="false">Light Mode</button>
+      <button class="code-tab" data-tab="langchain" role="tab" aria-selected="false">LangChain</button>
     </div>
-    <div class="code-panel active" id="tab-gate">
+    <div class="code-panel active" id="tab-gate" role="tabpanel">
       <div class="code-eg"><span class="ck">import</span> { <span class="cf">AriaSDK</span> } <span class="ck">from</span> <span class="cs">'@ariatrust-io/aria-sdk'</span>;
 
 <span class="ck">const</span> <span class="cf">aria</span> = <span class="ck">new</span> <span class="cf">AriaSDK</span>({ apiKey: process.env.<span class="cf">ARIA_API_KEY</span> });
 
-<span class="cc">// Block dangerous actions — require explicit human approval before execution</span>
+<span class="cc">// Block dangerous actions: require explicit human approval before execution</span>
 <span class="ck">await</span> aria.<span class="cf">track</span>(agent.did, agent.secret, <span class="cs">'delete:database'</span>, <span class="ck">async</span> () => {
   <span class="ck">return await</span> <span class="cf">dropDatabase</span>();
 }, {
@@ -641,24 +770,24 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   gate: { requireApproval: [<span class="cs">'delete:*'</span>] }
 });</div>
     </div>
-    <div class="code-panel" id="tab-light">
+    <div class="code-panel" id="tab-light" role="tabpanel">
       <div class="code-eg"><span class="ck">import</span> { <span class="cf">AriaSDK</span> } <span class="ck">from</span> <span class="cs">'@ariatrust-io/aria-sdk'</span>;
 
 <span class="ck">const</span> <span class="cf">aria</span> = <span class="ck">new</span> <span class="cf">AriaSDK</span>({ apiKey: process.env.<span class="cf">ARIA_API_KEY</span> });
 
-<span class="cc">// Passive monitoring — cryptographic sealing with minimal latency overhead</span>
+<span class="cc">// Passive monitoring: cryptographic sealing with minimal latency overhead</span>
 <span class="ck">const</span> result = <span class="ck">await</span> aria.<span class="cf">track</span>(
   agent.did, agent.secret, <span class="cs">'read:invoices'</span>,
   <span class="ck">async</span> () => <span class="cf">fetchInvoices</span>()
 );
 
-<span class="cc">// result.trustScore → 92%  |  result.sealed → true</span>
-<span class="cc">// result.eventId   → "evt_8f2a9c..."</span></div>
+<span class="cc">// result.trustScore -> 92%  |  result.sealed -> true</span>
+<span class="cc">// result.eventId   -> "evt_8f2a9c..."</span></div>
     </div>
-    <div class="code-panel" id="tab-langchain">
+    <div class="code-panel" id="tab-langchain" role="tabpanel">
       <div class="code-eg"><span class="ck">import</span> { <span class="cf">AriaLangChain</span> } <span class="ck">from</span> <span class="cs">'@ariatrust-io/aria-sdk/langchain'</span>;
 
-<span class="cc">// Wrap existing tool executors — zero disruption to your existing codebase</span>
+<span class="cc">// Wrap existing tool executors: zero disruption to your existing codebase</span>
 <span class="ck">const</span> executor = <span class="cf">AriaLangChain</span>.<span class="cf">wrap</span>(agentExecutor, {
   agentDid: agent.did,
   secret:   agent.secret,
@@ -673,14 +802,13 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
 </section>
 
 <!-- PRICING -->
-<section id="pricing">
-  <div style="max-width:1200px;margin:0 auto;text-align:center;">
-    <span class="sec-label reveal">Pricing</span>
-    <h2 class="sec-title reveal">SCALES WITH YOUR FLEET</h2>
+<section id="pricing" class="sec">
+  <div class="wrap">
+    <h2 class="sec-title">Scales with your fleet.</h2>
   </div>
   <div class="pricing-grid">
-    <div class="pricing-card reveal">
-      <h4 class="pricing-title">Free</h4>
+    <div class="pricing-card">
+      <h3 class="pricing-title">Free</h3>
       <div class="pricing-price">$0<span>/month</span></div>
       <p class="pricing-desc">For testing and personal sandbox integrations. No credit card required.</p>
       <ul class="pricing-features">
@@ -690,10 +818,11 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
         <li>Trust Score + ARIA Spectrum</li>
         <li>Community Support</li>
       </ul>
-      <a href="/app" class="pricing-btn pricing-btn-outline">Register Free</a>
+      <a href="/app" class="pricing-btn pricing-btn-line">Register Free</a>
     </div>
-    <div class="pricing-card premium reveal">
-      <h4 class="pricing-title">Professional</h4>
+    <div class="pricing-card featured">
+      <span class="pricing-flag">RECOMMENDED</span>
+      <h3 class="pricing-title">Professional</h3>
       <div class="pricing-price">$49<span>/month</span></div>
       <p class="pricing-desc">For startups with agents in production. Full trust infrastructure included.</p>
       <ul class="pricing-features">
@@ -704,10 +833,10 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
         <li>ARIA Gate + ZeroProof</li>
         <li>Webhooks + CSV/JSON Export</li>
       </ul>
-      <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/5c1caa35-6528-461c-86e1-2689e8819f49?checkout[custom][plan]=professional&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-gradient lemonsqueezy-button">Get Started</a>
+      <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/5c1caa35-6528-461c-86e1-2689e8819f49?checkout[custom][plan]=professional&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-solid lemonsqueezy-button">Get Started</a>
     </div>
-    <div class="pricing-card reveal" style="border-color:rgba(201,168,76,0.3)">
-      <h4 class="pricing-title" style="color:#e8c87a">Business</h4>
+    <div class="pricing-card">
+      <h3 class="pricing-title">Business</h3>
       <div class="pricing-price">$149<span>/month</span></div>
       <p class="pricing-desc">For companies running multiple heavy agents. Scale without interruptions.</p>
       <ul class="pricing-features">
@@ -718,10 +847,10 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
         <li>All Professional features</li>
         <li>Priority Email Support</li>
       </ul>
-      <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/7fcb5f39-5d30-49d5-b1a0-96cc3d15288a?checkout[custom][plan]=business&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-gradient lemonsqueezy-button">Get Started</a>
+      <a href="https://ariatrust.lemonsqueezy.com/checkout/buy/7fcb5f39-5d30-49d5-b1a0-96cc3d15288a?checkout[custom][plan]=business&checkout[redirect_url]=https%3A%2F%2Fariatrust.org%2Fapp%3Fbilling%3Dsuccess" class="pricing-btn pricing-btn-solid lemonsqueezy-button">Get Started</a>
     </div>
-    <div class="pricing-card reveal">
-      <h4 class="pricing-title">Enterprise</h4>
+    <div class="pricing-card">
+      <h3 class="pricing-title">Enterprise</h3>
       <div class="pricing-price">$599+<span>/month</span></div>
       <p class="pricing-desc">For regulated industries requiring compliance, SLA, and dedicated infrastructure.</p>
       <ul class="pricing-features">
@@ -732,36 +861,38 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
         <li>Invoice Billing</li>
         <li>Custom Integrations</li>
       </ul>
-      <a href="mailto:dhdez3149@gmail.com" class="pricing-btn pricing-btn-primary">Contact Sales</a>
+      <a href="mailto:dhdez3149@gmail.com" class="pricing-btn pricing-btn-ink">Contact Sales</a>
     </div>
   </div>
 </section>
 
 <!-- CTA FINAL -->
 <section id="cta">
-  <div class="cta-line1 reveal">AGENT ACCOUNTABILITY<br>IS NON-NEGOTIABLE.</div>
-  <div class="cta-line2 reveal">Start protecting your fleet today.</div>
-  <div class="cta-btns reveal">
-    <a href="/app" class="btn-primary-gradient">Secure Your First Agent &rarr;</a>
-    <a href="#how" class="btn-outline-glass">Browse Dev Reference</a>
+  <h2 class="cta-line1">Agent accountability<br>is non-negotiable.</h2>
+  <p class="cta-line2">Start protecting your fleet today.</p>
+  <div class="cta-btns">
+    <a href="/app" class="btn-solid">Secure Your First Agent &rarr;</a>
+    <a href="/docs" class="btn-line">Browse Dev Reference</a>
   </div>
-  <div class="cta-note reveal">Beta access &middot; Open source libraries &middot; BUSL-1.1 License</div>
+  <div class="cta-note">Beta access &middot; Open source libraries &middot; BUSL-1.1 License</div>
 </section>
+
+</main>
 
 <!-- FOOTER -->
 <footer>
   <div class="footer-main">
     <div class="footer-col">
       <div class="footer-logo-row">
-        <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="#6366f1" stroke-width="2"/>
-          <polygon points="14,8 21,22 7,22" fill="rgba(99,102,241,0.15)"/>
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+          <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
         </svg>
         <span class="footer-brand-name">ARIA</span>
       </div>
       <p class="footer-desc">Cryptographic identity, immutable audit trails, and human-in-the-loop enforcement for autonomous AI agent fleets.</p>
       <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener" class="footer-gh">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         ariatrust-io/aria
       </a>
     </div>
@@ -770,6 +901,7 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
       <ul>
         <li><a href="/app">Dashboard</a></li>
         <li><a href="#pricing">Pricing</a></li>
+        <li><a href="/proof">Live Proof</a></li>
         <li><a href="/app">API Keys</a></li>
       </ul>
     </div>
@@ -799,86 +931,84 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
 
 <script>
 (function() {
-  // Nav scroll glow
-  var nav = document.getElementById('nav');
-  window.addEventListener('scroll', function() {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  }, { passive: true });
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Mobile menu
   var hamburger = document.getElementById('hamburger');
   var mobileMenu = document.getElementById('mobile-menu');
-  hamburger.addEventListener('click', function() { mobileMenu.classList.toggle('open'); });
+  hamburger.addEventListener('click', function() {
+    var open = mobileMenu.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
   mobileMenu.querySelectorAll('a').forEach(function(a) {
-    a.addEventListener('click', function() { mobileMenu.classList.remove('open'); });
-  });
-
-  // Scroll reveal
-  var revealObs = new IntersectionObserver(function(entries) {
-    entries.forEach(function(e) {
-      if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+    a.addEventListener('click', function() {
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
     });
-  }, { threshold: 0.08 });
-  document.querySelectorAll('.reveal').forEach(function(el, i) {
-    el.style.transitionDelay = ((i % 4) * 0.08) + 's';
-    revealObs.observe(el);
   });
 
-  // Stats counter animation
-  function animateCount(el, target, suffix) {
-    var t0 = performance.now();
-    var dur = target > 1000 ? 2000 : 1200;
-    (function tick(now) {
-      var p = Math.min((now - t0) / dur, 1);
-      var eased = 1 - Math.pow(1 - p, 3);
-      var val = Math.round(eased * target);
-      el.textContent = (target >= 1000 ? val.toLocaleString() : val) + (suffix || '');
-      if (p < 1) requestAnimationFrame(tick);
-    })(t0);
-  }
-  var statsObs = new IntersectionObserver(function(entries) {
-    if (entries[0].isIntersecting) {
-      document.querySelectorAll('#statsbar [data-target]').forEach(function(el) {
-        animateCount(el, +el.dataset.target, el.dataset.suffix || '');
+  // Scroll reveal (ledger cells + exhibits only; everything else is static by design)
+  if (reducedMotion) {
+    document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+  } else {
+    var revealObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
       });
-      statsObs.disconnect();
-    }
-  }, { threshold: 0.3 });
-  statsObs.observe(document.getElementById('statsbar'));
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(function(el, i) {
+      el.style.transitionDelay = ((i % 4) * 0.07) + 's';
+      revealObs.observe(el);
+    });
+  }
 
   // Code tabs
   document.querySelectorAll('.code-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
-      document.querySelectorAll('.code-tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.code-tab').forEach(function(t) {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       document.querySelectorAll('.code-panel').forEach(function(p) { p.classList.remove('active'); });
       tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
       document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
     });
   });
 
-  // Terminal typewriter animation
+  // Signed event record: typewriter (instant transcript under reduced motion)
   var LINES = [
     { text: "> aria.track(agent.did, secret, 'delete:database', fn, {", cls: 'tcode' },
     { text: ">   mode: 'gate',", cls: 'tcode' },
     { text: ">   gate: { requireApproval: ['delete:*'] }", cls: 'tcode' },
     { text: "> })", cls: 'tcode' },
     { text: '', pause: 700 },
-    { text: "\u25c6 ARIA Gate \u2014 Approval Required", cls: 'tgate-hdr', pause: 180 },
+    { text: "◆ ARIA Gate — Approval Required", cls: 'tgate-hdr', pause: 180 },
     { text: "  Agent:  invoice-processor", cls: 'tlbl' },
     { text: "  Action: delete:database", cls: 'tlbl' },
     { text: "  Risk:   CRITICAL", cls: 'tcrit' },
     { text: '', pause: 400 },
     { text: "  Owner notified. Waiting...", cls: 'twait', pause: 1400 },
     { text: '', pause: 180 },
-    { text: "\u2713 Action DENIED by owner", cls: 'tok' },
-    { text: "\u2713 Database protected", cls: 'tok' },
-    { text: "\u2713 Event recorded: evt_8f2a9c", cls: 'tok' },
-    { text: "\u2713 Trust score updated: 87% TRUSTED", cls: 'tok' }
+    { text: "✓ Action DENIED by owner", cls: 'tok' },
+    { text: "✓ Database protected", cls: 'tok' },
+    { text: "✓ Event recorded: evt_8f2a9c", cls: 'tok' },
+    { text: "✓ Trust score updated: 87% TRUSTED", cls: 'tok' }
   ];
 
   var termBody = document.getElementById('term-body');
   var tcursor = document.getElementById('tcursor');
   var started = false;
+
+  function appendStatic() {
+    LINES.forEach(function(l) {
+      var span = document.createElement('span');
+      span.className = 'tline ' + (l.cls || '');
+      span.textContent = l.text;
+      termBody.insertBefore(span, tcursor);
+      termBody.insertBefore(document.createElement('br'), tcursor);
+    });
+  }
 
   function typeLine(lineObj, cb) {
     var span = document.createElement('span');
@@ -906,6 +1036,7 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   function startTerminal() {
     if (started) return;
     started = true;
+    if (reducedMotion) { appendStatic(); return; }
     var idx = 0;
     function next() { if (idx < LINES.length) typeLine(LINES[idx++], next); }
     setTimeout(next, 800);
@@ -914,7 +1045,7 @@ footer { background:#02040a; border-top:1px solid rgba(255,255,255,0.02); paddin
   var termObs = new IntersectionObserver(function(entries) {
     if (entries[0].isIntersecting) { startTerminal(); termObs.disconnect(); }
   }, { threshold: 0.3 });
-  var termEl = document.getElementById('hero-term');
+  var termEl = document.getElementById('hero-record');
   if (termEl) termObs.observe(termEl);
 })();
 </script>

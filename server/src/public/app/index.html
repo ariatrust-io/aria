@@ -3,87 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARIA — Agent Trust Dashboard</title>
+  <title>ARIA · Agent Trust Dashboard</title>
   <meta name="description" content="Monitor and manage cryptographic identity, trust scores, and access control for your autonomous AI agent fleet.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ── DESIGN SYSTEM & NEON TOKENS ── */
+    /* ── ARIA OPS CONSOLE — ink/green forensic system ──
+       Dark surface scale carries depth (no glows, no glass).
+       Severity always pairs color with a text label. */
     :root {
-      --bg-black:   #030712;
-      --bg-dark:    #070a13;
-      --bg-card:    rgba(15, 23, 42, 0.45);
-      --accent-primary: #6366f1; /* Indigo */
-      --accent-secondary: #a855f7; /* Purple */
-      --accent-teal: #14b8a6; /* Teal */
-      --accent-pink: #ec4899; /* Pink */
-      --white:      #f8fafc;
-      --muted:      #94a3b8;
-      --success:    #22c55e;
-      --error:      #ef4444;
-      --warning:    #f59e0b;
-      --border-muted: rgba(255, 255, 255, 0.05);
-      --border-glow:  rgba(99, 102, 241, 0.2);
-      --font-sans:  'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono:  'JetBrains Mono', monospace;
+      --bg:          oklch(15% 0.012 160);
+      --surface:     oklch(19% 0.014 160);
+      --surface-2:   oklch(23% 0.016 160);
+      --border:      oklch(33% 0.015 160);
+      --border-soft: oklch(26% 0.014 160);
+      --text:        oklch(93% 0.005 150);
+      --text-soft:   oklch(73% 0.012 150);
+      --text-faint:  oklch(62% 0.012 150);
+      --accent:        oklch(74% 0.11 155);
+      --accent-strong: oklch(44% 0.09 155);
+      --success:  oklch(74% 0.13 150);
+      --warning:  oklch(80% 0.12 85);
+      --critical: oklch(70% 0.17 25);
+      --info:     oklch(78% 0.07 220);
+      /* legacy aliases kept for templates */
+      --gold:   var(--warning);
+      --red:    var(--critical);
+      --error:  var(--critical);
+      --muted:  var(--text-soft);
+      --white:  var(--text);
+      --accent-primary: var(--accent);
+      --border-muted: var(--border-soft);
+      --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
 
     body {
       font-family: var(--font-sans);
-      background-color: var(--bg-black);
-      color: var(--white);
+      background-color: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
+      font-kerning: normal;
     }
 
-    /* DOT GRID BACKDROP */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-      background-size: 24px 24px;
-      pointer-events: none;
-      z-index: 0;
+    a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
-    /* NOISE BLEND */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-    }
-
-    /* GLOW ORBS */
-    .dashboard-glow-1 {
-      position: absolute;
-      top: -10%;
-      left: -10%;
-      width: 50vw;
-      height: 50vw;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .dashboard-glow-2 {
-      position: absolute;
-      bottom: -10%;
-      right: -10%;
-      width: 50vw;
-      height: 50vw;
-      background: radial-gradient(circle, rgba(20, 184, 166, 0.05) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+    ::selection { background: var(--accent-strong); color: var(--text); }
 
     .hidden { display: none !important; }
 
@@ -91,77 +63,51 @@
     .navbar {
       position: sticky;
       top: 0;
-      height: 64px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 48px;
-      background: rgba(3, 7, 18, 0.65);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      z-index: 1000;
-      transition: all 0.3s ease;
+      padding: 0 40px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-soft);
+      z-index: 100;
     }
 
-    .navbar.scrolled {
-      background: rgba(3, 7, 18, 0.95);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
-      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    }
-
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-    }
+    .navbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 
     .navbar-logo-text {
       font-weight: 800;
-      font-size: 18px;
-      letter-spacing: 3px;
-      background: linear-gradient(135deg, var(--white) 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 17px;
+      letter-spacing: 0.14em;
+      color: var(--text);
     }
 
-    .navbar-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .navbar-right { display: flex; align-items: center; gap: 16px; }
 
     .navbar-email {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
+      font-size: 12.5px;
+      color: var(--text-soft);
       font-family: var(--font-mono);
-      background: rgba(255, 255, 255, 0.03);
-      padding: 4px 12px;
-      border-radius: 100px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--surface);
+      padding: 5px 12px;
+      border-radius: 3px;
+      border: 1px solid var(--border-soft);
     }
 
     .btn-nav {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--white);
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-muted);
-      padding: 8px 18px;
-      border-radius: 6px;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 3px;
       cursor: pointer;
       font-family: var(--font-sans);
-      transition: all 0.2s ease;
-      backdrop-filter: blur(8px);
+      transition: border-color 0.15s ease, background-color 0.15s ease;
     }
 
-    .btn-nav:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
-    }
+    .btn-nav:hover { background: var(--surface); border-color: var(--text-faint); }
 
     /* ── AUTH SCREEN ── */
     #auth-screen {
@@ -170,64 +116,49 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background-color: var(--bg-black);
-      position: relative;
-      z-index: 2;
+      background-color: var(--bg);
     }
 
     .auth-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-muted);
-      border-radius: 16px;
-      padding: 48px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 6px;
+      padding: 44px 40px;
       width: 100%;
       max-width: 440px;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.05);
       opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(12px);
+      transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
     }
 
-    .auth-card.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .auth-card.visible { opacity: 1; transform: translateY(0); }
 
-    .auth-logo {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-
-    .auth-logo svg {
-      margin-bottom: 12px;
-    }
+    .auth-logo { text-align: center; margin-bottom: 30px; }
+    .auth-logo svg { margin-bottom: 10px; }
 
     .auth-logo-mark {
       font-weight: 800;
-      font-size: 28px;
-      letter-spacing: 4px;
-      background: linear-gradient(135deg, var(--white) 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 26px;
+      letter-spacing: 0.16em;
+      color: var(--text);
       display: block;
     }
 
     .auth-logo-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 6px;
-      letter-spacing: 0.5px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-top: 8px;
+      letter-spacing: 0.06em;
     }
 
     .auth-toggle {
       display: flex;
-      margin-bottom: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 8px;
+      margin-bottom: 26px;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.2);
+      background: var(--bg);
       padding: 4px;
     }
 
@@ -235,20 +166,19 @@
       flex: 1;
       background: transparent;
       border: none;
-      color: var(--muted);
+      color: var(--text-soft);
       padding: 10px;
       cursor: pointer;
       font-size: 14px;
       font-family: var(--font-sans);
       font-weight: 600;
-      border-radius: 6px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 3px;
+      transition: background-color 0.15s ease, color 0.15s ease;
     }
 
     .auth-toggle button.active {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      color: var(--white);
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      background: var(--accent-strong);
+      color: var(--text);
     }
 
     .form-group { margin-bottom: 20px; }
@@ -256,39 +186,73 @@
     .form-group label {
       display: block;
       font-size: 12px;
-      color: var(--muted);
+      color: var(--text-soft);
       margin-bottom: 8px;
       font-weight: 600;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .form-group input {
       width: 100%;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
       padding: 12px 16px;
-      color: var(--white) !important;
+      color: var(--text);
       font-size: 14px;
       font-family: var(--font-sans);
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease;
     }
 
     .form-group input:focus {
       outline: none;
-      border-color: var(--accent-primary);
-      background: rgba(0, 0, 0, 0.3);
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+      border-color: var(--accent);
     }
 
-    .form-group input::placeholder { color: rgba(255, 255, 255, 0.25) !important; }
+    .form-group input::placeholder { color: var(--text-faint); }
 
-    .code-input-group {
+    .auth-aux {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .auth-aux:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    .login-error {
+      display: none;
+      color: var(--critical);
+      font-size: 13px;
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: oklch(70% 0.17 25 / 0.08);
+      border-radius: 4px;
+      border: 1px solid oklch(70% 0.17 25 / 0.3);
+    }
+
+    .auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-soft); }
+    .auth-divider span { font-size: 12px; color: var(--text-faint); }
+
+    .btn-oauth {
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 10px;
-      margin-bottom: 24px;
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
     }
+    .btn-oauth:hover { border-color: var(--text-faint); background: var(--surface-2); }
+
+    .code-input-group { display: flex; gap: 10px; margin-bottom: 24px; }
 
     .code-input-group input {
       flex: 1;
@@ -298,138 +262,106 @@
       letter-spacing: 6px;
       text-align: center;
       padding: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      color: var(--white) !important;
-      transition: all 0.2s ease;
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s ease;
     }
 
-    .code-input-group input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-      background: rgba(0, 0, 0, 0.35);
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
-    }
+    .code-input-group input:focus { outline: none; border-color: var(--accent); }
 
     /* ── BUTTONS ── */
     .btn {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      color: var(--white) !important;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 8px;
-      padding: 14px 24px;
+      background: var(--accent-strong);
+      color: var(--text);
+      border: none;
+      border-radius: 4px;
+      padding: 13px 24px;
       font-size: 14px;
       font-weight: 600;
       font-family: var(--font-sans);
       cursor: pointer;
       width: 100%;
-      box-shadow: 0 4px 20px -5px rgba(99, 102, 241, 0.4);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: background-color 0.15s ease;
     }
 
-    .btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.6);
-      opacity: 0.95;
-    }
+    .btn:hover:not(:disabled) { background: oklch(50% 0.095 155); }
 
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .btn-outline {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--white) !important;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
       font-weight: 500;
-      box-shadow: none;
-      backdrop-filter: blur(8px);
     }
 
-    .btn-outline:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
-      box-shadow: none;
-    }
+    .btn-outline:hover:not(:disabled) { background: var(--surface-2); border-color: var(--text-faint); }
 
     .btn-danger {
-      background: rgba(239, 68, 68, 0.05);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      color: var(--error) !important;
+      background: oklch(70% 0.17 25 / 0.08);
+      border: 1px solid oklch(70% 0.17 25 / 0.35);
+      color: var(--critical);
       font-weight: 500;
-      box-shadow: none;
     }
 
     .btn-danger:hover:not(:disabled) {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: var(--error);
-      transform: translateY(-1px);
-      box-shadow: none;
+      background: oklch(70% 0.17 25 / 0.16);
+      border-color: var(--critical);
     }
 
-    .btn-sm {
-      width: auto;
-      padding: 8px 16px;
-      font-size: 13px;
-    }
+    .btn-sm { width: auto; padding: 8px 16px; font-size: 13px; }
 
     .btn-back {
       background: transparent;
       border: none;
-      color: var(--muted) !important;
+      color: var(--text-soft);
       font-size: 13px;
       cursor: pointer;
       font-family: var(--font-sans);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 0;
-      margin-bottom: 24px;
-      transition: color 0.2s ease;
+      padding: 4px 0;
+      margin-bottom: 20px;
+      transition: color 0.15s ease;
     }
 
-    .btn-back:hover { color: var(--white) !important; }
+    .btn-back:hover { color: var(--text); }
 
     /* ── ALERTS ── */
     .alert {
-      padding: 14px 18px;
-      border-radius: 8px;
+      padding: 13px 18px;
+      border-radius: 4px;
       font-size: 13.5px;
       margin-bottom: 20px;
       line-height: 1.6;
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.05);
-      border: 1px solid rgba(239, 68, 68, 0.15);
-      color: var(--error) !important;
+      background: oklch(70% 0.17 25 / 0.08);
+      border: 1px solid oklch(70% 0.17 25 / 0.3);
+      color: var(--critical);
     }
 
     .alert-success {
-      background: rgba(34, 197, 94, 0.05);
-      border: 1px solid rgba(34, 197, 94, 0.15);
-      color: var(--success) !important;
+      background: oklch(74% 0.13 150 / 0.08);
+      border: 1px solid oklch(74% 0.13 150 / 0.3);
+      color: var(--success);
     }
 
     .alert-info {
-      background: rgba(99, 102, 241, 0.05);
-      border: 1px solid rgba(99, 102, 241, 0.15);
-      color: #818cf8 !important;
+      background: oklch(78% 0.07 220 / 0.08);
+      border: 1px solid oklch(78% 0.07 220 / 0.3);
+      color: var(--info);
     }
 
     /* ── DASHBOARD LAYOUT ── */
-    #dashboard-screen {
-      min-height: 100vh;
-      position: relative;
-      z-index: 2;
-    }
+    #dashboard-screen { min-height: 100vh; }
 
     .dashboard-content {
-      padding: 40px 64px 80px;
+      padding: 36px 40px 80px;
       max-width: 1200px;
       margin: 0 auto;
     }
@@ -437,109 +369,104 @@
     /* ── TABS ── */
     .tabs {
       display: flex;
-      gap: 8px;
+      gap: 4px;
       margin-bottom: 32px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      padding-bottom: 2px;
+      border-bottom: 1px solid var(--border-soft);
     }
 
     .tab {
       background: transparent;
       border: none;
-      color: var(--muted) !important;
-      padding: 12px 24px;
-      font-size: 14.5px;
+      color: var(--text-soft);
+      padding: 12px 22px;
+      font-size: 14px;
       font-family: var(--font-sans);
       font-weight: 600;
       cursor: pointer;
       border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: -1px;
+      transition: color 0.15s ease;
     }
 
-    .tab:hover { color: var(--white) !important; }
+    .tab:hover { color: var(--text); }
 
     .tab.active {
-      color: var(--accent-primary) !important;
-      border-bottom-color: var(--accent-primary);
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .gate-badge {
+      background: var(--critical);
+      color: oklch(15% 0.02 25);
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      margin-left: 6px;
     }
 
     /* ── STATS ROW ── */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-      margin-bottom: 40px;
+      gap: 16px;
+      margin-bottom: 36px;
     }
 
     .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-muted);
-      border-top: 3px solid var(--accent-primary);
-      border-radius: 12px;
-      padding: 24px 28px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.4);
-      transition: border-color 0.3s ease, transform 0.2s ease;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
+      padding: 22px 26px;
     }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(99, 102, 241, 0.3);
-    }
-
-    .stat-card:nth-child(2) { border-top-color: var(--accent-secondary); }
-    .stat-card:nth-child(3) { border-top-color: var(--error); }
-    .stat-card:nth-child(4) { border-top-color: var(--success); }
 
     .stat-label {
       font-size: 11px;
-      font-weight: 700;
-      color: var(--muted) !important;
+      font-weight: 600;
+      color: var(--text-soft);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.1em;
       margin-bottom: 10px;
     }
 
     .stat-value {
-      font-size: 38px;
-      font-weight: 700;
+      font-size: 34px;
+      font-weight: 600;
       font-family: var(--font-mono);
-      color: var(--white) !important;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
       line-height: 1.1;
     }
 
-    .stat-value.gold    { color: var(--gold) !important; }
-    .stat-value.success { color: var(--success) !important; }
-    .stat-value.error   { color: var(--error) !important; }
-    .stat-value.warning { color: var(--warning) !important; }
+    .stat-value.gold    { color: var(--warning); }
+    .stat-value.success { color: var(--success); }
+    .stat-value.error   { color: var(--critical); }
+    .stat-value.warning { color: var(--warning); }
 
     /* ── SECTION HEADERS ── */
     .section-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .section-title {
+      font-family: var(--font-mono);
       font-size: 12px;
-      font-weight: 700;
-      color: var(--accent-primary) !important;
+      font-weight: 600;
+      color: var(--text-soft);
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 0.12em;
     }
 
     /* ── CARDS ── */
     .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-muted);
-      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
       overflow: hidden;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 10px 35px -10px rgba(0, 0, 0, 0.5);
     }
 
     /* ── AGENTS TABLE ── */
@@ -549,89 +476,85 @@
       display: grid;
       grid-template-columns: 2.2fr 1.8fr 90px 110px 80px 110px;
       gap: 16px;
-      padding: 18px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-soft);
       align-items: center;
-      transition: all 0.2s ease;
       background: transparent;
-      color: var(--white) !important;
+      color: var(--text);
+      transition: background-color 0.15s ease;
     }
 
     .agent-row:last-child { border-bottom: none; }
 
-    .agent-row:not(.header):hover {
-      background: rgba(255, 255, 255, 0.02);
+    .agent-row:not(.header):hover,
+    .agent-row:not(.header):focus-visible {
+      background: var(--surface-2);
       cursor: pointer;
     }
 
     .agent-row.header {
-      background: rgba(0, 0, 0, 0.15);
+      background: var(--bg);
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 700;
-      color: var(--muted) !important;
+      font-weight: 600;
+      color: var(--text-soft);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-      border-bottom-color: rgba(255, 255, 255, 0.05);
+      letter-spacing: 0.1em;
     }
 
-    .agent-name {
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--white) !important;
-    }
+    .agent-name { font-weight: 600; font-size: 15px; color: var(--text); }
 
     .agent-did {
       font-family: var(--font-mono);
       font-size: 11px;
-      color: var(--muted) !important;
+      color: var(--text-soft);
+      overflow-wrap: anywhere;
     }
 
     .trust-score {
       font-family: var(--font-mono);
       font-size: 15px;
       font-weight: 600;
+      font-variant-numeric: tabular-nums;
     }
 
-    .trust-score.high    { color: var(--success) !important; }
-    .trust-score.medium  { color: var(--warning) !important; }
-    .trust-score.low     { color: var(--error) !important; }
+    .trust-score.high    { color: var(--success); }
+    .trust-score.medium  { color: var(--warning); }
+    .trust-score.low     { color: var(--critical); }
 
     .trust-badge {
       display: inline-flex;
       align-items: center;
       padding: 4px 10px;
-      border-radius: 100px;
+      border-radius: 3px;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       border: 1px solid transparent;
     }
 
-    .trust-badge.trusted   { background: rgba(34, 197, 94, 0.08) !important;  color: var(--success) !important; border-color: rgba(34, 197, 94, 0.2); }
-    .trust-badge.neutral   { background: rgba(245, 158, 11, 0.08) !important; color: var(--warning) !important; border-color: rgba(245, 158, 11, 0.2); }
-    .trust-badge.untrusted { background: rgba(239, 68, 68, 0.08) !important;  color: var(--error) !important;   border-color: rgba(239, 68, 68, 0.2); }
+    .trust-badge.trusted   { background: oklch(74% 0.13 150 / 0.1);  color: var(--success);  border-color: oklch(74% 0.13 150 / 0.3); }
+    .trust-badge.neutral   { background: oklch(80% 0.12 85 / 0.1);   color: var(--warning);  border-color: oklch(80% 0.12 85 / 0.3); }
+    .trust-badge.untrusted { background: oklch(70% 0.17 25 / 0.1);   color: var(--critical); border-color: oklch(70% 0.17 25 / 0.3); }
 
     .agent-events {
       font-family: var(--font-mono);
       font-size: 13.5px;
-      color: rgba(255, 255, 255, 0.8) !important;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
     }
 
-    .agent-last-seen {
-      font-size: 12.5px;
-      color: var(--muted) !important;
-    }
+    .agent-last-seen { font-size: 12.5px; color: var(--text-soft); }
 
     /* ── EVENTS FEED ── */
     .event-item {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 16px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      background: transparent;
-      color: var(--white) !important;
+      gap: 14px;
+      padding: 15px 24px;
+      border-bottom: 1px solid var(--border-soft);
+      color: var(--text);
     }
 
     .event-item:last-child { border-bottom: none; }
@@ -641,195 +564,409 @@
       height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
-      box-shadow: 0 0 10px currentColor;
     }
 
-    .event-dot.success { background-color: var(--success); color: var(--success); }
-    .event-dot.error   { background-color: var(--error); color: var(--error); }
-    .event-dot.anomaly { background-color: var(--warning); color: var(--warning); }
-    .event-dot.blocked { background-color: var(--accent-teal); color: var(--accent-teal); }
+    .event-dot.success { background-color: var(--success); }
+    .event-dot.error   { background-color: var(--critical); }
+    .event-dot.anomaly { background-color: var(--warning); }
+    .event-dot.blocked { background-color: var(--info); }
 
     .event-action {
       flex: 1;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--white) !important;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text);
       font-family: var(--font-mono);
+      overflow-wrap: anywhere;
     }
-    .event-agent  { font-size: 12.5px; color: var(--muted) !important; }
-    .event-time   { font-size: 12px; color: rgba(255, 255, 255, 0.3) !important; font-family: var(--font-mono); }
+    .event-agent  { font-size: 12.5px; color: var(--text-soft); }
+    .event-time   { font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
 
-    .badge-violation {
-      background: rgba(239, 68, 68, 0.08);
-      color: var(--error);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 9px;
+    .badge-success, .badge-error, .badge-blocked, .badge-violation {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 10px;
       font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: inline-block;
-      margin-left: 8px;
+      border: 1px solid transparent;
+      white-space: nowrap;
     }
+
+    .badge-success   { background: oklch(74% 0.13 150 / 0.1); color: var(--success);  border-color: oklch(74% 0.13 150 / 0.3); }
+    .badge-error     { background: oklch(70% 0.17 25 / 0.1);  color: var(--critical); border-color: oklch(70% 0.17 25 / 0.3); }
+    .badge-blocked   { background: oklch(78% 0.07 220 / 0.1); color: var(--info);     border-color: oklch(78% 0.07 220 / 0.3); }
+    .badge-violation { background: oklch(70% 0.17 25 / 0.1);  color: var(--critical); border-color: oklch(70% 0.17 25 / 0.3); margin-left: 8px; }
 
     /* ── AGENT DETAIL ── */
     .detail-header { margin-bottom: 32px; }
 
     .detail-name {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       margin-bottom: 8px;
-      color: var(--white) !important;
+      color: var(--text);
     }
 
     .detail-did {
       font-family: var(--font-mono);
       font-size: 13px;
-      color: var(--muted) !important;
+      color: var(--text-soft);
       margin-bottom: 20px;
+      overflow-wrap: anywhere;
     }
 
-    .detail-score {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .detail-score { display: flex; align-items: center; gap: 16px; }
 
     .detail-score-value {
-      font-size: 52px;
-      font-weight: 800;
+      font-size: 48px;
+      font-weight: 600;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       line-height: 1;
     }
 
-    .detail-score-value.high    { color: var(--success) !important; }
-    .detail-score-value.medium  { color: var(--warning) !important; }
-    .detail-score-value.low     { color: var(--error) !important; }
+    .detail-score-value.high    { color: var(--success); }
+    .detail-score-value.medium  { color: var(--warning); }
+    .detail-score-value.low     { color: var(--critical); }
 
-    .scope-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 20px 0 28px;
-    }
+    .scope-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 28px; }
 
     .scope-tag {
-      background: rgba(99, 102, 241, 0.06);
-      color: #818cf8 !important;
-      border: 1px solid rgba(99, 102, 241, 0.15);
-      padding: 6px 14px;
-      border-radius: 100px;
+      background: oklch(74% 0.11 155 / 0.08);
+      color: var(--accent);
+      border: 1px solid oklch(74% 0.11 155 / 0.25);
+      padding: 5px 12px;
+      border-radius: 3px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
       font-family: var(--font-mono);
     }
 
     .detail-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 36px;
+      gap: 16px;
+      margin-bottom: 32px;
     }
 
     .detail-stat {
-      background: var(--bg-card);
-      border: 1px solid var(--border-muted);
-      border-top: 2px solid var(--accent-primary);
-      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
       padding: 20px;
       text-align: center;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
 
     .detail-stat-value {
-      font-size: 26px;
-      font-weight: 700;
+      font-size: 24px;
+      font-weight: 600;
       font-family: var(--font-mono);
-      color: var(--white) !important;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
     }
 
     .detail-stat-label {
       font-size: 11px;
-      color: var(--muted) !important;
+      color: var(--text-soft);
       margin-top: 6px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.08em;
       font-weight: 600;
     }
 
     .detail-event {
       display: grid;
-      grid-template-columns: 1fr 100px 100px 110px;
+      grid-template-columns: 1fr 130px 90px 110px;
       gap: 16px;
-      padding: 14px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 13px 24px;
+      border-bottom: 1px solid var(--border-soft);
       align-items: center;
       font-size: 14px;
-      background: transparent;
-      color: var(--white) !important;
+      color: var(--text);
     }
 
     .detail-event:last-child { border-bottom: none; }
 
     .detail-event.header {
-      background: rgba(0, 0, 0, 0.15);
+      background: var(--bg);
+      font-family: var(--font-mono);
       font-size: 11px;
-      font-weight: 700;
-      color: var(--muted) !important;
+      font-weight: 600;
+      color: var(--text-soft);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.1em;
     }
+
+    .detail-event .ev-action { color: var(--text); font-weight: 500; overflow-wrap: anywhere; }
+    .detail-event .ev-duration { color: var(--text-soft); font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+    .detail-event .ev-time { color: var(--text-faint); font-size: 12px; }
+
+    .outcome-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; }
+    .outcome-label.success   { color: var(--success); }
+    .outcome-label.error     { color: var(--critical); }
+    .outcome-label.blocked   { color: var(--info); }
+    .outcome-label.violation { color: var(--critical); }
+
+    /* ── PLAN BADGE ── */
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin: 20px 24px 4px;
+      background: var(--bg);
+    }
+    .plan-badge .plan-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-soft);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .plan-badge.plan-paid { border-color: oklch(74% 0.11 155 / 0.4); }
+    .plan-badge.plan-paid .plan-name { color: var(--accent); }
+    .plan-badge a {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .plan-badge a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── GATE ── */
+    .gate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+    }
+    .gate-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .gate-meta-label {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .gate-agent-name { font-size: 16px; font-weight: 600; color: var(--text); }
+    .gate-timer {
+      font-size: 14px;
+      color: var(--warning);
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .gate-action {
+      font-size: 15px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    .gate-risk {
+      display: inline-flex;
+      margin-left: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      background: oklch(70% 0.17 25 / 0.12);
+      color: var(--critical);
+      border: 1px solid oklch(70% 0.17 25 / 0.35);
+    }
+    .gate-actions { display: flex; gap: 12px; margin-top: 16px; }
+    .gate-approve, .gate-deny {
+      flex: 1;
+      padding: 11px;
+      border-radius: 4px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .gate-approve {
+      background: var(--accent-strong);
+      color: var(--text);
+      border: none;
+    }
+    .gate-approve:hover { background: oklch(50% 0.095 155); }
+    .gate-deny {
+      background: transparent;
+      color: var(--critical);
+      border: 1px solid oklch(70% 0.17 25 / 0.4);
+    }
+    .gate-deny:hover { background: oklch(70% 0.17 25 / 0.12); border-color: var(--critical); }
+
+    /* ── EXPORT / PROOF BUTTONS ── */
+    .export-row { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; align-items: center; }
+    .export-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-right: 6px;
+    }
+    .export-btn {
+      padding: 7px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+      border-radius: 3px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+    }
+    .export-btn:hover { border-color: var(--text-faint); color: var(--text); background: var(--surface-2); }
+    .export-btn.accent:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── PROOF / PATTERN / ANCHOR CARDS ── */
+    .proof-card, .pattern-card, .anchor-card {
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+    }
+    .proof-card.proven  { border-color: oklch(74% 0.13 150 / 0.35); }
+    .proof-card.failed  { border-color: oklch(70% 0.17 25 / 0.35); }
+    .proof-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 12px; }
+    .proof-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .proof-card.proven .proof-status { color: var(--success); }
+    .proof-card.failed .proof-status { color: var(--critical); }
+    .proof-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); }
+    .proof-claim { font-size: 13px; color: var(--text-soft); margin-bottom: 8px; line-height: 1.6; }
+    .proof-root { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); overflow-wrap: anywhere; }
+
+    .pattern-card.sev-critical { border-color: oklch(70% 0.17 25 / 0.45); }
+    .pattern-card.sev-high     { border-color: oklch(72% 0.15 50 / 0.45); }
+    .pattern-card.sev-medium   { border-color: oklch(80% 0.12 85 / 0.4); }
+    .pattern-card.sev-low      { border-color: var(--border-soft); }
+    .pattern-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px; flex-wrap: wrap; }
+    .pattern-sev {
+      display: inline-flex;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .pattern-sev.sev-critical { color: var(--critical); background: oklch(70% 0.17 25 / 0.12); border-color: oklch(70% 0.17 25 / 0.35); }
+    .pattern-sev.sev-high     { color: oklch(75% 0.15 50); background: oklch(72% 0.15 50 / 0.12); border-color: oklch(72% 0.15 50 / 0.35); }
+    .pattern-sev.sev-medium   { color: var(--warning); background: oklch(80% 0.12 85 / 0.1); border-color: oklch(80% 0.12 85 / 0.3); }
+    .pattern-sev.sev-low      { color: var(--success); background: oklch(74% 0.13 150 / 0.1); border-color: oklch(74% 0.13 150 / 0.3); }
+    .pattern-type { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+    .pattern-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+    .pattern-action { font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-bottom: 10px; overflow-wrap: anywhere; }
+    .pattern-desc { font-size: 13px; color: var(--text-soft); line-height: 1.6; }
+    .pattern-dates { font-size: 11px; color: var(--text-faint); margin-top: 10px; }
+
+    .anchor-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .anchor-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .anchor-desc { font-size: 13px; color: var(--text-soft); }
+    .anchor-hash-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-faint); }
+    .anchor-hash { font-family: var(--font-mono); font-size: 12px; color: var(--text); overflow-wrap: anywhere; }
+
+    /* ── STATUS CHIP (Shadow Witness) ── */
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      margin-bottom: 20px;
+    }
+    .status-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status-chip span {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .status-chip.verified    { color: var(--success);  border-color: oklch(74% 0.13 150 / 0.4); }
+    .status-chip.discrepancy { color: var(--critical); border-color: oklch(70% 0.17 25 / 0.4); }
+    .status-chip.pending     { color: var(--warning);  border-color: oklch(80% 0.12 85 / 0.4); }
+    .status-chip.none        { color: var(--text-faint); }
 
     /* ── API KEYS PANEL ── */
     .api-key-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border-muted);
-      border-top: 3px solid var(--accent-primary);
-      border-radius: 12px;
-      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border-soft);
+      border-radius: 5px;
+      padding: 30px;
       max-width: 600px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
     .api-key-row {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 24px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 8px;
+      margin-bottom: 22px;
+      background: var(--bg);
+      border: 1px solid var(--border-soft);
+      border-radius: 4px;
       padding: 14px 18px;
     }
 
     .api-key-value {
       flex: 1;
       font-family: var(--font-mono);
-      font-size: 14.5px;
-      color: var(--white) !important;
-      letter-spacing: 1px;
+      font-size: 14px;
+      color: var(--text);
+      letter-spacing: 0.06em;
+      overflow-wrap: anywhere;
     }
 
-    .api-key-actions {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
+    .api-key-actions { display: flex; gap: 12px; margin-bottom: 22px; }
+
+    .api-key-note { font-size: 13px; color: var(--text-soft); margin-top: 12px; line-height: 1.6; }
 
     .warning-box {
-      background: rgba(239, 68, 68, 0.03);
-      border: 1px solid rgba(239, 68, 68, 0.15);
-      border-radius: 8px;
-      padding: 16px 20px;
+      background: oklch(70% 0.17 25 / 0.06);
+      border: 1px solid oklch(70% 0.17 25 / 0.25);
+      border-radius: 4px;
+      padding: 14px 18px;
+      margin-top: 16px;
     }
 
-    .warning-box p {
-      font-size: 13px;
-      color: #f87171 !important;
-      line-height: 1.6;
-    }
+    .warning-box p { font-size: 13px; color: var(--critical); line-height: 1.6; }
 
     /* ── LOADING / EMPTY ── */
     .loading {
@@ -840,75 +977,87 @@
     }
 
     .spinner {
-      width: 32px;
-      height: 32px;
-      border: 2px solid rgba(255, 255, 255, 0.05);
-      border-top-color: var(--accent-primary);
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border-soft);
+      border-top-color: var(--accent);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .empty-state {
-      text-align: center;
-      padding: 64px 24px;
-      color: var(--muted) !important;
-    }
-
-    .empty-state h3 { color: var(--white) !important; margin-bottom: 10px; font-weight: 600; }
+    .empty-state { text-align: center; padding: 56px 24px; color: var(--text-soft); }
+    .empty-state h3 { color: var(--text); margin-bottom: 10px; font-weight: 600; }
     .empty-state p { font-size: 14px; }
+    .empty-state .error-text { color: var(--critical); }
 
     /* ── PAGINATION ── */
-    .pagination {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      padding: 24px 20px;
-    }
+    .pagination { display: flex; justify-content: center; gap: 8px; padding: 24px 20px; }
 
     .pagination button {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      color: var(--white) !important;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
       padding: 8px 16px;
-      border-radius: 6px;
+      border-radius: 3px;
       cursor: pointer;
       font-family: var(--font-sans);
       font-size: 13px;
-      transition: all 0.2s ease;
+      transition: border-color 0.15s ease;
     }
 
-    .pagination button:hover:not(:disabled) {
-      border-color: var(--accent-primary);
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .pagination button:disabled { opacity: 0.25; cursor: not-allowed; }
+    .pagination button:hover:not(:disabled) { border-color: var(--accent); }
+    .pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ── DIVIDER ── */
-    .divider { border: none; border-top: 1px solid rgba(255, 255, 255, 0.04); margin: 24px 0; }
+    /* ── DIVIDER / FOOTER ── */
+    .divider { border: none; border-top: 1px solid var(--border-soft); margin: 24px 0; }
+
+    .app-footer {
+      text-align: center;
+      padding: 22px;
+      border-top: 1px solid var(--border-soft);
+      font-size: 12.5px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .app-footer a { color: var(--text-soft); text-decoration: none; }
+    .app-footer a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+    /* ── MOTION PREFERENCES ── */
+    @media (prefers-reduced-motion: reduce) {
+      .auth-card { transition: none; opacity: 1; transform: none; }
+      .spinner { animation-duration: 1.6s; }
+      * { transition-duration: 0.01ms !important; }
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 960px) {
-      .navbar { padding: 0 24px; }
-      .dashboard-content { padding: 24px; }
+      .navbar { padding: 0 20px; }
+      .dashboard-content { padding: 24px 20px 64px; }
 
-      .agent-row {
-        grid-template-columns: 1fr 100px 100px;
-      }
+      .agent-row { grid-template-columns: 1fr 90px 100px; }
 
       .agent-row .agent-did,
       .agent-row .agent-events,
-      .agent-row .agent-last-seen { display: none; }
+      .agent-row .agent-last-seen,
+      .agent-row.header div:nth-child(2),
+      .agent-row.header div:nth-child(5),
+      .agent-row.header div:nth-child(6) { display: none; }
 
-      .stats-row { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 12px; }
       .detail-stats { grid-template-columns: 1fr; }
+      .detail-event { grid-template-columns: 1fr 110px 90px; }
+      .detail-event .ev-time { display: none; }
     }
 
     @media (max-width: 480px) {
       .stats-row { grid-template-columns: 1fr; }
       .navbar-email { display: none; }
     }
+
   </style>
 </head>
 <body>
@@ -929,10 +1078,10 @@
   <div class="auth-card">
     <!-- Logo -->
     <div class="auth-logo">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-        <polygon points="14,2 26,24 2,24" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
-        <polygon points="14,8 21,22 7,22" fill="rgba(201,168,76,0.12)"/>
-        <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(201,168,76,0.2)" stroke-width="0.75"/>
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+        <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(74% 0.11 155)" stroke-width="1.5"/>
+        <polygon points="14,8 21,22 7,22" fill="oklch(74% 0.11 155 / 0.15)"/>
+        <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(74% 0.11 155 / 0.3)" stroke-width="0.75"/>
       </svg>
       <span class="auth-logo-mark">ARIA</span>
       <span class="auth-logo-sub">Verified by Design · Trusted by Architecture</span>
@@ -950,39 +1099,25 @@
     <!-- ── LOGIN: Step 1 — credentials ── -->
     <form id="login-form" onsubmit="handleLogin(event)" autocomplete="off">
       <div class="form-group">
-        <label>Email</label>
+        <label for="login-email">Email</label>
         <input type="email" id="login-email" placeholder="you@company.com" required autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label for="login-password">Password</label>
         <input type="password" id="login-password" placeholder="••••••••" required autocomplete="off">
       </div>
       <div style="text-align:right;margin-top:8px;margin-bottom:16px">
-        <a href="#" onclick="showForgotPassword();return false;"
-           style="font-size:12px;color:rgba(201,168,76,0.6);text-decoration:none">
+        <a href="#" class="auth-aux" onclick="showForgotPassword();return false;">
           Forgot password?
         </a>
       </div>
-      <div id="login-error"
-           style="display:none;color:#c94c4c;font-size:13px;margin-bottom:16px;
-                  padding:10px;background:rgba(201,76,76,0.1);
-                  border-radius:4px;border:1px solid rgba(201,76,76,0.3)">
-      </div>
+      <div id="login-error" class="login-error"></div>
       <button type="submit" class="btn" id="login-btn">Sign In</button>
-      <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.08)"></div>
-        <span style="font-size:12px;color:rgba(248,244,238,0.3)">or</span>
-        <div style="flex:1;height:1px;background:rgba(255,255,255,0.08)"></div>
+      <div class="auth-divider">
+        <span>or</span>
       </div>
-      <a href="/v1/auth/google"
-         style="display:flex;align-items:center;justify-content:center;gap:10px;
-                width:100%;padding:12px;background:transparent;
-                border:1px solid rgba(255,255,255,0.1);border-radius:5px;
-                color:#f0ece4;text-decoration:none;font-size:14px;
-                margin-bottom:10px;transition:border-color 0.2s"
-         onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'"
-         onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <svg width="18" height="18" viewBox="0 0 24 24">
+      <a href="/v1/auth/google" class="btn-oauth">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -990,15 +1125,8 @@
         </svg>
         Continue with Google
       </a>
-      <a href="/v1/auth/github"
-         style="display:flex;align-items:center;justify-content:center;gap:10px;
-                width:100%;padding:12px;background:transparent;
-                border:1px solid rgba(255,255,255,0.1);border-radius:5px;
-                color:#f0ece4;text-decoration:none;font-size:14px;
-                transition:border-color 0.2s"
-         onmouseover="this.style.borderColor='rgba(255,255,255,0.3)'"
-         onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="#f0ece4">
+      <a href="/v1/auth/github" class="btn-oauth">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
         </svg>
         Continue with GitHub
@@ -1011,7 +1139,7 @@
         A 6-digit verification code was sent to <strong id="code-email-display"></strong>
       </p>
       <div class="code-input-group">
-        <input type="text" id="code-input" placeholder="000000" maxlength="6"
+        <input type="text" id="code-input" placeholder="000000" maxlength="6" aria-label="6-digit verification code"
                inputmode="numeric" pattern="\d{6}" autocomplete="one-time-code">
       </div>
       <button class="btn" id="verify-btn" onclick="handleVerifyCode()">Verify Code</button>
@@ -1021,15 +1149,15 @@
     <!-- ── REGISTER ── -->
     <form id="register-form" class="hidden" onsubmit="handleRegister(event)" autocomplete="off">
       <div class="form-group">
-        <label>Full Name</label>
+        <label for="register-name">Full Name</label>
         <input type="text" id="register-name" placeholder="Jane Smith" required autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Work Email</label>
+        <label for="register-email">Work Email</label>
         <input type="email" id="register-email" placeholder="jane@company.com" required autocomplete="off">
       </div>
       <div class="form-group">
-        <label>Password</label>
+        <label for="register-password">Password</label>
         <input type="password" id="register-password" placeholder="Minimum 8 characters"
                required minlength="8" autocomplete="new-password">
       </div>
@@ -1038,7 +1166,7 @@
 
     <!-- ── POST-REGISTER message ── -->
     <div id="confirm-pending" class="hidden" style="text-align:center;padding:16px 0">
-      <div style="margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="2" y="8" width="28" height="20" rx="2" stroke="#c9a84c" stroke-width="1.5"/><path d="M2 10l14 10L30 10" stroke="#c9a84c" stroke-width="1.5"/></svg></div>
+      <div style="margin-bottom:16px"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="2" y="8" width="28" height="20" rx="2" stroke="oklch(74% 0.11 155)" stroke-width="1.5"/><path d="M2 10l14 10L30 10" stroke="oklch(74% 0.11 155)" stroke-width="1.5"/></svg></div>
       <h3 style="font-size:16px;font-weight:600;margin-bottom:8px">Check your email</h3>
       <p style="font-size:13px;color:var(--muted);line-height:1.6">
         We sent a confirmation link to your email address.<br>
@@ -1060,10 +1188,10 @@
     <!-- Navbar -->
     <nav class="navbar">
       <a href="/" class="navbar-brand">
-        <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="#c9a84c" stroke-width="1.5"/>
-          <polygon points="14,8 21,22 7,22" fill="rgba(201,168,76,0.12)"/>
-          <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(201,168,76,0.2)" stroke-width="0.75"/>
+        <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(74% 0.11 155)" stroke-width="1.5"/>
+          <polygon points="14,8 21,22 7,22" fill="oklch(74% 0.11 155 / 0.15)"/>
+          <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(74% 0.11 155 / 0.3)" stroke-width="0.75"/>
         </svg>
         <span class="navbar-logo-text">ARIA</span>
       </a>
@@ -1082,10 +1210,7 @@
       <button class="tab" id="tab-btn-apikeys"  onclick="showTab('apikeys', this)">API Keys</button>
       <button class="tab" id="tab-btn-gate" onclick="showTab('gate', this)">
         Gate
-        <span id="gate-badge" class="hidden"
-          style="background:#c94c4c;color:#fff;
-                 border-radius:10px;padding:1px 6px;
-                 font-size:10px;margin-left:4px">0</span>
+        <span id="gate-badge" class="gate-badge hidden">0</span>
       </button>
     </div>
 
@@ -1098,19 +1223,19 @@
       <div class="stats-row">
         <div class="stat-card">
           <div class="stat-label">Agents</div>
-          <div class="stat-value" id="stat-agents">—</div>
+          <div class="stat-value" id="stat-agents">–</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Events</div>
-          <div class="stat-value gold" id="stat-events">—</div>
+          <div class="stat-value gold" id="stat-events">–</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Anomalies</div>
-          <div class="stat-value error" id="stat-anomalies">—</div>
+          <div class="stat-value error" id="stat-anomalies">–</div>
         </div>
         <div class="stat-card">
           <div class="stat-label">Avg Trust</div>
-          <div class="stat-value success" id="stat-trust">—</div>
+          <div class="stat-value success" id="stat-trust">–</div>
         </div>
       </div>
 
@@ -1150,7 +1275,7 @@
           <button class="btn btn-danger btn-sm" onclick="rotateApiKey()">Rotate Key</button>
         </div>
 
-        <p style="font-size:13px;color:rgba(248,244,238,0.5);margin-top:12px;line-height:1.6">
+        <p class="api-key-note">
           Your API key was set when you first logged in.<br>
           To see it again, check your saved records or rotate to get a new one.
         </p>
@@ -1537,55 +1662,30 @@
         const timeStr = `${minsLeft}m ${sLeft}s`;
 
         html += `
-          <div style="background:#07090f;
-                      border:1px solid rgba(255,255,255,0.06);
-                      border-left:3px solid #c9a84c;
-                      border-radius:8px;padding:20px;
-                      margin-bottom:16px">
-            <div style="display:flex;justify-content:space-between;
-                        align-items:flex-start;margin-bottom:12px">
+          <div class="gate-card">
+            <div class="gate-card-head">
               <div>
-                <div style="font-size:13px;
-                            color:rgba(248,244,238,0.5);
-                            margin-bottom:4px">AGENT</div>
-                <div style="font-size:16px;font-weight:600;
-                            color:#f8f4ee">${escapeHtml(req.agent_name)}</div>
+                <div class="gate-meta-label">Agent</div>
+                <div class="gate-agent-name">${escapeHtml(req.agent_name)}</div>
               </div>
               <div style="text-align:right">
-                <div style="font-size:11px;
-                            color:rgba(248,244,238,0.4)">
-                  Expires in
-                </div>
-                <div style="font-size:14px;color:#ffbd2e;
-                            font-family:'JetBrains Mono',monospace"
-                     id="timer-${req.id}">${timeStr}</div>
+                <div class="gate-meta-label">Expires in</div>
+                <div class="gate-timer" id="timer-${req.id}">${timeStr}</div>
               </div>
             </div>
 
-            <div style="margin-bottom:16px">
-              <div style="font-size:13px;
-                          color:rgba(248,244,238,0.5);
-                          margin-bottom:4px">REQUESTED ACTION</div>
-              <div style="font-size:15px;color:#e8c87a;
-                          font-family:'JetBrains Mono',monospace;
-                          font-weight:600">
-                ${escapeHtml(req.action)}
-              </div>
+            <div>
+              <div class="gate-meta-label">Requested action</div>
+              <span class="gate-action">${escapeHtml(req.action)}</span><span class="gate-risk">Awaiting approval</span>
             </div>
 
-            <div style="display:flex;gap:12px">
-              <button
-                onclick="resolveGateRequest('${escapeHtml(req.id)}', 'approve')"
-                style="flex:1;padding:10px;background:#28c841;
-                       color:#04060d;border:none;border-radius:6px;
-                       font-weight:600;font-size:14px;cursor:pointer">
+            <div class="gate-actions">
+              <button class="gate-approve"
+                onclick="resolveGateRequest('${escapeHtml(req.id)}', 'approve', '${escapeHtml(req.action)}')">
                 Approve
               </button>
-              <button
-                onclick="resolveGateRequest('${escapeHtml(req.id)}', 'deny')"
-                style="flex:1;padding:10px;background:#c94c4c;
-                       color:#f8f4ee;border:none;border-radius:6px;
-                       font-weight:600;font-size:14px;cursor:pointer">
+              <button class="gate-deny"
+                onclick="resolveGateRequest('${escapeHtml(req.id)}', 'deny', '${escapeHtml(req.action)}')">
                 Deny
               </button>
             </div>
@@ -1596,14 +1696,18 @@
     } catch (err) {
       el.innerHTML = `
         <div class="empty-state">
-          <p style="color:var(--red)">
+          <p class="error-text">
             Failed to load gate requests
           </p>
         </div>`;
     }
   }
 
-  async function resolveGateRequest(id, action) {
+  async function resolveGateRequest(id, action, gatedAction) {
+    if (action === 'approve' &&
+        !confirm(`Approve this request? The agent will be allowed to execute:\n\n${gatedAction || 'the gated action'}`)) {
+      return;
+    }
     try {
       await apiCall(`/v1/gate/${action}/${id}`, {
         method: 'POST',
@@ -1658,36 +1762,15 @@
       const el     = document.getElementById('agents-list');
 
       const plan = data.plan || 'free';
-      const planColors = {
-        free:         'rgba(248,244,238,0.3)',
-        professional: '#d4a843',
-        business:     '#e8c87a',
-        enterprise:   '#4a9ebb'
-      };
-      const planColor = planColors[plan] || planColors.free;
       const upgradeTarget = plan === 'free' ? 'professional' : plan === 'professional' ? 'business' : null;
       let planBadge = `
-        <div style="display:inline-flex;align-items:center;
-                    gap:6px;padding:4px 12px;
-                    border:1px solid ${planColor};
-                    border-radius:20px;margin-bottom:24px">
-          <div style="width:6px;height:6px;border-radius:50%;
-                      background:${planColor}"></div>
-          <span style="font-size:11px;font-weight:600;
-                       color:${planColor};
-                       letter-spacing:1px;
-                       text-transform:uppercase">
-            ${plan} plan
-          </span>
+        <div class="plan-badge ${plan === 'free' ? '' : 'plan-paid'}">
+          <span class="plan-name">${plan} plan</span>
           ${upgradeTarget ? `
-            <a href="#" onclick="startUpgrade('${upgradeTarget}');return false;"
-               style="font-size:11px;color:#d4a843;
-                      text-decoration:none;margin-left:8px">
+            <a href="#" onclick="startUpgrade('${upgradeTarget}');return false;">
               Upgrade →
             </a>` : `
-            <a href="#" onclick="openBillingPortal();return false;"
-               style="font-size:11px;color:${planColor};
-                      text-decoration:none;margin-left:8px;opacity:0.7">
+            <a href="#" onclick="openBillingPortal();return false;">
               Manage
             </a>`}
         </div>`;
@@ -1711,7 +1794,10 @@
         const badgeLbl   = score >= 80 ? 'Trusted'  : score >= 50 ? 'Neutral' : 'Untrusted';
         const shortDid   = (agent.masked_did || agent.did || '').slice(0, 24) + '…';
 
-        html += `<div class="agent-row" onclick='showAgentDetail(${JSON.stringify(agent.did || "")})'>
+        html += `<div class="agent-row" role="button" tabindex="0"
+          aria-label="View agent ${escapeHtml(agent.name)}"
+          onclick='showAgentDetail(${JSON.stringify(agent.did || "")})'
+          onkeydown='if(event.key==="Enter"||event.key===" "){event.preventDefault();showAgentDetail(${JSON.stringify(agent.did || "")});}'>
           <div>
             <div class="agent-name">${escapeHtml(agent.name)}</div>
           </div>
@@ -1727,7 +1813,7 @@
       if (el.innerHTML !== newHtml) el.innerHTML = newHtml;
     } catch (err) {
       document.getElementById('agents-list').innerHTML =
-        `<div class="empty-state"><p style="color:var(--error)">${escapeHtml(err.message)}</p></div>`;
+        `<div class="empty-state"><p class="error-text">${escapeHtml(err.message)}</p></div>`;
     }
   }
 
@@ -1756,21 +1842,21 @@
         const outcomeBadge = event.outcome === 'success'
           ? '<span class="badge-success">SUCCESS</span>'
           : event.outcome === 'blocked'
-          ? '<span style="display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0.5px;background:#071e2e;color:#4a9ebb;border:1px solid rgba(74,158,187,0.4)">BLOCKED BY ARIA</span>'
+          ? '<span class="badge-blocked">BLOCKED BY ARIA</span>'
           : '<span class="badge-error">ERROR</span>';
         html += `<div class="event-item">
           <div class="event-dot ${cls}"></div>
-          <div class="event-action" style="color:#f8f4ee;flex:1">${escapeHtml(event.action)}</div>
-          <div class="event-agent" style="color:rgba(248,244,238,0.55);font-size:12px">${escapeHtml(event.agent_name || 'Unknown')}</div>
+          <div class="event-action">${escapeHtml(event.action)}</div>
+          <div class="event-agent">${escapeHtml(event.agent_name || 'Unknown')}</div>
           ${outcomeBadge}
           ${!withinScope ? '<span class="badge-violation">SCOPE VIOLATION</span>' : ''}
-          <div class="event-time" style="color:rgba(248,244,238,0.4);font-size:12px;font-family:\'JetBrains Mono\',monospace">${relativeTime(event.client_ts)}</div>
+          <div class="event-time">${relativeTime(event.client_ts)}</div>
         </div>`;
       });
       if (el.innerHTML !== html) el.innerHTML = html;
     } catch {
       document.getElementById('events-feed').innerHTML =
-        `<div class="empty-state"><p style="color:var(--error)">Failed to load events</p></div>`;
+        `<div class="empty-state"><p class="error-text">Failed to load events</p></div>`;
     }
   }
 
@@ -1841,14 +1927,14 @@
             <div class="detail-stat-label">Anomalies</div>
           </div>
         </div>
-        <div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap">
-          <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(248,244,238,0.4);display:flex;align-items:center;margin-right:8px">EXPORT:</div>
-          <button onclick="exportEvents('${agent.did}','all')" style="padding:7px 14px;background:transparent;border:1px solid rgba(201,168,76,0.3);color:#e8c87a;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">All Events</button>
-          <button onclick="exportEvents('${agent.did}','success')" style="padding:7px 14px;background:transparent;border:1px solid rgba(40,200,65,0.3);color:#28c841;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Successes</button>
-          <button onclick="exportEvents('${agent.did}','errors')" style="padding:7px 14px;background:transparent;border:1px solid rgba(201,76,76,0.3);color:#c94c4c;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Errors</button>
-          <button onclick="exportEvents('${agent.did}','violations')" style="padding:7px 14px;background:transparent;border:1px solid rgba(201,168,76,0.3);color:#c9a84c;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Violations</button>
-          <button onclick="exportEvents('${agent.did}','anomalies')" style="padding:7px 14px;background:transparent;border:1px solid rgba(255,189,46,0.3);color:#ffbd2e;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Anomalies</button>
-          <button onclick="exportEvents('${agent.did}','all','otel')" style="padding:7px 14px;background:transparent;border:1px solid rgba(74,158,187,0.3);color:#4a9ebb;border-radius:4px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Export OTEL</button>
+        <div class="export-row">
+          <div class="export-label">Export:</div>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','all')">All Events</button>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','success')">Successes</button>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','errors')">Errors</button>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','violations')">Violations</button>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','anomalies')">Anomalies</button>
+          <button class="export-btn" onclick="exportEvents('${agent.did}','all','otel')">Export OTEL</button>
         </div>
         <div id="detail-patterns"></div>
         <div class="section-title" style="margin-bottom:16px">Event History</div>
@@ -1862,26 +1948,20 @@
         `/v1/witness/agents/${encodeURIComponent(did)}`
       ).catch(() => null);
       if (witnessData) {
-        const statusColor =
-          witnessData.verification_status === 'verified'    ? '#28c841' :
-          witnessData.verification_status === 'discrepancy' ? '#c94c4c' :
-          witnessData.verification_status === 'pending'     ? '#ffbd2e' :
-          'rgba(248,244,238,0.3)';
+        const statusCls =
+          witnessData.verification_status === 'verified'    ? 'verified' :
+          witnessData.verification_status === 'discrepancy' ? 'discrepancy' :
+          witnessData.verification_status === 'pending'     ? 'pending' :
+          'none';
         const statusLabel =
           witnessData.verification_status === 'verified'    ? 'Shadow Verified' :
           witnessData.verification_status === 'discrepancy' ? 'Discrepancy Detected' :
           witnessData.verification_status === 'pending'     ? 'Verification Pending' :
           'Not Registered';
         document.getElementById('detail-witness').innerHTML = `
-          <div style="display:inline-flex;align-items:center;gap:6px;
-                      padding:4px 12px;border:1px solid ${statusColor};
-                      border-radius:12px;margin-bottom:20px">
-            <div style="width:6px;height:6px;border-radius:50%;
-                        background:${statusColor}"></div>
-            <span style="font-size:11px;font-weight:600;color:${statusColor};
-                         letter-spacing:0.5px;text-transform:uppercase">
-              ${statusLabel}
-            </span>
+          <div class="status-chip ${statusCls}">
+            <div class="dot"></div>
+            <span>${statusLabel}</span>
           </div>`;
       }
 
@@ -1893,37 +1973,17 @@
       if (temporalData?.temporal_anchor?.total_anchors > 0) {
         const anchor = temporalData.temporal_anchor;
         let html = `
-          <div style="background:#07090f;
-                      border:1px solid rgba(255,255,255,0.06);
-                      border-left:3px solid #c9a84c;
-                      border-radius:8px;padding:16px 20px;
-                      margin-bottom:20px;
-                      display:flex;justify-content:space-between;
-                      align-items:center">
+          <div class="anchor-card">
             <div>
-              <div style="font-size:11px;font-weight:600;
-                          letter-spacing:2px;
-                          color:#c9a84c;
-                          text-transform:uppercase;
-                          margin-bottom:6px">
-                Temporal Anchor
-              </div>
-              <div style="font-size:13px;
-                          color:rgba(248,244,238,0.7)">
+              <div class="anchor-title">Temporal Anchor</div>
+              <div class="anchor-desc">
                 ${anchor.total_events_anchored} events anchored
                 across ${anchor.total_anchors} snapshots
               </div>
             </div>
             <div style="text-align:right">
-              <div style="font-family:'JetBrains Mono',monospace;
-                          font-size:11px;
-                          color:rgba(248,244,238,0.4)">
-                Latest hash
-              </div>
-              <div style="font-family:'JetBrains Mono',monospace;
-                          font-size:12px;color:#e8c87a">
-                ${anchor.latest_anchor_hash?.slice(0, 16)}...
-              </div>
+              <div class="anchor-hash-label">Latest hash</div>
+              <div class="anchor-hash">${anchor.latest_anchor_hash?.slice(0, 16)}...</div>
             </div>
           </div>`;
         const witnessEl = document.getElementById('detail-witness');
@@ -1942,80 +2002,39 @@
              style="margin-bottom:16px;margin-top:8px">
           Zero Proofs
         </div>
-        <div style="display:flex;gap:10px;
-                    margin-bottom:16px;flex-wrap:wrap">
-          <button
-            onclick="generateProof('${did}','innocence')"
-            style="padding:8px 16px;background:transparent;
-                   border:1px solid rgba(40,200,65,0.3);
-                   color:#28c841;border-radius:4px;
-                   font-size:12px;cursor:pointer;
-                   font-family:'DM Sans',sans-serif">
+        <div class="export-row" style="margin-bottom:16px">
+          <button class="export-btn accent" onclick="generateProof('${did}','innocence')">
             Proof of Innocence
           </button>
-          <button
-            onclick="generateProof('${did}','consistency')"
-            style="padding:8px 16px;background:transparent;
-                   border:1px solid rgba(201,168,76,0.3);
-                   color:#e8c87a;border-radius:4px;
-                   font-size:12px;cursor:pointer;
-                   font-family:'DM Sans',sans-serif">
+          <button class="export-btn accent" onclick="generateProof('${did}','consistency')">
             Proof of Consistency
           </button>
-          <button
-            onclick="generateProof('${did}','limits')"
-            style="padding:8px 16px;background:transparent;
-                   border:1px solid rgba(255,189,46,0.3);
-                   color:#ffbd2e;border-radius:4px;
-                   font-size:12px;cursor:pointer;
-                   font-family:'DM Sans',sans-serif">
+          <button class="export-btn accent" onclick="generateProof('${did}','limits')">
             Proof of Limits
           </button>
         </div>`;
 
       if (proofs.length > 0) {
         proofs.forEach(p => {
-          const color = p.verified ? '#28c841' : '#c94c4c';
+          const proofCls = p.verified ? 'proven' : 'failed';
           const status = p.verified ? 'PROVEN' : 'FAILED';
           zeroProofHtml += `
-            <div style="background:#07090f;
-                        border:1px solid rgba(255,255,255,0.06);
-                        border-left:3px solid ${color};
-                        border-radius:8px;padding:16px 20px;
-                        margin-bottom:10px">
-              <div style="display:flex;
-                          justify-content:space-between;
-                          align-items:center;
-                          margin-bottom:8px">
-                <span style="font-size:10px;font-weight:600;
-                             color:${color};letter-spacing:1px;
-                             text-transform:uppercase">
+            <div class="proof-card ${proofCls}">
+              <div class="proof-head">
+                <span class="proof-status">
                   ${p.proof_type.toUpperCase()} · ${status}
                 </span>
-                <span style="font-family:'JetBrains Mono',monospace;
-                             font-size:10px;
-                             color:rgba(248,244,238,0.3)">
-                  ${relativeTime(p.created_at)}
-                </span>
+                <span class="proof-time">${relativeTime(p.created_at)}</span>
               </div>
-              <div style="font-size:13px;
-                          color:rgba(248,244,238,0.75);
-                          margin-bottom:8px">
-                ${escapeHtml(p.claim)}
-              </div>
-              <div style="font-family:'JetBrains Mono',monospace;
-                          font-size:10px;
-                          color:rgba(248,244,238,0.3)">
-                root: ${p.merkle_root.slice(0,32)}...
-              </div>
+              <div class="proof-claim">${escapeHtml(p.claim)}</div>
+              <div class="proof-root">root: ${p.merkle_root.slice(0,32)}...</div>
             </div>`;
         });
       } else {
         zeroProofHtml += `
-          <div style="color:rgba(248,244,238,0.35);
-                      font-size:13px;padding:16px 0">
-            No proofs generated yet.
-            Click a button above to generate your first proof.
+          <div class="empty-state" style="padding:16px 0;text-align:left">
+            <p>No proofs generated yet.
+            Click a button above to generate your first proof.</p>
           </div>`;
       }
 
@@ -2036,40 +2055,23 @@
             Behavior Patterns
           </div>`;
         patterns.forEach(p => {
-          const severityColor =
-            p.severity === 'CRITICAL' ? '#c94c4c' :
-            p.severity === 'HIGH'     ? '#ff6b35' :
-            p.severity === 'MEDIUM'   ? '#ffbd2e' : '#28c841';
+          const sevCls =
+            p.severity === 'CRITICAL' ? 'sev-critical' :
+            p.severity === 'HIGH'     ? 'sev-high' :
+            p.severity === 'MEDIUM'   ? 'sev-medium' : 'sev-low';
           patternHtml += `
-            <div style="background:#07090f;border:1px solid rgba(255,255,255,0.06);
-                        border-left:3px solid ${severityColor};border-radius:8px;
-                        padding:20px;margin-bottom:12px">
-              <div style="display:flex;justify-content:space-between;
-                          align-items:center;margin-bottom:10px">
+            <div class="pattern-card ${sevCls}">
+              <div class="pattern-head">
                 <div style="display:flex;align-items:center;gap:10px">
-                  <span style="font-size:11px;font-weight:600;letter-spacing:1px;
-                               color:${severityColor};text-transform:uppercase">
-                    ${p.severity}
-                  </span>
-                  <span style="font-size:11px;color:rgba(248,244,238,0.4);
-                               text-transform:uppercase;letter-spacing:1px">
-                    ${p.pattern_type.replace(/_/g,' ')}
-                  </span>
+                  <span class="pattern-sev ${sevCls}">${p.severity}</span>
+                  <span class="pattern-type">${p.pattern_type.replace(/_/g,' ')}</span>
                 </div>
-                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;
-                             color:rgba(248,244,238,0.4)">
-                  ${p.occurrences} occurrences
-                </span>
+                <span class="pattern-count">${p.occurrences} occurrences</span>
               </div>
               ${p.action ? `
-                <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-                            color:#e8c87a;margin-bottom:10px">
-                  ${escapeHtml(p.action)}
-                </div>` : ''}
-              <div style="font-size:13px;color:rgba(248,244,238,0.7);line-height:1.6">
-                ${escapeHtml(p.description)}
-              </div>
-              <div style="font-size:11px;color:rgba(248,244,238,0.3);margin-top:10px">
+                <div class="pattern-action">${escapeHtml(p.action)}</div>` : ''}
+              <div class="pattern-desc">${escapeHtml(p.description)}</div>
+              <div class="pattern-dates">
                 First seen: ${relativeTime(p.first_seen)} &middot;
                 Last seen: ${relativeTime(p.last_seen)}
               </div>
@@ -2085,22 +2087,22 @@
         document.getElementById('detail-events').innerHTML =
           `<div class="empty-state"><h3>No events yet</h3></div>`;
       } else {
-        let html = `<div class="detail-event header" style="color:#c9a84c">
+        let html = `<div class="detail-event header">
           <div>Action</div><div>Outcome</div><div>Duration</div><div>Time</div></div>`;
         evtList.forEach(ev => {
           const isViolation = ev.server_within_scope === false;
-          const outcomeColor = ev.outcome === 'blocked' ? '#4a9ebb'
-            : isViolation ? 'var(--gold)'
-            : ev.outcome === 'success' ? 'var(--success)'
-            : 'var(--red)';
+          const outcomeCls = ev.outcome === 'blocked' ? 'blocked'
+            : isViolation ? 'violation'
+            : ev.outcome === 'success' ? 'success'
+            : 'error';
           const outcomeLabel = ev.outcome === 'blocked' ? 'BLOCKED BY ARIA'
             : isViolation ? 'SCOPE VIOLATION'
             : ev.outcome.toUpperCase();
           html += `<div class="detail-event">
-            <div style="color:#f8f4ee;font-weight:500">${escapeHtml(ev.action)}</div>
-            <div style="color:${outcomeColor};font-size:11px;font-weight:600;letter-spacing:0.5px">${outcomeLabel}</div>
-            <div style="color:rgba(248,244,238,0.65);font-family:'JetBrains Mono',monospace;font-size:13px">${ev.duration_ms}ms</div>
-            <div style="color:rgba(248,244,238,0.45);font-size:12px">${relativeTime(ev.client_ts)}</div>
+            <div class="ev-action">${escapeHtml(ev.action)}</div>
+            <div class="outcome-label ${outcomeCls}">${outcomeLabel}</div>
+            <div class="ev-duration">${ev.duration_ms}ms</div>
+            <div class="ev-time">${relativeTime(ev.client_ts)}</div>
           </div>`;
         });
         document.getElementById('detail-events').innerHTML = html;
@@ -2143,12 +2145,12 @@
 
   // ── API KEYS ──────────────────────────────────────────────────────────────
   async function loadApiKeys() {
-    // Never show the full key — display only last 8 chars masked
+    // Never show the full key; display only last 8 chars masked
     const el = document.getElementById('current-api-key');
     if (apiKey && apiKey.length >= 8) {
       el.textContent = '••••-••••-••••-' + apiKey.slice(-8);
     } else {
-      el.textContent = apiKey ? '••••••••' : '—';
+      el.textContent = apiKey ? '••••••••' : '–';
     }
   }
 
@@ -2163,7 +2165,7 @@
       apiKey = data.api_key;
       localStorage.setItem('aria_api_key', apiKey);
       loadApiKeys();
-      alert('New API key created. Copy it now — it will not be shown again.\n\n' + apiKey);
+      alert('New API key created. Copy it now: it will not be shown again.\n\n' + apiKey);
     } catch (err) {
       alert('Failed: ' + err.message);
     }
@@ -2176,7 +2178,7 @@
       apiKey = data.new_api_key;
       localStorage.setItem('aria_api_key', apiKey);
       loadApiKeys();
-      alert('Key rotated. Copy your new key now — it will not be shown again.\n\n' + apiKey);
+      alert('Key rotated. Copy your new key now: it will not be shown again.\n\n' + apiKey);
     } catch (err) {
       alert('Failed: ' + err.message);
     }
@@ -2357,11 +2359,11 @@
     }
   }
 </script>
-<div style="text-align:center;padding:24px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(248,244,238,0.35);display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
-  <a href="/terms" style="color:rgba(248,244,238,0.35);">Terms</a>
-  <a href="/privacy" style="color:rgba(248,244,238,0.35);">Privacy</a>
-  <a href="/acceptable-use" style="color:rgba(248,244,238,0.35);">Acceptable Use</a>
-  <a href="/cookies" style="color:rgba(248,244,238,0.35);">Cookies</a>
+<div class="app-footer">
+  <a href="/terms">Terms</a>
+  <a href="/privacy">Privacy</a>
+  <a href="/acceptable-use">Acceptable Use</a>
+  <a href="/cookies">Cookies</a>
 </div>
 </body>
 </html>

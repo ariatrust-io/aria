@@ -6,55 +6,92 @@
   <title>Privacy Policy — ARIA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg-black:#030712;
-      --white:#f8fafc;
-      --muted:#94a3b8;
-      --accent-primary:#6366f1;
-      --border-muted:rgba(255,255,255,0.06);
-      --font-sans:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-      --font-mono:'JetBrains Mono',monospace;
+      --paper:       oklch(98% 0.003 150);
+      --paper-shade: oklch(95.5% 0.006 150);
+      --ink:         oklch(24% 0.015 160);
+      --ink-soft:    oklch(42% 0.015 160);
+      --ink-faint:   oklch(55% 0.012 160);
+      --green:       oklch(38% 0.085 155);
+      --green-deep:  oklch(31% 0.07 155);
+      --rule:        oklch(86% 0.01 150);
+      --rule-strong: oklch(70% 0.012 150);
+      --on-green:    oklch(98% 0.005 150);
+      --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+      --z-nav: 100;
     }
     html{scroll-behavior:smooth}
-    body{font-family:var(--font-sans);background:var(--bg-black);color:var(--white);line-height:1.6;padding-bottom:80px}
-    nav{position:fixed;top:0;left:0;right:0;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,7,18,0.6);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.03);z-index:1000}
-    .legal-wrap{max-width:880px;margin:0 auto;padding:120px 20px 40px}
-    .legal-title{font-size:clamp(36px,6vw,56px);font-weight:800;color:var(--white);margin-bottom:6px}
-    .legal-updated{color:var(--muted);font-size:13px;margin-bottom:28px}
-    h2{color:var(--accent-primary);font-size:16px;margin:24px 0 10px}
-    p, li{color:#dfe7f6;font-size:15px;line-height:1.7;margin-bottom:12px}
-    ul{padding-left:20px}
+    body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+    ::selection{background:var(--green);color:var(--on-green)}
+    h1,h2{text-wrap:balance}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+
+    nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:color-mix(in oklch, var(--paper) 92%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);z-index:var(--z-nav)}
+    .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .nav-logo-text{font-weight:800;font-size:18px;letter-spacing:0.14em;color:var(--ink)}
+    .nav-links{display:flex;align-items:center;gap:32px}
+    .nav-links a{font-size:14px;font-weight:500;color:var(--ink-soft);text-decoration:none;transition:color 0.15s ease}
+    .nav-links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+    .nav-cta{display:inline-flex;align-items:center;padding:9px 20px;background:var(--green);color:var(--on-green);font-size:13px;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:0.02em;transition:background-color 0.15s ease}
+    .nav-cta:hover{background:var(--green-deep)}
+
+    .legal-wrap{max-width:760px;margin:0 auto;padding:140px 32px 80px}
+    .legal-title{font-size:clamp(32px,5vw,48px);font-weight:700;letter-spacing:-0.015em;line-height:1.12;margin-bottom:14px}
+    .legal-updated{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:0.04em;padding-bottom:24px;border-bottom:1px solid var(--rule-strong)}
+    .legal-wrap h2{font-size:19px;font-weight:700;letter-spacing:-0.01em;margin:32px 0 12px;padding-top:32px;border-top:1px solid var(--rule)}
+    .legal-wrap h2:first-of-type{border-top:none;margin-top:0}
+    p,li{font-size:15.5px;color:var(--ink-soft);line-height:1.75;margin-bottom:12px}
+    ul{padding-left:22px;margin-bottom:12px}
+    .legal-wrap a{color:var(--green);font-weight:600;text-decoration:none}
+    .legal-wrap a:hover{text-decoration:underline;text-underline-offset:3px}
     table{width:100%;border-collapse:collapse;margin:12px 0}
-    th{color:var(--accent-primary);text-align:left;padding:8px;border-bottom:1px solid var(--border-muted)}
-    td{padding:8px;color:#dfe7f6;border-bottom:1px solid rgba(255,255,255,0.03)}
+    th{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink);text-align:left;padding:8px;border-bottom:1px solid var(--rule-strong)}
+    td{padding:8px;color:var(--ink-soft);border-bottom:1px solid var(--rule);font-size:14.5px}
 
-    footer{background:transparent;border-top:1px solid var(--border-muted);padding:48px}
-    .footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px}
-    .footer-bottom{max-width:1100px;margin:20px auto 0;display:flex;justify-content:space-between;color:rgba(248,250,252,0.6)}
+    footer{background:var(--paper);border-top:1px solid var(--rule-strong);padding:56px 40px 24px}
+    .footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
+    .footer-brand-name{font-weight:800;font-size:18px;letter-spacing:0.12em;color:var(--ink);margin-bottom:10px}
+    .footer-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.8;max-width:320px}
+    .footer-col-title{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);margin-bottom:16px}
+    .footer-col ul{list-style:none;padding:0;margin:0}
+    .footer-col ul li{margin-bottom:10px}
+    .footer-col ul li a{font-size:13.5px;color:var(--ink-soft);text-decoration:none;transition:color 0.15s}
+    .footer-col ul li a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+    .footer-bottom{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--rule);padding-top:22px;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--ink-faint)}
+    .footer-domain{font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em}
 
-    @media(max-width:768px){.footer-main{grid-template-columns:1fr 1fr}.legal-wrap{padding:100px 20px}}
-    @media(max-width:480px){.footer-main{grid-template-columns:1fr}}
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto}
+      .nav-links a,.nav-cta,.footer-col ul li a{transition:none}
+    }
+    @media(max-width:768px){nav{padding:0 24px}.legal-wrap{padding:120px 24px 64px}.footer-main{grid-template-columns:1fr 1fr;gap:32px}footer{padding:48px 24px 24px}}
+    @media(max-width:480px){.footer-main{grid-template-columns:1fr}.nav-links{display:none}}
   </style>
 </head>
 <body>
 
-<nav>
-  <a href="/" class="nav-logo" style="display:flex;align-items:center;gap:12px;color:var(--white);text-decoration:none">
-    <svg width="24" height="24" viewBox="0 0 28 28" fill="none"><polygon points="14,2 26,24 2,24" stroke="currentColor" stroke-opacity="0.12"/></svg>
-    <span style="font-weight:700;letter-spacing:1px;color:var(--white)">ARIA</span>
+<nav aria-label="Main">
+  <a href="/" class="nav-logo">
+    <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
+      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
+    </svg>
+    <span class="nav-logo-text">ARIA</span>
   </a>
-  <div style="display:flex;gap:18px;align-items:center">
-    <a href="/docs" style="color:var(--muted);text-decoration:none">Docs</a>
-    <a href="/pricing" style="color:var(--muted);text-decoration:none">Pricing</a>
-    <a href="/app" style="background:var(--accent-primary);color:#fff;padding:8px 12px;border-radius:6px;text-decoration:none">Get Access</a>
+  <div class="nav-links">
+    <a href="/docs">Docs</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/app" class="nav-cta">Get Access</a>
   </div>
 </nav>
 
 <main class="legal-wrap">
-  <div class="legal-title">Privacy Policy</div>
+  <h1 class="legal-title">Privacy Policy</h1>
   <div class="legal-updated">Last updated: May 27, 2026 &nbsp;&middot;&nbsp; Effective: May 27, 2026</div>
 
   <h2>Data collection policy</h2>
@@ -76,29 +113,29 @@
 <footer>
   <div class="footer-main">
     <div>
-      <div style="font-weight:800;color:var(--white);margin-bottom:8px">ARIA</div>
-      <div style="color:var(--muted);max-width:320px">Cryptographic identity and immutable audit trails for agent fleets.</div>
+      <div class="footer-brand-name">ARIA</div>
+      <p class="footer-desc">Cryptographic identity and immutable audit trails for agent fleets.</p>
     </div>
-    <div>
-      <div style="font-weight:700;color:var(--accent-primary);margin-bottom:8px">Product</div>
-      <ul style="list-style:none;padding:0"><li><a href="/app" style="color:var(--muted)">Dashboard</a></li></ul>
+    <div class="footer-col">
+      <div class="footer-col-title">Product</div>
+      <ul><li><a href="/app">Dashboard</a></li></ul>
     </div>
-    <div>
-      <div style="font-weight:700;color:var(--accent-primary);margin-bottom:8px">Resources</div>
-      <ul style="list-style:none;padding:0"><li><a href="/docs" style="color:var(--muted)">Docs</a></li></ul>
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <ul><li><a href="/docs">Docs</a></li></ul>
     </div>
-    <div>
-      <div style="font-weight:700;color:var(--accent-primary);margin-bottom:8px">Legal</div>
-      <ul style="list-style:none;padding:0">
-        <li><a href="terms.html" style="color:var(--muted)">Terms of Service</a></li>
-        <li><a href="privacy.html" style="color:var(--muted)">Privacy Policy</a></li>
-        <li><a href="acceptable-use.html" style="color:var(--muted)">Acceptable Use</a></li>
+    <div class="footer-col">
+      <div class="footer-col-title">Legal</div>
+      <ul>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="acceptable-use.html">Acceptable Use</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <div>&copy; 2026 ARIA Trust Systems</div>
-    <div style="font-family:var(--font-mono)">ariatrust.org</div>
+    <div class="footer-domain">ariatrust.org</div>
   </div>
 </footer>
 

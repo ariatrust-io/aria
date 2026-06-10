@@ -6,74 +6,90 @@
 <title>Cookie Policy — ARIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --black:#030507;
-  --gold:#d4a843;
-  --gold-lt:#e8c87a;
-  --white:#f0ece4;
-  --muted:rgba(240,236,228,0.45);
-  --text:rgba(240,236,228,0.75);
-  --border:rgba(212,168,67,0.15);
+  --paper:       oklch(98% 0.003 150);
+  --paper-shade: oklch(95.5% 0.006 150);
+  --ink:         oklch(24% 0.015 160);
+  --ink-soft:    oklch(42% 0.015 160);
+  --ink-faint:   oklch(55% 0.012 160);
+  --green:       oklch(38% 0.085 155);
+  --green-deep:  oklch(31% 0.07 155);
+  --green-wash:  oklch(94% 0.02 155);
+  --rule:        oklch(86% 0.01 150);
+  --rule-strong: oklch(70% 0.012 150);
+  --on-green:    oklch(98% 0.005 150);
+  --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --z-nav: 100;
 }
 html{scroll-behavior:smooth}
-body{font-family:'IBM Plex Mono',monospace;background:var(--black);color:var(--white);line-height:1.6;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");pointer-events:none;z-index:9999}
+body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--green);color:var(--on-green)}
+h1,h2{text-wrap:balance}
+a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
 
-nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;background:rgba(3,5,7,0.96);border-bottom:1px solid var(--border);z-index:1000}
+nav{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:color-mix(in oklch, var(--paper) 92%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);z-index:var(--z-nav)}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-text{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:4px;color:var(--gold-lt)}
+.nav-logo-text{font-weight:800;font-size:18px;letter-spacing:0.14em;color:var(--ink)}
 .nav-links{display:flex;align-items:center;gap:32px;list-style:none}
-.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .2s}
-.nav-links a:hover{color:var(--white)}
-.nav-cta{display:inline-flex;align-items:center;padding:8px 20px;background:var(--gold);color:var(--black);font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;text-decoration:none;border-radius:2px;letter-spacing:.5px;transition:background .2s}
-.nav-cta:hover{background:var(--gold-lt)}
+.nav-links a{font-size:14px;font-weight:500;color:var(--ink-soft);text-decoration:none;transition:color 0.15s ease}
+.nav-links a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+.nav-cta{display:inline-flex;align-items:center;padding:9px 20px;background:var(--green);color:var(--on-green);font-size:13px;font-weight:600;text-decoration:none;border-radius:3px;letter-spacing:0.02em;transition:background-color 0.15s ease}
+.nav-cta:hover{background:var(--green-deep)}
 
-.legal-wrap{max-width:800px;margin:0 auto;padding:120px 24px 80px}
-.legal-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,80px);color:var(--white);letter-spacing:2px;margin-bottom:8px}
-.legal-updated{font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:48px;padding-bottom:24px;border-bottom:1px solid rgba(212,168,67,0.12)}
-.legal-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold-lt);border-left:3px solid #d4a843;padding-left:16px;margin:32px 0 16px 0}
-.legal-wrap p{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px}
-.legal-wrap ul{padding-left:20px;margin-bottom:14px}
-.legal-wrap li{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:6px}
-.legal-wrap a{color:var(--gold);text-decoration:none}
-.legal-wrap a:hover{color:var(--gold-lt)}
-.legal-wrap strong{color:var(--white);font-weight:600}
-.cookie-row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-.cookie-row:last-child{border-bottom:none}
-.cookie-name{font-size:12px;color:var(--gold);font-weight:600;min-width:140px;padding-top:2px}
-.cookie-desc{font-size:12px;color:var(--text);line-height:1.7}
+.legal-wrap{max-width:760px;margin:0 auto;padding:140px 32px 80px}
+.legal-title{font-size:clamp(32px,5vw,48px);font-weight:700;letter-spacing:-0.015em;line-height:1.12;margin-bottom:14px}
+.legal-updated{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:0.04em;padding-bottom:24px;border-bottom:1px solid var(--rule-strong);margin-bottom:8px}
+.legal-wrap h2{font-size:19px;font-weight:700;letter-spacing:-0.01em;margin:32px 0 14px;padding-top:32px;border-top:1px solid var(--rule)}
+.legal-wrap h2:first-of-type{border-top:none;margin-top:0}
+.legal-wrap p{font-size:15.5px;color:var(--ink-soft);line-height:1.75;margin-bottom:14px}
+.legal-wrap ul{padding-left:22px;margin-bottom:14px}
+.legal-wrap li{font-size:15.5px;color:var(--ink-soft);line-height:1.75;margin-bottom:6px}
+.legal-wrap a{color:var(--green);font-weight:600;text-decoration:none}
+.legal-wrap a:hover{text-decoration:underline;text-underline-offset:3px}
+.legal-wrap strong{color:var(--ink);font-weight:600}
+.legal-wrap code{font-family:var(--font-mono);font-size:13px;background:var(--green-wash);border:1px solid color-mix(in oklch, var(--green) 25%, var(--paper));border-radius:3px;padding:1px 6px;color:var(--green)}
 
-footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60px 48px 0}
-.footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:56px}
+.cookie-row{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--rule)}
+.cookie-row:last-of-type{border-bottom:1px solid var(--rule)}
+.cookie-name{font-family:var(--font-mono);font-size:13px;color:var(--green);font-weight:600;min-width:140px;padding-top:2px;overflow-wrap:anywhere}
+.cookie-desc{font-size:14.5px;color:var(--ink-soft);line-height:1.7}
+
+footer{background:var(--paper);border-top:1px solid var(--rule-strong);padding:56px 40px 24px}
+.footer-main{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px}
 .footer-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.footer-brand-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--gold-lt)}
-.footer-desc{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:300;color:rgba(240,236,228,0.28);line-height:1.8;max-width:220px;margin-bottom:16px}
-.footer-gh{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.22);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .2s}
-.footer-gh:hover{color:var(--gold)}
-.footer-col-title{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
+.footer-brand-name{font-weight:800;font-size:18px;letter-spacing:0.12em;color:var(--ink)}
+.footer-desc{font-size:13.5px;color:var(--ink-soft);line-height:1.8;max-width:260px;margin-bottom:16px}
+.footer-gh{font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color 0.15s}
+.footer-gh:hover{color:var(--ink)}
+.footer-col-title{font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink);margin-bottom:16px}
 .footer-col ul{list-style:none}
 .footer-col ul li{margin-bottom:10px}
-.footer-col ul li a{font-family:'IBM Plex Mono',monospace;font-size:13px;color:rgba(240,236,228,0.3);text-decoration:none;transition:color .2s}
-.footer-col ul li a:hover{color:var(--white)}
-.footer-bottom{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.04);padding:22px 0;flex-wrap:wrap;gap:12px}
-.footer-copy{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(240,236,228,0.18);letter-spacing:.5px}
-.footer-domain{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(212,168,67,0.28);letter-spacing:1px}
+.footer-col ul li a{font-size:13.5px;color:var(--ink-soft);text-decoration:none;transition:color 0.15s}
+.footer-col ul li a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.footer-bottom{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--rule);padding:22px 0;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12.5px;color:var(--ink-faint)}
+.footer-domain{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);letter-spacing:0.06em}
 
-@media(max-width:768px){nav{padding:0 24px}.nav-links{display:none}.legal-wrap{padding:100px 20px 60px}.footer-main{grid-template-columns:1fr 1fr}footer{padding:40px 24px 0}.cookie-row{flex-direction:column;gap:4px}}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .nav-links a,.nav-cta,.footer-col ul li a,.footer-gh{transition:none}
+}
+@media(max-width:768px){nav{padding:0 24px}.nav-links{display:none}.legal-wrap{padding:120px 24px 64px}.footer-main{grid-template-columns:1fr 1fr;gap:32px}footer{padding:48px 24px 0}.cookie-row{flex-direction:column;gap:6px}}
 @media(max-width:480px){.footer-main{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<nav>
+<nav aria-label="Main">
   <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-      <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="rgba(212,168,67,0.18)" stroke-width="0.75"/>
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
+      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
     </svg>
     <span class="nav-logo-text">ARIA</span>
   </a>
@@ -85,8 +101,8 @@ footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60
   <a href="/app" class="nav-cta">Get Access</a>
 </nav>
 
-<div class="legal-wrap">
-  <div class="legal-title">Cookie Policy</div>
+<main class="legal-wrap">
+  <h1 class="legal-title">Cookie Policy</h1>
   <div class="legal-updated">Last updated: May 19, 2026 &nbsp;&middot;&nbsp; Effective: May 19, 2026</div>
 
   <h2>1. What Are Cookies</h2>
@@ -143,21 +159,21 @@ footer{background:#020406;border-top:1px solid rgba(255,255,255,0.04);padding:60
     <li>Email: <a href="mailto:dhdez3149@gmail.com">dhdez3149@gmail.com</a></li>
     <li>Website: <a href="https://ariatrust.org">ariatrust.org</a></li>
   </ul>
-</div>
+</main>
 
 <footer>
   <div class="footer-main">
     <div class="footer-col">
       <div class="footer-logo-row">
-        <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="#d4a843" stroke-width="1.5"/>
-          <polygon points="14,8 21,22 7,22" fill="rgba(212,168,67,0.12)"/>
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+          <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
+          <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
         </svg>
         <span class="footer-brand-name">ARIA</span>
       </div>
       <p class="footer-desc">Trust infrastructure for AI agents. Cryptographic identity, immutable audit trail, human enforcement.</p>
       <a href="https://github.com/ariatrust-io/aria" target="_blank" rel="noopener" class="footer-gh">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         ariatrust-io/aria
       </a>
     </div>
