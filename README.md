@@ -8,6 +8,7 @@ an immutable audit trail, a verified trust score, and
 human-in-the-loop enforcement before critical actions execute.
 
 [![npm version](https://img.shields.io/npm/v/@ariatrust-io/aria-sdk)](https://www.npmjs.com/package/@ariatrust-io/aria-sdk)
+[![PyPI version](https://img.shields.io/pypi/v/aria-sdk)](https://pypi.org/project/aria-sdk/)
 [![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-blue.svg)](LICENSE)
 
 ---
@@ -144,6 +145,52 @@ const tools = wrapTools(
 
 ---
 
+## Python SDK
+
+Functional parity with the TypeScript client — the same three modes and the
+same enforcement model.
+
+```bash
+pip install aria-sdk
+```
+
+```python
+from aria_sdk import ARIAClient, ScopeViolationException, GateDeniedException
+
+aria = ARIAClient(base_url="https://ariatrust.org", api_key="YOUR_API_KEY")
+
+# Register your agent — save the did and secret.
+agent = aria.register_agent(name="my-agent", scope=["read:data", "send:email"])
+
+# Track an action. fn() runs only if the action is within scope.
+result = aria.track(
+    agent["did"], agent["secret"], "read:data",
+    lambda: fetch_user_data(user_id),
+)
+print(result.value)  # whatever fn() returned
+
+# Require human approval before a destructive action executes.
+try:
+    aria.track(
+        agent["did"], agent["secret"], "delete:records",
+        lambda: delete_records(ids),
+        mode="gate",
+        gate={
+            "requireApproval": ["delete:*"],
+            "autoBlock": ["drop:*", "truncate:*"],
+            "timeoutMs": 5 * 60 * 1000,
+        },
+    )
+except GateDeniedException:
+    print("Owner denied — action blocked")
+```
+
+Modes: `light` (fire and forget, zero latency), `enforce` (blocking scope check,
+default), `gate` (human approval). An out-of-scope action raises
+`ScopeViolationException` and `fn()` never runs.
+
+---
+
 ## Trust Score
 
 Every agent has a score from 0 to 95 based on behavior
@@ -276,7 +323,7 @@ DELETE /v1/webhooks/:id              Remove webhook
 - [x] **Phase 7** — ZeroProof: Merkle tree behavioral proofs
 - [ ] **Phase 7b** — ZeroProof ZK: Full zk-SNARKs implementation
 - [ ] **Phase 8** — ARIA Shadow Witness: External source connectors
-- [ ] **Python SDK** — `pip install aria-sdk`
+- [x] **Python SDK** — `pip install aria-sdk`
 - [ ] **Go SDK** — `go get ariatrust.org/go-sdk`
 - [ ] **SOC 2 Type II** — Enterprise compliance certification
 - [ ] **Docker Compose** — Self-hosting for enterprise

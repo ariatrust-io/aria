@@ -8,6 +8,10 @@ dist/
 .claude/settings.local.json
 sdk/__pycache__/
 *.pyc
+__pycache__/
+sdk/dist-py/
+sdk/build/
+*.egg-info/
 *.tsbuildinfo
 .qodo/
 .vscode/

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aria-sdk"
+version = "0.5.0"
+description = "Official Python SDK for ARIA - Trust Infrastructure for AI Agents"
+readme = "README-python.md"
+requires-python = ">=3.8"
+license = { text = "BUSL-1.1" }
+authors = [{ name = "ARIA" }]
+keywords = ["aria", "ai-agents", "trust", "audit", "compliance"]
+dependencies = ["requests>=2.25"]
+
+[project.urls]
+Homepage = "https://ariatrust.org"
+Documentation = "https://ariatrust.org/docs"
+
+[tool.setuptools]
+py-modules = ["aria_sdk"]
