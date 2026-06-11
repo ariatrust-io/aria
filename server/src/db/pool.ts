@@ -19,10 +19,14 @@ export const pool = new Pool({
   // Fail fast if database is down (2 second timeout).
   connectionTimeoutMillis: 2000,
   
-  // Railway requires SSL with relaxed verification
-  ssl: process.env.NODE_ENV === 'production' 
-    ? { rejectUnauthorized: false } 
-    : false,
+  // Railway requires SSL with relaxed verification. Self-hosters running
+  // against a local Postgres without SSL set DB_SSL=false to opt out, even
+  // when NODE_ENV=production.
+  ssl: process.env.DB_SSL === 'false'
+    ? false
+    : process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
 pool.on("error", (err) => {

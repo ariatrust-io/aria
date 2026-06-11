@@ -1,0 +1,89 @@
+# ARIA — self-hosted stack (server + PostgreSQL + Redis).
+#
+# Quick start:
+#   cp .env.docker.example .env
+#   # edit .env: set SETUP_KEY and ENCRYPTION_KEY (see SELF-HOSTING.md)
+#   docker compose up -d
+#
+# The public API is then reachable at http://localhost:8080 (the membrane edge).
+# The internal API stays bound to the container and is never exposed.
+name: aria
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aria
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aria_local_dev}
+      POSTGRES_DB: aria
+    volumes:
+      - aria_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aria -d aria"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - aria_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # One-shot, idempotent. Applies schema + migrations to a fresh DB, then exits.
+  # Safe to run on every `up`: it detects an already-initialized DB and skips.
+  migrate:
+    build: ./server
+    image: aria-server:local
+    command: ["npx", "tsx", "docker-migrate.ts"]
+    environment:
+      DATABASE_URL: postgresql://aria:${POSTGRES_PASSWORD:-aria_local_dev}@db:5432/aria
+      NODE_ENV: production
+      DB_SSL: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  aria:
+    build: ./server
+    image: aria-server:local
+    restart: unless-stopped
+    ports:
+      - "${ARIA_PORT:-8080}:8080"
+    environment:
+      NODE_ENV: production
+      DB_SSL: "false"
+      PORT: "8080"
+      INTERNAL_PORT: "3000"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://aria:${POSTGRES_PASSWORD:-aria_local_dev}@db:5432/aria
+      REDIS_URL: redis://redis:6379
+      SETUP_KEY: ${SETUP_KEY:?SETUP_KEY is required — set it in .env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required (64 hex chars) — set it in .env}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  aria_pgdata:
+  aria_redisdata:

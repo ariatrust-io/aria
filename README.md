@@ -326,7 +326,7 @@ DELETE /v1/webhooks/:id              Remove webhook
 - [x] **Python SDK** — `pip install aria-sdk`
 - [ ] **Go SDK** — `go get ariatrust.org/go-sdk`
 - [ ] **SOC 2 Type II** — Enterprise compliance certification
-- [ ] **Docker Compose** — Self-hosting for enterprise
+- [x] **Docker Compose** — Self-hosting ([SELF-HOSTING.md](SELF-HOSTING.md))
 
 ---
 
@@ -365,4 +365,6 @@ BUSL-1.1 — See [LICENSE](LICENSE) for details.
 - **Docs**: https://ariatrust.org/docs
 - **Pricing**: https://ariatrust.org/pricing
 - **npm**: https://www.npmjs.com/package/@ariatrust-io/aria-sdk
+- **PyPI**: https://pypi.org/project/aria-sdk/
+- **Self-hosting**: [SELF-HOSTING.md](SELF-HOSTING.md)
 - **GitHub**: https://github.com/ariatrust-io/aria
