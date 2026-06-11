@@ -7,7 +7,8 @@
 <meta name="description" content="Cryptographic identity, immutable audit trail, and human-in-the-loop enforcement for autonomous AI agent fleets. Built for the era of agentic AI.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -80,9 +81,9 @@ nav {
   border-bottom: 1px solid var(--rule);
   z-index: var(--z-nav);
 }
-.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-.nav-logo-text {
-  font-weight: 800; font-size: 18px; letter-spacing: 0.14em; color: var(--ink);
+.nav-logo {font-family:'Unbounded','Archivo',sans-serif; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-text {font-family:'Unbounded','Archivo',sans-serif;
+  font-weight: 800; font-size:15px; letter-spacing:0.02em; color: var(--ink);
 }
 .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
 .nav-links a {
@@ -400,7 +401,7 @@ footer { background: var(--paper); border-top: 1px solid var(--rule-strong); pad
   display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 56px;
 }
 .footer-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-.footer-brand-name { font-weight: 800; font-size: 20px; letter-spacing: 0.12em; color: var(--ink); }
+.footer-brand-name {font-family:'Unbounded','Archivo',sans-serif; font-weight: 800; font-size: 20px; letter-spacing:0.02em; color: var(--ink); }
 .footer-desc { font-size: 13.5px; color: var(--ink-soft); line-height: 1.8; max-width: 30ch; margin-bottom: 22px; }
 .footer-gh {
   font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); text-decoration: none;
@@ -481,11 +482,6 @@ footer { background: var(--paper); border-top: 1px solid var(--rule-strong); pad
 <!-- NAV -->
 <nav id="nav" aria-label="Main">
   <a href="/" class="nav-logo">
-    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-      <polygon points="14,2 26,24 2,24" fill="none" stroke="currentColor" stroke-width="2" style="color:oklch(38% 0.085 155)"/>
-      <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
-      <line x1="14" y1="2" x2="14" y2="24" stroke="oklch(38% 0.085 155 / 0.35)" stroke-width="1"/>
-    </svg>
     <span class="nav-logo-text">ARIA</span>
   </a>
   <ul class="nav-links">
@@ -884,10 +880,6 @@ footer { background: var(--paper); border-top: 1px solid var(--rule-strong); pad
   <div class="footer-main">
     <div class="footer-col">
       <div class="footer-logo-row">
-        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-          <polygon points="14,2 26,24 2,24" fill="none" stroke="oklch(38% 0.085 155)" stroke-width="2"/>
-          <polygon points="14,8 21,22 7,22" fill="oklch(38% 0.085 155 / 0.18)"/>
-        </svg>
         <span class="footer-brand-name">ARIA</span>
       </div>
       <p class="footer-desc">Cryptographic identity, immutable audit trails, and human-in-the-loop enforcement for autonomous AI agent fleets.</p>

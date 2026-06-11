@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ARIA">
+  <rect width="32" height="32" rx="7" fill="oklch(38% 0.085 155)"/>
+  <g fill="none" stroke="oklch(98% 0.003 150)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="9" y1="25" x2="16" y2="7.5"/>
+    <line x1="23" y1="25" x2="16" y2="7.5"/>
+    <line x1="11.7" y1="18.5" x2="20.3" y2="18.5"/>
+  </g>
+</svg>
