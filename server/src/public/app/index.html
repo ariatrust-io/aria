@@ -1255,24 +1255,32 @@
     <!-- ── API KEYS TAB ── -->
     <div id="tab-apikeys" class="hidden">
       <div class="api-key-panel">
-        <div class="section-title" style="margin-bottom:20px">Your API Key</div>
-
-        <div class="api-key-row">
-          <div class="api-key-value" id="current-api-key">Loading…</div>
-        </div>
-
-        <div class="api-key-actions">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px">
+          <div class="section-title" style="margin:0">API Keys</div>
           <button class="btn btn-outline btn-sm" onclick="createApiKey()">New Key</button>
-          <button class="btn btn-danger btn-sm" onclick="rotateApiKey()">Rotate Key</button>
         </div>
-
-        <p class="api-key-note">
-          Your API key was set when you first logged in.<br>
-          To see it again, check your saved records or rotate to get a new one.
+        <p class="api-key-note" style="margin-top:0;margin-bottom:18px">
+          All keys in your account. For security the full value is shown only
+          <strong>once</strong>, when a key is created or rotated — it is never
+          stored and cannot be retrieved again. Identify a key by its label or ID.
         </p>
 
-        <div class="warning-box">
-          <p>Rotating your key immediately revokes the current one. Any SDK integrations using the old key will stop working until updated.</p>
+        <!-- Shown once right after create/rotate so the value can be copied -->
+        <div id="new-key-banner" class="hidden" style="border:1px solid oklch(74% 0.13 150 / 0.4);background:oklch(74% 0.13 150 / 0.08);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+          <div style="font-size:13px;color:var(--text-soft);margin-bottom:8px">
+            New key — copy it now, it won't be shown again:
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div class="api-key-value" id="new-key-value" style="margin:0;flex:1;min-width:240px"></div>
+            <button class="btn btn-outline btn-sm" onclick="copyText(document.getElementById('new-key-value').textContent, this)">Copy</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('new-key-banner').classList.add('hidden')">Done</button>
+          </div>
+        </div>
+
+        <div id="api-keys-list">Loading…</div>
+
+        <div class="warning-box" style="margin-top:20px">
+          <p>Rotating a key immediately revokes it. Any SDK integration using that key will stop working until you update it with the new value.</p>
         </div>
       </div>
     </div>
@@ -2136,13 +2144,57 @@
 
   // ── API KEYS ──────────────────────────────────────────────────────────────
   async function loadApiKeys() {
-    // Never show the full key; display only last 8 chars masked
-    const el = document.getElementById('current-api-key');
-    if (apiKey && apiKey.length >= 8) {
-      el.textContent = '••••-••••-••••-' + apiKey.slice(-8);
-    } else {
-      el.textContent = apiKey ? '••••••••' : '–';
+    const box = document.getElementById('api-keys-list');
+    box.textContent = 'Loading…';
+    try {
+      const data = await apiCall('/v1/api-keys');
+      renderApiKeys(data.keys || []);
+    } catch (err) {
+      box.textContent = 'Failed to load keys: ' + err.message;
     }
+  }
+
+  let apiKeysCache = [];
+
+  function renderApiKeys(keys) {
+    apiKeysCache = keys;
+    const box = document.getElementById('api-keys-list');
+    if (!keys.length) {
+      box.innerHTML = '<p class="api-key-note">No API keys yet. Click "New Key" to create one.</p>';
+      return;
+    }
+    box.innerHTML = keys.map(k => {
+      const created = k.created_at ? new Date(k.created_at).toLocaleDateString() : '—';
+      let badge, badgeCls;
+      if (k.revoked)        { badge = 'Revoked'; badgeCls = 'badge-error'; }
+      else if (k.is_current){ badge = 'Current'; badgeCls = 'badge-success'; }
+      else                  { badge = 'Active';  badgeCls = 'badge-blocked'; }
+      const rotateBtn = k.revoked ? '' :
+        `<button class="btn btn-danger btn-sm" onclick="rotateKey('${k.id}')">Rotate</button>`;
+      return `
+        <div class="api-key-row" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
+          <div style="flex:1;min-width:200px">
+            <div style="font-weight:600">${escapeHtml(k.label)} <span class="${badgeCls}">${badge}</span></div>
+            <div style="font-size:12px;color:var(--text-faint);font-family:ui-monospace,monospace;margin-top:3px">
+              ID ${escapeHtml(k.id)} · created ${created}
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="copyText('${k.id}', this)">Copy ID</button>
+          ${rotateBtn}
+        </div>`;
+    }).join('');
+  }
+
+  function showNewKey(value) {
+    document.getElementById('new-key-value').textContent = value;
+    document.getElementById('new-key-banner').classList.remove('hidden');
+  }
+
+  async function copyText(text, btn) {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (btn) { const old = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = old; }, 1500); }
+    } catch { alert('Copy failed. Value:\n\n' + text); }
   }
 
   async function createApiKey() {
@@ -2153,23 +2205,31 @@
         method: 'POST',
         body: JSON.stringify({ label: label.trim() })
       });
-      apiKey = data.api_key;
-      localStorage.setItem('aria_api_key', apiKey);
+      showNewKey(data.api_key);
       loadApiKeys();
-      alert('New API key created. Copy it now: it will not be shown again.\n\n' + apiKey);
     } catch (err) {
       alert('Failed: ' + err.message);
     }
   }
 
-  async function rotateApiKey() {
-    if (!confirm('Are you sure? This will immediately revoke your current key.\nAny integrations using the old key will stop working.')) return;
+  async function rotateKey(keyId) {
+    const k = apiKeysCache.find(x => x.id === keyId) || { label: keyId, is_current: false };
+    const warn = k.is_current
+      ? 'This is the key your dashboard session uses. Rotating it revokes it immediately; the session will switch to the new key.'
+      : 'This immediately revokes the selected key. Any integration using it will stop working until updated.';
+    if (!confirm(`Rotate "${k.label}"?\n\n${warn}`)) return;
     try {
-      const data = await apiCall('/v1/api-keys/rotate', { method: 'POST', body: '{}' });
-      apiKey = data.new_api_key;
-      localStorage.setItem('aria_api_key', apiKey);
+      const data = await apiCall('/v1/api-keys/rotate', {
+        method: 'POST',
+        body: JSON.stringify({ keyId })
+      });
+      // If we rotated the key this session authenticates with, adopt the new one.
+      if (data.rotated_current) {
+        apiKey = data.new_api_key;
+        localStorage.setItem('aria_api_key', apiKey);
+      }
+      showNewKey(data.new_api_key);
       loadApiKeys();
-      alert('Key rotated. Copy your new key now: it will not be shown again.\n\n' + apiKey);
     } catch (err) {
       alert('Failed: ' + err.message);
     }

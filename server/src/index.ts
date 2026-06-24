@@ -337,15 +337,76 @@ app.post("/v1/api-keys", apiLimiter, requireApiKey, async (req, res) => {
   }
 });
 
-// ENDPOINT 3: Rotate API key
+// ENDPOINT 3: List all API keys for the account
+// Returns metadata only — the raw key value is never stored (bcrypt + sha256),
+// so it can never be shown again after creation. The caller's own key is
+// flagged with `is_current` so the UI can mark it.
+app.get("/v1/api-keys", apiLimiter, requireApiKey, async (req, res) => {
+  try {
+    const result = await query<{
+      id: string;
+      label: string;
+      created_at: string;
+      revoked_at: string | null;
+    }>(
+      `SELECT id, label, created_at, revoked_at
+         FROM api_keys
+        WHERE owner_email = $1
+        ORDER BY created_at DESC`,
+      [req.ownerEmail]
+    );
+
+    const keys = result.rows.map((k) => ({
+      id: k.id,
+      label: k.label,
+      created_at: k.created_at,
+      revoked: k.revoked_at !== null,
+      revoked_at: k.revoked_at,
+      is_current: k.id === req.apiKeyId,
+    }));
+
+    res.json({ keys });
+  } catch (e) {
+    console.error("[api-keys] List error:", e instanceof Error ? e.message : "Unknown error");
+    res.status(500).json({ error: "Failed to list API keys", code: "LIST_KEYS_ERROR" });
+  }
+});
+
+// ENDPOINT 4: Rotate an API key
+// Without `keyId` it rotates the caller's own key (backward compatible).
+// With `keyId` it rotates a specific key in the same account — letting the
+// owner choose which key to replace. The old key is revoked and a new one
+// (whose value is returned ONCE) takes its place.
 app.post("/v1/api-keys/rotate", apiLimiter, requireApiKey, async (req, res) => {
-  const { label } = req.body as { label?: string };
-  const newLabel = label?.trim() || "rotated-key";
+  const { label, keyId } = req.body as { label?: string; keyId?: string };
 
   try {
+    // Resolve which key to rotate. Default: the caller's own key.
+    let targetId = req.apiKeyId;
+    let newLabel = label?.trim();
+
+    if (keyId && keyId !== req.apiKeyId) {
+      // Rotating another key: it must belong to the same account and be active.
+      const target = await query<{ id: string; label: string; revoked_at: string | null }>(
+        "SELECT id, label, revoked_at FROM api_keys WHERE id = $1 AND owner_email = $2",
+        [keyId, req.ownerEmail]
+      );
+      const row = target.rows[0];
+      if (!row) {
+        return res.status(404).json({ error: "Key not found in this account", code: "KEY_NOT_FOUND" });
+      }
+      if (row.revoked_at !== null) {
+        return res.status(400).json({ error: "Key is already revoked", code: "KEY_REVOKED" });
+      }
+      targetId = keyId;
+      newLabel = newLabel || row.label;
+    }
+
+    newLabel = newLabel || "rotated-key";
+
     const userResult = await query<{ user_id: string | null }>(
       'SELECT user_id FROM api_keys WHERE id = $1',
-      [req.apiKeyId]
+      [targetId]
     );
     const userId = userResult.rows[0]?.user_id ?? null;
 
@@ -359,18 +420,21 @@ app.post("/v1/api-keys/rotate", apiLimiter, requireApiKey, async (req, res) => {
       [randomUUID(), keyHash, keySha256, newLabel, req.ownerEmail, userId]
     );
 
-    // Revoke old key
+    // Revoke the rotated key
     await query(
       "UPDATE api_keys SET revoked_at = NOW() WHERE id = $1",
-      [req.apiKeyId]
+      [targetId]
     );
 
     // Immediately invalidate the old key from cache so it stops working
-    invalidateCacheByApiKeyId(req.apiKeyId);
+    invalidateCacheByApiKeyId(targetId);
 
-    res.status(201).json({ 
-      new_api_key: newKey, 
-      message: "Old key revoked" 
+    res.status(201).json({
+      new_api_key: newKey,
+      label: newLabel,
+      rotated_key_id: targetId,
+      rotated_current: targetId === req.apiKeyId,
+      message: "Old key revoked",
     });
   } catch (e) {
     console.error("[api-keys] Rotate error:", e instanceof Error ? e.message : "Unknown error");
