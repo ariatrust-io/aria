@@ -1817,45 +1817,66 @@
   }
 
   // ── EVENTS FEED ───────────────────────────────────────────────────────────
+  function _eventItemHtml(event) {
+    const cls         = event.outcome === 'success' ? 'success'
+                      : event.outcome === 'anomaly'  ? 'anomaly'
+                      : event.outcome === 'blocked'  ? 'blocked' : 'error';
+    const withinScope = event.server_within_scope !== false;
+    const outcomeBadge = event.outcome === 'success'
+      ? '<span class="badge-success">SUCCESS</span>'
+      : event.outcome === 'blocked'
+      ? '<span class="badge-blocked">BLOCKED BY ARIA</span>'
+      : '<span class="badge-error">ERROR</span>';
+    return `<div class="event-item" data-eid="${escapeHtml(String(event.event_id || ''))}">
+      <div class="event-dot ${cls}"></div>
+      <div class="event-action">${escapeHtml(event.action)}</div>
+      <div class="event-agent">${escapeHtml(event.agent_name || 'Unknown')}</div>
+      ${outcomeBadge}
+      ${!withinScope ? '<span class="badge-violation">SCOPE VIOLATION</span>' : ''}
+      <div class="event-time">${relativeTime(event.client_ts)}</div>
+    </div>`;
+  }
+
+  const _MAX_FEED_ITEMS = 20;
+
+  // Feed de eventos INCREMENTAL: en vez de reconstruir toda la lista (que
+  // recargaba el dashboard y quitaba lo que estabas viendo), solo añade al
+  // principio los eventos NUEVOS que aún no están en el DOM. Todo interno.
   async function loadRecentEvents() {
     try {
       const data   = await apiCall('/v1/events?limit=20');
-      const dataKey = JSON.stringify(data);
-      if (dataKey === _cachedEvents) return;
-      _cachedEvents = dataKey;
       const events = data.events || [];
       const el     = document.getElementById('events-feed');
 
       if (!events.length) {
-        el.innerHTML = `<div class="empty-state"><h3>No events yet</h3>
-          <p>Agent events will appear here in real time.</p></div>`;
+        if (!el.querySelector('.event-item')) {
+          el.innerHTML = `<div class="empty-state"><h3>No events yet</h3>
+            <p>Agent events will appear here in real time.</p></div>`;
+        }
         return;
       }
 
-      let html = '';
-      events.forEach(event => {
-        const cls         = event.outcome === 'success' ? 'success'
-                          : event.outcome === 'anomaly'  ? 'anomaly'
-                          : event.outcome === 'blocked'  ? 'blocked' : 'error';
-        const withinScope = event.server_within_scope !== false;
-        const outcomeBadge = event.outcome === 'success'
-          ? '<span class="badge-success">SUCCESS</span>'
-          : event.outcome === 'blocked'
-          ? '<span class="badge-blocked">BLOCKED BY ARIA</span>'
-          : '<span class="badge-error">ERROR</span>';
-        html += `<div class="event-item">
-          <div class="event-dot ${cls}"></div>
-          <div class="event-action">${escapeHtml(event.action)}</div>
-          <div class="event-agent">${escapeHtml(event.agent_name || 'Unknown')}</div>
-          ${outcomeBadge}
-          ${!withinScope ? '<span class="badge-violation">SCOPE VIOLATION</span>' : ''}
-          <div class="event-time">${relativeTime(event.client_ts)}</div>
-        </div>`;
-      });
-      if (el.innerHTML !== html) el.innerHTML = html;
+      const existentes = el.querySelectorAll('.event-item');
+      // Primera carga (feed vacío o con empty-state): render completo una vez.
+      if (!existentes.length) {
+        el.innerHTML = events.map(_eventItemHtml).join('');
+        return;
+      }
+
+      // Incremental: prepend SOLO los eventos que aún no están pintados.
+      const yaVistos = new Set(Array.from(existentes).map(n => n.getAttribute('data-eid')));
+      const nuevos = events.filter(e => !yaVistos.has(String(e.event_id || '')));
+      if (nuevos.length) {
+        el.insertAdjacentHTML('afterbegin', nuevos.map(_eventItemHtml).join(''));
+        // Recortar la cola para que el feed no crezca sin fin.
+        const items = el.querySelectorAll('.event-item');
+        for (let i = items.length - 1; i >= _MAX_FEED_ITEMS; i--) items[i].remove();
+      }
     } catch {
-      document.getElementById('events-feed').innerHTML =
-        `<div class="empty-state"><p class="error-text">Failed to load events</p></div>`;
+      const el = document.getElementById('events-feed');
+      if (!el.querySelector('.event-item')) {
+        el.innerHTML = `<div class="empty-state"><p class="error-text">Failed to load events</p></div>`;
+      }
     }
   }
 
