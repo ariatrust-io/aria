@@ -21,6 +21,7 @@ import { temporalRouter } from "./routes/temporal.js";
 import { zeroproofRouter } from "./routes/zeroproof.js";
 import { adminRouter } from "./routes/admin.js";
 import { oauthRouter } from "./routes/oauth.js";
+import { MAX_SCOPE_ACTIONS, MAX_SCOPE_ACTION_LENGTH } from "./config/limits.js";
 import { billingRouter, lsWebhookHandler } from "./routes/billing.js";
 import { proofRouter } from "./routes/proof.js";
 import { requireApiKey, invalidateCacheByApiKeyId } from "./middleware/auth.js";
@@ -207,8 +208,8 @@ app.post("/v1/setup", setupLimiter, async (req, res) => {
   }
 
   if (scope !== undefined) {
-    if (!Array.isArray(scope) || scope.length === 0 || scope.length > 20 ||
-        scope.some((s) => typeof s !== "string" || s.length > 50 || !/^[a-z]+:[a-z_]+$/.test(s))) {
+    if (!Array.isArray(scope) || scope.length === 0 || scope.length > MAX_SCOPE_ACTIONS ||
+        scope.some((s) => typeof s !== "string" || s.length > MAX_SCOPE_ACTION_LENGTH || !/^[a-z]+:[a-z_]+$/.test(s))) {
       res.status(400).json({ error: "scope must contain valid verb:resource actions", code: "INVALID_SCOPE" });
       return;
     }

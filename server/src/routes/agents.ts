@@ -8,6 +8,7 @@ import { requireApiKey } from "../middleware/auth.js";
 import { encryptSecret } from "../utils/crypto.js";
 import { checkAgentLimit } from "../middleware/plans.js";
 import { PLANS, type Plan } from "../config/plans.js";
+import { MAX_SCOPE_ACTIONS, MAX_SCOPE_ACTION_LENGTH } from "../config/limits.js";
 
 const secretRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -45,11 +46,16 @@ agentsRouter.post("/", checkAgentLimit, async (req, res) => {
     return res.status(400).json({ error: "scope must be a non-empty array", code: "INVALID_SCOPE" });
   }
 
-  if (scope.length > 20) {
-    return res.status(400).json({ error: "Field too long: scope", code: "VALIDATION_ERROR" });
+  // ARIA registra el scope REAL del agente: 2 si tiene 2, 80 si tiene 80.
+  // El tope es solo un guardarraíl anti-abuso (DoS), no una restricción baja.
+  if (scope.length > MAX_SCOPE_ACTIONS) {
+    return res.status(400).json({
+      error: `scope cannot exceed ${MAX_SCOPE_ACTIONS} actions`,
+      code: "VALIDATION_ERROR",
+    });
   }
 
-  if (scope.some((s) => typeof s !== "string" || s.length > 50 || !/^[a-z]+:[a-z_]+$/.test(s))) {
+  if (scope.some((s) => typeof s !== "string" || s.length > MAX_SCOPE_ACTION_LENGTH || !/^[a-z]+:[a-z_]+$/.test(s))) {
     return res.status(400).json({
       error: "Each scope action must follow the pattern verb:resource (e.g. send:email)",
       code: "INVALID_SCOPE_FORMAT",
