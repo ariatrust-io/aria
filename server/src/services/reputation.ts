@@ -8,7 +8,13 @@ import { createTemporalAnchor } from "./temporal-anchor.js";
 class ReputationQueue {
   private pending = new Set<string>();
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private firstPendingAt = 0;
   private readonly DEBOUNCE_MS = 3000;
+  // Tope máximo de espera: aunque sigan llegando eventos sin parar, se fuerza un
+  // recálculo al menos cada MAX_WAIT_MS. Sin esto, el debounce se reinicia en
+  // cada evento y bajo carga continua el snapshot NUNCA se actualiza (el trust
+  // score se quedaba congelado mientras el agente estaba ocupado).
+  private readonly MAX_WAIT_MS = 15000;
   private readonly MAX_PENDING_SIZE = 1000;
 
   push(agentId: string): void {
@@ -21,15 +27,21 @@ class ReputationQueue {
       return;
     }
     this.pending.add(agentId);
+    if (this.firstPendingAt === 0) this.firstPendingAt = Date.now();
     this.schedule();
   }
 
   private schedule(): void {
     if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.flush(), this.DEBOUNCE_MS);
+    // Debounce de 3s (agrupa ráfagas), pero garantizando un flush como muy tarde
+    // a MAX_WAIT_MS desde el primer pendiente -> nunca se inanida bajo carga.
+    const sinceFirst = Date.now() - this.firstPendingAt;
+    const wait = Math.max(0, Math.min(this.DEBOUNCE_MS, this.MAX_WAIT_MS - sinceFirst));
+    this.timer = setTimeout(() => this.flush(), wait);
   }
 
   private async flush(): Promise<void> {
+    this.firstPendingAt = 0;
     if (this.pending.size === 0) return;
     const batch = [...this.pending];
     this.pending.clear();
